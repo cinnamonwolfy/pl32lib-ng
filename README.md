@@ -1,2 +1,2 @@
 # pl32lib
-A library containing all portable routines/algorithms I've ever implemented in any program
+pl32lib is a library containing all of the portable algorithms/routines I've implemented at some point in time, in a standardized package
