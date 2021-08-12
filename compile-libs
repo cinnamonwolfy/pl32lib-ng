@@ -1,0 +1,28 @@
+#!/bin/sh
+components="pl32-memory pl32-math"
+lib="libpl32"
+
+cd build
+mkdir obj -p
+
+case $1 in
+	shared)
+		for i in $components; do
+			echo "Compiling $i component..."
+			g++ -I../include -c -fPIC ../src/$i.cpp -o obj/$i.o
+		done
+
+		echo "Linking components into $lib.so"
+		g++ -shared -o "$lib.so" obj/*.o
+		;;
+
+	static)
+		for i in $components; do
+			echo "Compiling $i component (static)..."
+			g++ -I../include -c ../src/$i.cpp -o obj/$i.o
+		done
+
+		echo "Packaging components into libpl32engine.a..."
+		ar rc "$lib.a" obj/*.o
+		;;
+esac
