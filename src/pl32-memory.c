@@ -73,7 +73,7 @@ void* safe_malloc(size_t size){
 	return retPtr;
 }
 
-void* safe_calloc(size_t size){
+void* safe_calloc(size_t amount, size_t size){
 	if((usedMemory + size) > allocMaxMemory){
 		return NULL;
 	}
@@ -85,9 +85,20 @@ void* safe_calloc(size_t size){
 }
 
 void* safe_realloc(void* pointer, size_t size){
-	if((usedMemory + size) > allocMaxMemory){
+	int pIndex = findPtr(pointer);
+	int newAllocSize = usedMemeory;
+
+	if(pIndex == -1){
+		pointer = malloc(1);
+		newAllocSize = newAllocSize + size;
+	}else{
+		newAllocSize = newAllocSize + ((int)size - ptrStore[pIndex].size);
+	}
+
+	if(NewAllocSize > allocMaxMemory){
 		return NULL;
 	}
+
 
 	void* retPtr = realloc(pointer, size);
 	ptrHandler(pointer, NULL, 1);
@@ -98,10 +109,30 @@ void* safe_realloc(void* pointer, size_t size){
 
 void safe_free(void* pointer){
 	ptrHandler(pointer, NULL, 1);
+	free();
 }
 
 void safe_free_all(){
 	for(int i = 0; i < ptrStoreSize; i++){
-		
+		if(pointerStore[i] != NULL){
+			free(pointerStore[i].pointer);
+			pointerStore[i] = NULL;
+		}
 	}
+}
+
+int* int_smalloc(size_t amount){
+	return (int*)safe_malloc(amount * sizeof(int));
+}
+
+int* int_srealloc(int* pointer, size_t amount){
+	return (int*)safe_realloc(pointer, amount * sizeof(int));
+}
+
+char* char_smalloc(size_t amount){
+	return (char*)safe_malloc(amount * sizeof(char));
+}
+
+char* char_srealloc(char* pointer, size_t amount){
+	return (char*)safe_realloc(pointer, amount * sizeof(char));
 }
