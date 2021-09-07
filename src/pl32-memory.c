@@ -136,3 +136,11 @@ char* char_smalloc(size_t amount){
 char* char_srealloc(char* pointer, size_t amount){
 	return (char*)safe_realloc(pointer, amount * sizeof(char));
 }
+
+char** parse(char* input, char delimiter){
+	if(delimiter == NULL){
+		delimiter = ' ';
+	}
+
+	char** workDir = safe_malloc(
+}
