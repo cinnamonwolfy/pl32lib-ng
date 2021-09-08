@@ -1,21 +1,21 @@
 #include <pl32-memory.h>
 
-struct pointerTracker{
+typedef struct pointerTracker{
 	void* pointer;
 	size_t size;
-}
+} ptrtrack_t;
 
-struct pointerTracker* pointerStore = NULL;
-unsigned int ptrStoreSize = 0;
+ptrtrack_t* pointerStore = NULL;
+size_t ptrStoreSize = 0;
 
-unsigned int allocMaxMemory = 128 * 1024 * 1024;
-unsigned int usedMemory = 0;
+size_t allocMaxMemory = 128 * 1024 * 1024;
+size_t usedMemory = 0;
 
 int findPtr(void* pointer){
 	int i = 0;
 
 	while(i < ptrStoreSize){
-		if((pointer == NULL && pointerStore[i] == NULL) || (pointerStore[i] != NULL && pointerStore[i].pointer == pointer)){
+		if((pointer == NULL && pointerStore[i].pointer == NULL) || (pointerStore[i] != NULL && pointerStore[i].pointer == pointer)){
 			return i;
 		}
 
@@ -27,24 +27,25 @@ int findPtr(void* pointer){
 
 void ptrHandler(void* pointer, size_t size, unsigned int action){
 	if(pointerStore == NULL){
-		pointerStore = malloc(1 * sizeof(struct pointerTracker));
+		pointerStore = (ptrtrack_t*)malloc(1 * sizeof(ptrtrack_t));
 	}
 
 	switch(action){
 		case 0:
-			int i = findPtr(NULL);
+			int index = findPtr(NULL);
 
 			if(index == -1){
-				pointerStore = realloc(pointerStore, (ptrStoreSize + 1) * sizeof(struct pointerTracker));
+				pointerStore = (ptrtrack_t*)realloc(pointerStore, (ptrStoreSize + 1) * sizeof(ptrtrack_t));
 				ptrStoreSize++;
+				i = ptrStoreSize - 1;
 			}
 
-			struct pointerTracker tempTracker;
+			ptrtrack_t tempTracker;
 
 			tempTracker.pointer = pointer;
 			tempTracker.size = size;
 
-			pointerStore[i] = tempTracker;
+			pointerStore[index] = tempTracker;
 			break;
 		case 1:
 			int index = findPtr(pointer);
@@ -54,12 +55,17 @@ void ptrHandler(void* pointer, size_t size, unsigned int action){
 			}
 
 			usedMemory = usedMemory - pointerStore[index].size;
-			pointerStore[index] = NULL;
+			pointerStore[index].pointer = NULL;
+			pointerStore[index].size = 0;
 	}
 }
 
-void changeAllocLimit(unsigned int bytes){
+void changeAllocLimit(size_t bytes){
 	allocMaxMemory = bytes;
+}
+
+size_t getAllocSize(){
+	return usedMemory;
 }
 
 void* safe_malloc(size_t size){
@@ -86,7 +92,7 @@ void* safe_calloc(size_t amount, size_t size){
 
 void* safe_realloc(void* pointer, size_t size){
 	int pIndex = findPtr(pointer);
-	int newAllocSize = usedMemeory;
+	int newAllocSize = usedMemory;
 
 	if(pIndex == -1){
 		pointer = malloc(1);
@@ -109,7 +115,7 @@ void* safe_realloc(void* pointer, size_t size){
 
 void safe_free(void* pointer){
 	ptrHandler(pointer, NULL, 1);
-	free();
+	free(pointer);
 }
 
 void safe_free_all(){
@@ -137,10 +143,25 @@ char* char_srealloc(char* pointer, size_t amount){
 	return (char*)safe_realloc(pointer, amount * sizeof(char));
 }
 
-char** parse(char* input, char delimiter){
+parsedstr_t parse(char* input, char delimiter){
 	if(delimiter == NULL){
 		delimiter = ' ';
 	}
 
-	char** workDir = safe_malloc(
+	char** workArr = safe_malloc(1 * sizeof(char*));
+	int size = 1;
+	char* workPtr = strtok(input, delimeter);
+	workArr[0] = workPtr;
+
+	while((workPtr = strtok(NULL, delimeter)) != NULL){
+		size++;
+		workArr = safe_realloc(size * sizeof(char*));
+		workArr[size - 1] = workPtr;
+	}
+
+	parsedstr_t returnStruct;
+	returnStruct.array = workArr;
+	returnStruct.size = size;
+
+	return returnStruct;
 }

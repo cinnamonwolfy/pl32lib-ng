@@ -1,25 +1,27 @@
 #!/bin/sh
 components="pl32-memory pl32-math"
+ext="c"
 lib="libpl32"
 
 cd build
 mkdir obj -p
+pwd
 
 case $1 in
 	shared)
 		for i in $components; do
 			echo "Compiling $i component..."
-			g++ -I../include -c -fPIC ../src/$i.cpp -o obj/$i.o
+			gcc -I../include -c -fPIC ../src/$i.$ext -o obj/$i.o
 		done
 
 		echo "Linking components into $lib.so"
-		g++ -shared -o "$lib.so" obj/*.o
+		gcc -shared -o "$lib.so" obj/*.o
 		;;
 
 	static)
 		for i in $components; do
 			echo "Compiling $i component (static)..."
-			g++ -I../include -c ../src/$i.cpp -o obj/$i.o
+			gcc -I../include -c ../src/$i.$ext -o obj/$i.o
 		done
 
 		echo "Packaging components into libpl32engine.a..."
