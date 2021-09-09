@@ -1,8 +1,8 @@
-//pl32-memory.c: Memory management and string parser module
+// pl32-memory.c: Memory management and string parser module
 #include <pl32-memory.h>
 
 // Struct to track pointers and their sizes
-typedef struct pointerTracker{
+typedef struct ptrtrack{
 	void* pointer;
 	size_t size;
 } ptrtrack_t;
@@ -164,7 +164,7 @@ void safe_free_all(){
 	}
 
 	free(pointerStore);
-	pointerStore = malloc(2 * sizeof(ptrtrack_t);
+	pointerStore = malloc(2 * sizeof(ptrtrack_t));
 }
 
 // safe_malloc but casted to int pointer
@@ -185,38 +185,4 @@ char* char_smalloc(size_t amount){
 // safe_realloc but casted to char pointer
 char* char_srealloc(char* pointer, size_t amount){
 	return (char*)safe_realloc(pointer, amount * sizeof(char));
-}
-
-// Parses a string into an array
-parsedstr_t parse(char* input, char* delimiter){
-	if(delimiter == NULL){
-		delimiter = malloc(1);
-		*delimiter = ' ';
-	}
-
-	char** workArr = safe_malloc(2 * sizeof(char*));
-	int size = 1;
-	char* workPtr = strtok(input, delimiter);
-	workArr[0] = workPtr;
-
-	while((workPtr = strtok(NULL, delimiter)) != NULL){
-		size++;
-		void* tempArr = safe_realloc(workArr, size * sizeof(char*));
-		if(!tempArr){
-			parsedstr_t errStruct;
-			errStruct.array = NULL;
-			errStruct.size = 0;
-			return errStruct;
-		}
-		workArr = tempArr;
-		workArr[size - 1] = workPtr;
-	}
-
-	parsedstr_t returnStruct;
-	returnStruct.array = workArr;
-	returnStruct.size = size;
-
-	free(delimiter);
-
-	return returnStruct;
 }

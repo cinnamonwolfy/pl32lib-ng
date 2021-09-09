@@ -1,3 +1,4 @@
+// pl32-math.c: Math parsing and calculating module
 #include <pl32-math.h>
 
 double internal_calculate(double* numbers, char op){

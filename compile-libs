@@ -1,6 +1,7 @@
 #!/bin/sh
-components="pl32-memory pl32-math"
+components="pl32-memory pl32-string pl32-math"
 ext="c"
+cpl="gcc"
 lib="libpl32"
 
 cd build
@@ -11,17 +12,17 @@ case $1 in
 	shared)
 		for i in $components; do
 			echo "Compiling $i component..."
-			gcc -I../include -c -fPIC ../src/$i.$ext -o obj/$i.o
+			$cpl -I../include -c -fPIC ../src/$i.$ext -o obj/$i.o
 		done
 
 		echo "Linking components into $lib.so"
-		gcc -shared -o "$lib.so" obj/*.o
+		$cpl -shared -o "$lib.so" obj/*.o
 		;;
 
 	static)
 		for i in $components; do
 			echo "Compiling $i component (static)..."
-			gcc -I../include -c ../src/$i.$ext -o obj/$i.o
+			$cpl -I../include -c ../src/$i.$ext -o obj/$i.o
 		done
 
 		echo "Packaging components into libpl32engine.a..."

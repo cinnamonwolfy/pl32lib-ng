@@ -1,8 +1,14 @@
 #pragma once
 #include <pl32-memory.h>
-#include <math.h>
+#include <pl32-string.h>
 
-typedef struct calcStruct {
+#ifndef __cplusplus
+#include <math.h>
+#else
+#include <cmath>
+#endif
+
+typedef struct calcstruct{
 	double* numbers;
 	char* ops;
 	size_t size[2];
