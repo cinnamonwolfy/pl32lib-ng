@@ -11,52 +11,65 @@ size_t ptrStoreSize = 0;
 size_t allocMaxMemory = 128 * 1024 * 1024;
 size_t usedMemory = 0;
 
-int findPtr(void* pointer){
+int findPtr(void* ptr){
 	int i = 0;
+	bool found;
 
-	while(i < ptrStoreSize){
-		if((pointer == NULL && pointerStore[i].pointer == NULL) || (pointerStore[i] != NULL && pointerStore[i].pointer == pointer)){
-			return i;
+	while(!found && i < ptrStoreSize){
+		if(pointerStore[i].pointer == ptr){
+			found = true;
 		}
-
-		i++;
 	}
 
-	return -1;
+	if(!found){
+		return -1;
+	}else{
+		return i;
+	}
+
 }
 
-void ptrHandler(void* pointer, size_t size, unsigned int action){
+void addPtrEntry(void* ptr, size_t size){
 	if(pointerStore == NULL){
-		pointerStore = (ptrtrack_t*)malloc(1 * sizeof(ptrtrack_t));
+		pointerStore = malloc(2 * sizeof(ptrtrack_t));
+		ptrStoreSize = 1;
 	}
 
-	switch(action){
-		case 0:
-			int index = findPtr(NULL);
+	ptrtrack_t tempTracker;
 
-			if(index == -1){
-				pointerStore = (ptrtrack_t*)realloc(pointerStore, (ptrStoreSize + 1) * sizeof(ptrtrack_t));
-				ptrStoreSize++;
-				i = ptrStoreSize - 1;
-			}
+	tempTracker.pointer = ptr;
+	tempTracker.size = size;
 
-			ptrtrack_t tempTracker;
+	ptrtrack_t* tempPtr = realloc(pointerStore, (ptrStoreSize + 1) * sizeof(ptrtrack_t));
 
-			tempTracker.pointer = pointer;
-			tempTracker.size = size;
+	if(!tempPtr){
+		printf("addPtrEntry(): realloc() failed!");
+		exit(0);
+	}else{
+		pointerStore = tempPtr;
+		ptrStoreSize++;
 
-			pointerStore[index] = tempTracker;
-			break;
-		case 1:
-			int index = findPtr(pointer);
+		pointerStore[ptrStoreSize - 1] = tempTracker;
+	}
 
-			if(index == -1){
-				return;
-			}
+}
 
-			usedMemory = usedMemory - pointerStore[index].size;
-			pointerStore[index].pointer = NULL;
-			pointerStore[index].size = 0;
+void rmPtrEntry(void* ptr){
+	if(pointerStore == NULL){
+		pointerStore = malloc(2 * sizeof(ptrtrack_t));
+		ptrStoreSize = 1;
+		return;
+	}
+
+	if(!ptr){
+		return;
+	}
+
+	int i = findPtr(ptr);
+
+	if(i != -1){
+		pointerStore[i].pointer = NULL;
+		pointerStore[i].size = 0;
 	}
 }
 
@@ -74,7 +87,7 @@ void* safe_malloc(size_t size){
 	}
 
 	void* retPtr = malloc(size);
-	ptrHandler(retPtr, size, 0);
+	addPtrEntry(retPtr, size);
 
 	return retPtr;
 }
@@ -85,7 +98,7 @@ void* safe_calloc(size_t amount, size_t size){
 	}
 
 	void* retPtr = calloc(amount, size);
-	ptrHandler(retPtr, size, 0);
+	addPtrEntry(retPtr, size);
 
 	return retPtr;
 }
@@ -98,31 +111,32 @@ void* safe_realloc(void* pointer, size_t size){
 		pointer = malloc(1);
 		newAllocSize = newAllocSize + size;
 	}else{
-		newAllocSize = newAllocSize + ((int)size - ptrStore[pIndex].size);
+		newAllocSize = newAllocSize + (size - pointerStore[pIndex].size);
 	}
 
-	if(NewAllocSize > allocMaxMemory){
+	if(newAllocSize > allocMaxMemory){
 		return NULL;
 	}
 
 
 	void* retPtr = realloc(pointer, size);
-	ptrHandler(pointer, NULL, 1);
-	ptrHandler(retPtr, size, 0);
+	rmPtrEntry(pointer);
+	addPtrEntry(retPtr, size);
 
 	return retPtr;
 }
 
 void safe_free(void* pointer){
-	ptrHandler(pointer, NULL, 1);
+	rmPtrEntry(pointer);
 	free(pointer);
 }
 
 void safe_free_all(){
 	for(int i = 0; i < ptrStoreSize; i++){
-		if(pointerStore[i] != NULL){
+		if(pointerStore[i].pointer != NULL){
 			free(pointerStore[i].pointer);
-			pointerStore[i] = NULL;
+			pointerStore[i].pointer = NULL;
+			pointerStore[i].size = 0;
 		}
 	}
 }
