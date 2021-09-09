@@ -1,3 +1,4 @@
+//pl32-memory.c: Memory management and string parser module
 #include <pl32-memory.h>
 
 typedef struct pointerTracker{
@@ -43,7 +44,6 @@ void addPtrEntry(void* ptr, size_t size){
 	ptrtrack_t* tempPtr = realloc(pointerStore, (ptrStoreSize + 1) * sizeof(ptrtrack_t));
 
 	if(!tempPtr){
-		printf("addPtrEntry(): realloc() failed!");
 		exit(0);
 	}else{
 		pointerStore = tempPtr;
@@ -108,7 +108,7 @@ void* safe_realloc(void* pointer, size_t size){
 	int newAllocSize = usedMemory;
 
 	if(pIndex == -1){
-		pointer = malloc(1);
+		pointer = malloc(2);
 		newAllocSize = newAllocSize + size;
 	}else{
 		newAllocSize = newAllocSize + (size - pointerStore[pIndex].size);
@@ -157,25 +157,35 @@ char* char_srealloc(char* pointer, size_t amount){
 	return (char*)safe_realloc(pointer, amount * sizeof(char));
 }
 
-parsedstr_t parse(char* input, char delimiter){
+parsedstr_t parse(char* input, char* delimiter){
 	if(delimiter == NULL){
-		delimiter = ' ';
+		delimiter = malloc(1);
+		*delimiter = ' ';
 	}
 
-	char** workArr = safe_malloc(1 * sizeof(char*));
+	char** workArr = safe_malloc(2 * sizeof(char*));
 	int size = 1;
-	char* workPtr = strtok(input, delimeter);
+	char* workPtr = strtok(input, delimiter);
 	workArr[0] = workPtr;
 
-	while((workPtr = strtok(NULL, delimeter)) != NULL){
+	while((workPtr = strtok(NULL, delimiter)) != NULL){
 		size++;
-		workArr = safe_realloc(size * sizeof(char*));
+		void* tempArr = safe_realloc(workArr, size * sizeof(char*));
+		if(!tempArr){
+			parsedstr_t errStruct;
+			errStruct.array = NULL;
+			errStruct.size = 0;
+			return errStruct;
+		}
+		workArr = tempArr;
 		workArr[size - 1] = workPtr;
 	}
 
 	parsedstr_t returnStruct;
 	returnStruct.array = workArr;
 	returnStruct.size = size;
+
+	free(delimiter);
 
 	return returnStruct;
 }
