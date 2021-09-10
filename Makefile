@@ -3,7 +3,7 @@ RPATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 .SILENT:
 .PHONY: all clean init
 
-all: build/*.so
+all: build/*.so build/*.a
 
 init:
 	if [ $(shell ./shell-check $(RPATH); echo $$?) -ne 0 ]; then \
