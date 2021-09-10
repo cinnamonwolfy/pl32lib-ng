@@ -1,5 +1,5 @@
 #!/bin/sh
-components="pl32-memory pl32-string pl32-math"
+components="pl32-memory pl32-parse"
 ext="c"
 cpl="gcc"
 lib="libpl32"
