@@ -25,7 +25,7 @@ case $1 in
 			$cpl -I../include -c ../src/$i.$ext -o obj/$i.o
 		done
 
-		echo "Packaging components into libpl32engine.a..."
+		echo "Packaging components into $lib.a..."
 		ar rc "$lib.a" obj/*.o
 		;;
 esac
