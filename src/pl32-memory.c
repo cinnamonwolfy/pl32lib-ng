@@ -21,6 +21,8 @@ int findPtr(void* ptr){
 	while(!found && i < ptrStoreSize){
 		if(pointerStore[i].pointer == ptr){
 			found = true;
+		}else{
+			i++;
 		}
 	}
 

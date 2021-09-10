@@ -6,7 +6,10 @@ lib="libpl32"
 
 cd build
 mkdir obj -p
-pwd
+
+echo "compile-libs build system, v1.0.0\n"
+echo "Current compile directory: $(pwd)"
+echo "Compile mode: $1\n"
 
 case $1 in
 	shared)
