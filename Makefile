@@ -14,10 +14,14 @@ init:
 	mkdir build -p
 
 build/*.so: init
-	./compile-libs shared
+	./export-vars; \
+	cd build; \
+	../compile-libs -c ../${SHARED_CFG}
 
 build/*.a: init
-	./compile-libs static
+	./export-vars; \
+	cd build; \
+	 ../compile-libs -c ../${STATIC_CFG}
 
 clean:
 	rm -rf build

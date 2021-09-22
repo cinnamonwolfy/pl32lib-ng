@@ -1,34 +1,44 @@
 #!/bin/sh
-components="pl32-memory pl32-parse"
-ext="c"
-cpl="gcc"
-lib="libpl32"
 
-cd build
-mkdir obj -p
+echo "compile-libs build system, v0.10"
 
-echo "compile-libs build system, v1.0.0\n"
-echo "Current compile directory: $(pwd)"
-echo "Compile mode: $1\n"
+while true; do
+	case $1 in
+		-c)
+			cfgfile=$2
+			shift
+			;;
+		-h | --help)
+			echo "-c		Gives configuration file path"
+			echo "-h|--help	Shows this help"
+			exit 0
+	esac
 
-case $1 in
-	shared)
-		for i in $components; do
-			echo "Compiling $i component..."
-			$cpl -I../include -c -fPIC ../src/$i.$ext -o obj/$i.o
-		done
+	if [ $# -ne 0 ]; then
+		shift
+	else
+		break
+	fi
+done
 
-		echo "Linking components into $lib.so"
-		$cpl -shared -o "$lib.so" obj/*.o
-		;;
+if [ -f "$cfgfile" ]; then
+	source "$cfgfile"
+else
+	if [ "$components" = "" ]; then
+		echo "Error: No components listed"
+		exit 1
+	fi
+fi
 
-	static)
-		for i in $components; do
-			echo "Compiling $i component (static)..."
-			$cpl -I../include -c ../src/$i.$ext -o obj/$i.o
-		done
+for i in $components; do
+	echo "Compiling $(basename $i .$ext) component with $flags..."
+	$cpl $flags -c $srcdir/$i -o obj/$i.o
+done
 
-		echo "Packaging components into $lib.a..."
-		ar rc "$lib.a" obj/*.o
-		;;
-esac
+if [ $(echo "$flags" | grep -c fPIC) -ne 0 ]; then
+	echo "Linking components into $lib.so"
+	$cpl -shared -o "$lib.so" obj/*.o
+else
+	echo "Packaging components into $lib.a..."
+	ar rc "$lib.a" obj/*.o
+fi
