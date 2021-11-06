@@ -1,5 +1,4 @@
-// pl32-parse.c: Parsing module
-#include <pl32-parse.h>
+#include <pl32-calc.h>
 
 // A simple internal calculator
 double internal_calculate(double* numbers, char op){
@@ -19,45 +18,6 @@ double internal_calculate(double* numbers, char op){
 			}
 			return numbers[0];
 	}
-}
-
-// Parses a string into an array
-parsedstr_t parseString(char* input, char* delimiter){
-	bool malloc_del = false;
-
-	if(delimiter == NULL){
-		delimiter = malloc(1);
-		*delimiter = ' ';
-		malloc_del = true;
-	}
-
-	char** workArr = safe_malloc(2 * sizeof(char*));
-	int size = 1;
-	char* workPtr = strtok(input, delimiter);
-	workArr[0] = workPtr;
-
-	while((workPtr = strtok(NULL, delimiter)) != NULL){
-		size++;
-		void* tempArr = safe_realloc(workArr, size * sizeof(char*));
-		if(!tempArr){
-			parsedstr_t errStruct;
-			errStruct.array = NULL;
-			errStruct.size = 0;
-			return errStruct;
-		}
-		workArr = tempArr;
-		workArr[size - 1] = workPtr;
-	}
-
-	parsedstr_t returnStruct;
-	returnStruct.array = workArr;
-	returnStruct.size = size;
-
-	if(malloc_del){
-		free(delimiter);
-	}
-
-	return returnStruct;
 }
 
 // internal_calculate wrapper with order of operations algorithm
@@ -108,3 +68,4 @@ double* calculateString(char* workString){
 	parsedstr_t parsedWorkStr = parseString(workString, " ");
 	safe_free(parsedWorkStr.array);
 }
+
