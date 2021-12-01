@@ -91,24 +91,33 @@ void rmPtrEntry(void* ptr){
 	}
 }*/
 
+// Memory buffer struct
+struct plmembuf {
+	void* pointer;
+	size_t size;
+};
+
 // Pointer struct
 struct plpointer {
-	void* pointer;
+	const void* pointer;
 	size_t sizeOfItem;
 };
 
 // Array struct
 struct plarray {
-	void** pointer;
-	size_t size;
+	plmembuf_t membuf;
 	size_t sizeOfItem;
 }
 
-int plAddToArray(plarray_t* array, plpointer_t pointer){
-	
+struct plgc {
+	plarray_t pointerStore;
+	size_t usedMemory;
+	size_t maxMemory;
 }
 
-int plRemoveFromArray(plarray_t* array, void* pointer){
+plgc_t garbageCollector;
+
+int plInternalAddToPtrStore(void* retPtr, size_t size){
 	
 }
 
@@ -122,7 +131,7 @@ size_t plGetAllocSize(){
 	return usedMemory;
 }
 
-// Malloc wrapper that adds a struct to pointerStore
+// Malloc wrapper that keeps track of pointers
 void* plSafeMalloc(size_t size){
 	if((usedMemory + size) > allocMaxMemory){
 		return NULL;
@@ -134,7 +143,7 @@ void* plSafeMalloc(size_t size){
 	return retPtr;
 }
 
-// Calloc wrapper that adds a struct to pointerStore
+// Calloc wrapper that keeps track of pointers
 void* plSafeCalloc(size_t amount, size_t size){
 	if((usedMemory + size) > allocMaxMemory){
 		return NULL;
@@ -146,7 +155,7 @@ void* plSafeCalloc(size_t amount, size_t size){
 	return retPtr;
 }
 
-// Realloc wrapper that removes and add a struct to pointerStore
+// Realloc wrapper that keeps track of pointers
 void* plSafeRealloc(void* pointer, size_t size){
 	int pIndex = findPtr(pointer);
 	int newAllocSize = usedMemory;
@@ -170,13 +179,13 @@ void* plSafeRealloc(void* pointer, size_t size){
 	return retPtr;
 }
 
-// Free wrapper that removes a struct from pointerStore
+// Free wrapper that keeps track of pointers
 void plSafeFree(void* pointer){
 	rmPtrEntry(pointer);
 	free(pointer);
 }
 
-// Frees all pointers listed in pointerStore
+// Frees all remembered pointers
 void plSafeFreeAll(){
 	for(int i = 0; i < ptrStoreSize; i++){
 		if(pointerStore[i].pointer != NULL){
@@ -189,6 +198,23 @@ void plSafeFreeAll(){
 	free(pointerStore);
 	pointerStore = malloc(2 * sizeof(plptrtrack_t));
 }
+
+int plAddToArray(plarray_t* array, plpointer_t pointer){
+	if(pointer.sizeOfItem != array->sizeOfItem){
+		return 1;
+	}
+
+	void* tempbuf = plSafeRealloc
+}
+
+int plAddPointerToArray(plarray_t* array, plpointer_t pointer){
+	
+}
+
+int plRemovePointerFromArray(plarray_t* array, void* pointer){
+	
+}
+
 
 // plSafeMalloc but casted to int pointer
 int* plIntSafeMalloc(size_t amount){
