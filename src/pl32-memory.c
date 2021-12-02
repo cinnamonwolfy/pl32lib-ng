@@ -33,28 +33,41 @@ struct plgc {
 	size_t maxMemory;
 };
 
-plgc_t* garbageCollector = NULL;
+plgc_t* mainGarbageCollector = NULL;
 
+// Find a value in a memory buffer
 long long unsigned int plFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
+	int i = 0;
+	bool done = false;
+
 	switch(mode){
 		case 0:
-			int i = 0;
-			bool done = false;
 			while(i + pointer.sizeOfItem < membuf.size && !done){
-				if(!memcmp(membuf.pointer + i, pointer.pointer, pointer.size)){
+				if(!memcmp(membuf.pointer + i, pointer.pointer, pointer.sizeOfItem)){
 					return membuf.pointer + i;
-				}else{
-					i++;
 				}
+				i++;
+			}
+			break;
+		case 1:
+			while(i * pointer.sizeOfItem < membuf.size && !done){
+				if(!memcmp(membuf.pointer + (i * pointer.sizeOfItem), pointer.pointer, pointer.sizeOfItem)){
+					return membuf.pointer + (i * pointer.sizeOfItem);
+				}
+				i++;
 			}
 			break;
 	}
 }
 
+int plManageGC(plgc_t* gc, int mode, ){
+	
+}
+
 /*
 // Change memory allocation limit
 void plChangeAllocLimit(size_t bytes){
-	allocMaxMemory = bytes;
+	
 }
 
 // Get current amount of used memory
