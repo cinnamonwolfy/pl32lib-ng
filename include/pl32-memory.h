@@ -10,12 +10,13 @@
 #include <cerrno>
 #endif
 
-typedef struct plmembuf plmembuf_t
+typedef struct plmembuf plmembuf_t;
 typedef struct plpointer plpointer_t;
 typedef struct plarray plarray_t;
+typedef struct plgc plgc_t;
 
-void plChangeAllocLimit(unsigned int buffer, size_t bytes);
-size_t plGetAllocSize(unsigned int buffer);
+void plChangeAllocLimit(size_t bytes);
+size_t plGetAllocSize();
 
 void* plSafeMalloc(size_t size);
 void* plSafeCalloc(size_t amount, size_t size);
@@ -26,7 +27,3 @@ void plSafeFreeAll();
 int plAddToMemoryBuffer(plmembuf_t* array, void* pointer);
 int plRemoveFromMemoryBuffer(plmembuf_t* array, void* pointer);
 
-int* plIntSafeMalloc(size_t amount);
-int* plIntSafeRealloc(int* pointer, size_t amount);
-char* plCharSafeMalloc(size_t amount);
-char* plCharSafeRealloc(char* pointer, size_t amount);

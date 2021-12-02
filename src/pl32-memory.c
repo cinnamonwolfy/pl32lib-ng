@@ -1,95 +1,9 @@
-// pl32-memory.c: Memory management and string parser module
+/********************************************\
+* pl32lib, v0.01                             *
+* (c)2021 pocketlinux32, Under Lesser GPLv3  *
+* Memory Management/Garbage Collector module *
+\********************************************/
 #include <pl32-memory.h>
-
-/* // Struct to track pointers and their sizes
-typedef struct plptrtrack{
-	void* pointer;
-	size_t size;
-} plptrtrack_t;
-
-plptrtrack_t* pointerStore = NULL; // Contains the tracker structs
-size_t ptrStoreSize = 0; // Size of pointerStore
-
-size_t allocMaxMemory = 128 * 1024 * 1024; // Maximum amount of bytes it will allocate (Default = 128MB)
-size_t usedMemory = 0; // Amount of currently malloc'd memory in bytes
-
-// Finds a pointer within pointerStore. Returns -1 if it doesn't find the pointer
-int findPtr(void* ptr){
-	int i = 0;
-	bool found;
-
-	while(!found && i < ptrStoreSize){
-		if(pointerStore[i].pointer == ptr){
-			found = true;
-		}else{
-			i++;
-		}
-	}
-
-	if(!found){
-		return -1;
-	}else{
-		return i;
-	}
-
-}
-
-// Adss a struct containing the pointer and the size of the pointer to pointerStore. Terminates the program on realloc() failure
-void addPtrEntry(void* ptr, size_t size){
-	if(pointerStore == NULL){
-		pointerStore = malloc(2 * sizeof(plptrtrack_t));
-		ptrStoreSize = 1;
-	}
-
-	plptrtrack_t tempTracker;
-
-	tempTracker.pointer = ptr;
-	tempTracker.size = size;
-
-	plptrtrack_t* tempPtr = realloc(pointerStore, (ptrStoreSize + 1) * sizeof(plptrtrack_t));
-
-	if(!tempPtr){
-		exit(1);
-	}else{
-		pointerStore = tempPtr;
-		ptrStoreSize++;
-
-		pointerStore[ptrStoreSize - 1] = tempTracker;
-		usedMemory += size;
-	}
-
-}
-
-// Finds and removes a struct from pointerStore containing the pointer given. Terminates the program on realloc() failure
-void rmPtrEntry(void* ptr){
-	if(pointerStore == NULL){
-		pointerStore = malloc(2 * sizeof(plptrtrack_t));
-		ptrStoreSize = 1;
-		return;
-	}
-
-	if(!ptr){
-		return;
-	}
-
-	int i = findPtr(ptr);
-
-	if(i != -1){
-		usedMemory -= pointerStore[i].size;
-		pointerStore[i].pointer = pointerStore[ptrStoreSize - 1].pointer;
-		pointerStore[i].size = pointerStore[ptrStoreSize - 1].size;
-
-		plptrtrack_t* tempPtr = realloc(pointerStore, (ptrStoreSize * sizeof(plptrtrack_t)) - sizeof(plptrtrack_t));
-
-		if(!tempPtr){
-			exit(1);
-		}else{
-			pointerStore = tempPtr;
-			ptrStoreSize--;
-
-		}
-	}
-}*/
 
 // Memory buffer struct
 struct plmembuf {
@@ -99,7 +13,10 @@ struct plmembuf {
 
 // Pointer struct
 struct plpointer {
-	const void* pointer;
+	union {
+		const void* pointer;
+		const long long unsigned int ptrAsInt;
+	};
 	size_t sizeOfItem;
 };
 
@@ -107,20 +24,34 @@ struct plpointer {
 struct plarray {
 	plmembuf_t membuf;
 	size_t sizeOfItem;
-}
+};
 
+// Garbage Collector
 struct plgc {
 	plarray_t pointerStore;
 	size_t usedMemory;
 	size_t maxMemory;
+};
+
+plgc_t* garbageCollector = NULL;
+
+long long unsigned int plFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
+	switch(mode){
+		case 0:
+			int i = 0;
+			bool done = false;
+			while(i + pointer.sizeOfItem < membuf.size && !done){
+				if(!memcmp(membuf.pointer + i, pointer.pointer, pointer.size)){
+					return membuf.pointer + i;
+				}else{
+					i++;
+				}
+			}
+			break;
+	}
 }
 
-plgc_t garbageCollector;
-
-int plInternalAddToPtrStore(void* retPtr, size_t size){
-	
-}
-
+/*
 // Change memory allocation limit
 void plChangeAllocLimit(size_t bytes){
 	allocMaxMemory = bytes;
@@ -215,23 +146,4 @@ int plRemovePointerFromArray(plarray_t* array, void* pointer){
 	
 }
 
-
-// plSafeMalloc but casted to int pointer
-int* plIntSafeMalloc(size_t amount){
-	return (int*)plSafemalloc(amount * sizeof(int));
-}
-
-// plSafeRealloc but casted to int pointer
-int* plIntSafeRealloc(int* pointer, size_t amount){
-	return (int*)plSaferealloc(pointer, amount * sizeof(int));
-}
-
-// plSafeMalloc but casted to char pointer
-char* plCharSafeMalloc(size_t amount){
-	return (char*)plSafemalloc(amount * sizeof(char));
-}
-
-// plSafeRealloc but casted to char pointer
-char* plCharSafeRealloc(char* pointer, size_t amount){
-	return (char*)plSaferealloc(pointer, amount * sizeof(char));
-}
+*/
