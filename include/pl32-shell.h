@@ -1,4 +1,5 @@
 #pragma once
+#include <pl32-types.h>
 #include <pl32-memory.h>
 #ifndef __cplusplus
 #include <string.h>
@@ -6,8 +7,6 @@
 #include <cstring>
 #endif
 
-typedef struct pltokenizedstr pltokenizedstr_t;
-typedef struct plfunctionptr plfunctionptr_t;
 
 char* plSafeMallocStrtok(char* input, char* delimiter);
 pltokenizedstr_t plParser(char* input);

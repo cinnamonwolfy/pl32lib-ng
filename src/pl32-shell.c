@@ -1,18 +1,6 @@
 // pl32-shell.c: Interpreter module
 #include <pl32-shell.h>
 
-// Struct defining a variable-sized array of char arrays and the size of the array of arrays
-struct pltokenizedstr {
-	char** array;
-	size_t size;
-}
-
-// Struct defining a function pointer and the name of said function
-struct plfunctionptr {
-	int (*function)(int, char**);
-	char* name;
-}
-
 // Wrapper for ISO C function strtok() that copies the output of strtok() into a memory-allocated buffer
 char* plSafeMallocStrtok(char* input, char* delimiter){
 	char* returnPtr = NULL;

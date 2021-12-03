@@ -1,5 +1,6 @@
 #pragma once
 #ifndef __cplusplus
+#include <pl32-types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,11 +10,6 @@
 #include <cstdlib>
 #include <cerrno>
 #endif
-
-typedef struct plmembuf plmembuf_t;
-typedef struct plpointer plpointer_t;
-typedef struct plarray plarray_t;
-typedef struct plgc plgc_t;
 
 void plChangeAllocLimit(size_t bytes);
 size_t plGetAllocSize();

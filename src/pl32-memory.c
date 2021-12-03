@@ -5,34 +5,6 @@
 \********************************************/
 #include <pl32-memory.h>
 
-// Memory buffer struct
-struct plmembuf {
-	void* pointer;
-	size_t size;
-};
-
-// Pointer struct
-struct plpointer {
-	union {
-		const void* pointer;
-		const long long unsigned int ptrAsInt;
-	};
-	size_t sizeOfItem;
-};
-
-// Array struct
-struct plarray {
-	plmembuf_t membuf;
-	size_t sizeOfItem;
-};
-
-// Garbage Collector
-struct plgc {
-	plarray_t pointerStore;
-	size_t usedMemory;
-	size_t maxMemory;
-};
-
 plgc_t* mainGarbageCollector = NULL;
 
 // Find a value in a memory buffer
