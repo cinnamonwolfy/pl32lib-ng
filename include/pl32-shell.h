@@ -7,6 +7,8 @@
 #include <cstring>
 #endif
 
+typedef struct pltokenizedstr pltokenizedstr_t;
+typedef struct plfunctionptr plfunctionptr_t;
 
 char* plSafeMallocStrtok(char* input, char* delimiter);
 pltokenizedstr_t plParser(char* input);

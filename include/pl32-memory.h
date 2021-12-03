@@ -1,6 +1,5 @@
 #pragma once
 #ifndef __cplusplus
-#include <pl32-types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,15 +10,20 @@
 #include <cerrno>
 #endif
 
-void plChangeAllocLimit(size_t bytes);
-size_t plGetAllocSize();
+typedef struct plmembuf plmembuf_t;
+typedef struct plgc plgc_t;
 
-void* plSafeMalloc(size_t size);
-void* plSafeCalloc(size_t amount, size_t size);
-void* plSafeRealloc(void* pointer, size_t size);
-void plSafeFree(void* pointer);
-void plSafeFreeAll();
+typedef struct plpointer plpointer_t;
+typedef struct plarray plarray_t;
 
-int plAddToMemoryBuffer(plmembuf_t* array, void* pointer);
-int plRemoveFromMemoryBuffer(plmembuf_t* array, void* pointer);
+long long unsigned int plMemFindInMembuf();
 
+int plGCManage(plgc_t* gc, int mode);
+void plGCSetAllocLimit(size_t bytes);
+size_t plGCGetAllocLimit();
+
+void* plGCMalloc(size_t size);
+void* plGCCalloc(size_t amount, size_t size);
+void* plGCRealloc(void* pointer, size_t size);
+void plGCFree(void* pointer);
+void plGCClear();

@@ -1,8 +1,20 @@
 // pl32-shell.c: Interpreter module
 #include <pl32-shell.h>
 
+// SafeMalloc()'ed strtok() output
+struct pltokenizedstr {
+	char** array;
+	size_t size;
+}
+
+// Function Pointer
+struct plfunctionptr {
+	int (*function)(int, char**);
+	char* name;
+}
+
 // Wrapper for ISO C function strtok() that copies the output of strtok() into a memory-allocated buffer
-char* plSafeMallocStrtok(char* input, char* delimiter){
+char* plGCMallocStrtok(char* input, char* delimiter){
 	char* returnPtr = NULL;
 	char* tempPtr;
 
@@ -46,7 +58,7 @@ pltokenizedstr_t plParser(char* input){
 	return returnStruct;
 }
 
-// Creates an object containing pl
+// Creates an object containing function pointer
 plfunctionptr_t plCreateFunctionPointer(int (*function)(int, char**), char* name){
 	plfunctionptr_t returnStruct;
 	returnStruct.function = function;
