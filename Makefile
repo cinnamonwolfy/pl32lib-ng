@@ -20,10 +20,10 @@ init:
 	mkdir build -p
 
 build/*.so: init
-	./compile-libs -c ${SHARED_CFG}
+	cd build; ./compile-libs -c ${SHARED_CFG}
 
 build/*.a: init
-	./compile-libs -c ${STATIC_CFG}
+	cd build; ./compile-libs -c ${STATIC_CFG}
 
 clean:
 	rm -rf build

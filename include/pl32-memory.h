@@ -16,14 +16,14 @@ typedef struct plgc plgc_t;
 typedef struct plpointer plpointer_t;
 typedef struct plarray plarray_t;
 
-long long unsigned int plMemFindInMembuf();
-
 int plGCManage(plgc_t* gc, int mode);
 void plGCSetAllocLimit(size_t bytes);
 size_t plGCGetAllocLimit();
 
-void* plGCMalloc(size_t size);
-void* plGCCalloc(size_t amount, size_t size);
-void* plGCRealloc(void* pointer, size_t size);
+plmembuf_t* plGCMalloc(size_t size);
+plmembuf_t* plGCCalloc(size_t amount, size_t size);
+plmembuf_t* plGCRealloc(plmembuf_t* membuf, size_t size);
 void plGCFree(void* pointer);
 void plGCClear();
+
+plpointer_t plGCFindInMembuf(plmembuf_t membuf, plpointer_t pointer);

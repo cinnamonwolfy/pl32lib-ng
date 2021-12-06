@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "compile-libs build system, v0.10"
+echo "compile-libs build system, v0.12"
 
 while true; do
 	case $1 in
@@ -22,17 +22,20 @@ while true; do
 done
 
 if [ -f "$cfgfile" ]; then
-	source "$cfgfile"
+	. "./$cfgfile"
 else
 	if [ "$components" = "" ]; then
 		echo "Error: No components listed"
 		exit 1
+	elif [ "$cpl" = "" ]; then
+		echo "Error: No compiler specified"
+		exit 2
 	fi
 fi
 
 for i in $components; do
 	echo "Compiling $(basename $i .$ext) component with $flags..."
-	$cpl $flags -c $srcdir/$i -o obj/$i.o
+	$cpl $flags -c "$srcdir/$i" -o "obj/$i.o"
 done
 
 if [ $(echo "$flags" | grep -c fPIC) -ne 0 ]; then

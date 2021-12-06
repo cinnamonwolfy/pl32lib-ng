@@ -33,7 +33,7 @@ struct plarray {
 	size_t sizeOfItem;
 };
 
-plgc_t* mainGarbageCollector = NULL;
+plgc_t mainGarbageCollector;
 
 // Find a value in a memory buffer
 void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
@@ -62,7 +62,29 @@ void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
 	return 0;
 }
 
-//
+int plMemRequestMemory(plmembuf_t* membuf, size_t size, bool realloc_ptr){
+	void tempPtr;
+
+	if(realloc_ptr && !(tempPtr = realloc(membuf->pointer, size))){
+		return 1;
+	}else if(!(tempPtr = malloc(size))){
+		return 2;
+	}
+
+	membuf->pointer = tempPtr;
+	membuf->size = size;
+
+	return 0;
+}
+
+int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
+	if(plMemRequestMemory(membuf, membuf->size + size, true)){
+		return 1;
+	}
+
+	return 0;
+}
+
 int plGCManage(plgc_t* gc, plpointer_t pointer, int mode){
 	
 }
