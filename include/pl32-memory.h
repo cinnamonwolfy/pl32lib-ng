@@ -10,10 +10,6 @@
 #include <cerrno>
 #endif
 
-#define PLGC_REQMEM 0
-#define PLGC_REQMOREMEM 2
-#define PLGC_FREEMEM 1
-
 typedef struct plmembuf plmembuf_t;
 typedef struct plgc plgc_t;
 

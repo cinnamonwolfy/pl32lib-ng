@@ -5,6 +5,10 @@
 \********************************************/
 #include <pl32-memory.h>
 
+#define PLGC_REQMEM 0
+#define PLGC_REQMOREMEM 1
+#define PLGC_FREEMEM 2
+
 // Memory Buffer
 struct plmembuf {
 	void* pointer;
@@ -14,7 +18,9 @@ struct plmembuf {
 // Garbage Collector
 struct plgc {
 	plmembuf_t memoryBuffer;
-	void* freeStore;
+	long long unsigned int* usedPointers;
+	plmembuf_t* freePointers;
+	size_t freePointersAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
 };
@@ -86,15 +92,19 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 	return 0;
 }
 
-int plGCManage(plgc_t* gc, int mode, plmembuf_t* membuf, size_t size){
+int plGCManage(int mode, plmembuf_t* membuf, size_t size){
 	switch(mode){
 		case PLGC_REQMEM:
-			if(gc->memoryBuffer.size + size > gc->maxMemory){
+			if(mainGarbageCollector.memoryBuffer.size + size > gc->maxMemory){
 				return 1;
-			}else if(gc->memoryBuffer.size + size > gc->usedMemory){
-				if(plMemRequestMoreMemory(membuf, size)){
-					
+			}else if(mainGarbageCollector.memoryBuffer.size + size > gc->usedMemory){
+				if(plMemRequestMoreMemory(mainGarbageCollector.memoryBuffer, size)){
+					return 2;
 				}
+			}
+
+			for(int i = 0; i < mainGarbageCollector.freePointerAmt; i++){
+				
 			}
 			break;
 		case PLGC_REQMOREMEM:

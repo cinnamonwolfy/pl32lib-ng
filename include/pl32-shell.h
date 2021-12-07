@@ -1,5 +1,4 @@
 #pragma once
-#include <pl32-types.h>
 #include <pl32-memory.h>
 #ifndef __cplusplus
 #include <string.h>
