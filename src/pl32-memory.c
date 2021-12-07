@@ -20,6 +20,7 @@ struct plgc {
 	plmembuf_t memoryBuffer;
 	long long unsigned int* usedPointers;
 	plmembuf_t* freePointers;
+	size_t usedPointersAmnt;
 	size_t freePointersAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
@@ -103,7 +104,7 @@ int plGCManage(int mode, plmembuf_t* membuf, size_t size){
 				}
 			}
 
-			for(int i = 0; i < mainGarbageCollector.freePointerAmt; i++){
+			while(mainGarbageCollector.freePointers[i].size != size){
 				
 			}
 			break;
