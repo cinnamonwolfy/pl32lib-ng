@@ -10,13 +10,16 @@
 #include <cerrno>
 #endif
 
+#define PLGC_REQMEM 0
+#define PLGC_REQMOREMEM 2
+#define PLGC_FREEMEM 1
+
 typedef struct plmembuf plmembuf_t;
 typedef struct plgc plgc_t;
 
 typedef struct plpointer plpointer_t;
 typedef struct plarray plarray_t;
 
-int plGCManage(plgc_t* gc, int mode);
 void plGCSetAllocLimit(size_t bytes);
 size_t plGCGetAllocLimit();
 

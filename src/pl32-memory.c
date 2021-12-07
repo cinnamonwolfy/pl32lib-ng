@@ -13,7 +13,8 @@ struct plmembuf {
 
 // Garbage Collector
 struct plgc {
-	plarray_t pointerStore;
+	plmembuf_t memoryBuffer;
+	void* freeStore;
 	size_t usedMemory;
 	size_t maxMemory;
 };
@@ -85,6 +86,20 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 	return 0;
 }
 
-int plGCManage(plgc_t* gc, plpointer_t pointer, int mode){
-	
+int plGCManage(plgc_t* gc, int mode, plmembuf_t* membuf, size_t size){
+	switch(mode){
+		case PLGC_REQMEM:
+			if(gc->memoryBuffer.size + size > gc->maxMemory){
+				return 1;
+			}else if(gc->memoryBuffer.size + size > gc->usedMemory){
+				if(plMemRequestMoreMemory(membuf, size)){
+					
+				}
+			}
+			break;
+		case PLGC_REQMOREMEM:
+			break;
+		case PLGC_FREEMEM:
+			break;
+	}
 }
