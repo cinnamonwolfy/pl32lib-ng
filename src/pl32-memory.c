@@ -5,25 +5,17 @@
 \********************************************/
 #include <pl32-memory.h>
 
-#define PLGC_REQMEM 0
-#define PLGC_REQMOREMEM 1
-#define PLGC_FREEMEM 2
+#define PLGC_INIT 0
+#define PLGC_REQMEM 1
+#define PLGC_REQMOREMEM 2
+#define PLGC_FREEMEM 3
+
+bool isInitialized = false;
 
 // Memory Buffer
 struct plmembuf {
 	void* pointer;
 	size_t size;
-};
-
-// Garbage Collector
-struct plgc {
-	plmembuf_t memoryBuffer;
-	long long unsigned int* usedPointers;
-	plmembuf_t* freePointers;
-	size_t usedPointersAmnt;
-	size_t freePointersAmnt;
-	size_t usedMemory;
-	size_t maxMemory;
 };
 
 // Immutable Pointer
@@ -39,6 +31,17 @@ struct plpointer {
 struct plarray {
 	plmembuf_t membuf;
 	size_t sizeOfItem;
+};
+
+// Garbage Collector
+struct plgc {
+	plmembuf_t memoryBuffer;
+	plpointer_t* usedPointers;
+	plpointer_t* freePointers;
+	size_t usedPointersAmnt;
+	size_t freePointersAmnt;
+	size_t usedMemory;
+	size_t maxMemory;
 };
 
 plgc_t mainGarbageCollector;
@@ -93,20 +96,24 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 	return 0;
 }
 
+plmembuf_t* plGCRequestMemory(size_t size){
+	plmembuf_t retbuf;
+
+	if(!isInitialized)
+		return NULL;
+
+	if(mainGarbageCollector.usedMemory + size > mainGarbageCollector.memomyBuffer.size){
+		if(){
+			plMemRequestMoreMemory(mainGarbageCollector.membuf&, size);
+		}
+	}
+}
+
 int plGCManage(int mode, plmembuf_t* membuf, size_t size){
 	switch(mode){
+		case PLGC_INIT:
+			break;
 		case PLGC_REQMEM:
-			if(mainGarbageCollector.memoryBuffer.size + size > gc->maxMemory){
-				return 1;
-			}else if(mainGarbageCollector.memoryBuffer.size + size > gc->usedMemory){
-				if(plMemRequestMoreMemory(mainGarbageCollector.memoryBuffer, size)){
-					return 2;
-				}
-			}
-
-			while(mainGarbageCollector.freePointers[i].size != size){
-				
-			}
 			break;
 		case PLGC_REQMOREMEM:
 			break;
@@ -114,3 +121,4 @@ int plGCManage(int mode, plmembuf_t* membuf, size_t size){
 			break;
 	}
 }
+
