@@ -1,4 +1,9 @@
-// pl32-shell.c: Interpreter module
+/********************************************\
+* pl32lib, v0.01                             *
+* (c)2021 pocketlinux32, Under Lesser GPLv3  *
+* String manipulation/Shell/Parser module    *
+* Warning: unfinished!                       *
+\********************************************/
 #include <pl32-shell.h>
 
 // SafeMalloc()'ed strtok() output
