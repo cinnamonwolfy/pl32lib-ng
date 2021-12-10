@@ -5,13 +5,6 @@
 \********************************************/
 #include <pl32-memory.h>
 
-#define PLGC_INIT 0
-#define PLGC_REQMEM 1
-#define PLGC_REQMOREMEM 2
-#define PLGC_FREEMEM 3
-
-bool isInitialized = false;
-
 // Memory Buffer
 struct plmembuf {
 	void* pointer;
@@ -36,15 +29,14 @@ struct plarray {
 // Garbage Collector
 struct plgc {
 	plmembuf_t memoryBuffer;
-	plpointer_t* usedPointers;
+	long long unsigned int* usedPointers;
 	plpointer_t* freePointers;
 	size_t usedPointersAmnt;
 	size_t freePointersAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
+	bool isInitialized;
 };
-
-plgc_t mainGarbageCollector;
 
 // Find a value in a memory buffer
 void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
@@ -74,7 +66,7 @@ void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
 }
 
 int plMemRequestMemory(plmembuf_t* membuf, size_t size, bool realloc_ptr){
-	void tempPtr;
+	void* tempPtr;
 
 	if(realloc_ptr && !(tempPtr = realloc(membuf->pointer, size))){
 		return 1;
@@ -96,22 +88,16 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 	return 0;
 }
 
-plmembuf_t* plGCRequestMemory(size_t size){
-	plmembuf_t retbuf;
+int plGCManage(plgc_t* gc, int mode, ...){
+	va_list args;
+	va_start(args, mode);
+	
 
-	if(!isInitialized)
-		return NULL;
-
-	if(mainGarbageCollector.usedMemory + size > mainGarbageCollector.memomyBuffer.size){
-		if(){
-			plMemRequestMoreMemory(mainGarbageCollector.membuf&, size);
-		}
-	}
-}
-
-int plGCManage(int mode, plmembuf_t* membuf, size_t size){
 	switch(mode){
 		case PLGC_INIT:
+			if(!gc->isInitialized){
+				gc->usedMemory
+			}
 			break;
 		case PLGC_REQMEM:
 			break;
