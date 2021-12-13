@@ -89,14 +89,18 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 }
 
 int plGCManage(plgc_t* gc, int mode, ...){
-	va_list args;
-	va_start(args, mode);
-	
+	va_list arglist;
+	va_start(arglist, mode);
 
 	switch(mode){
 		case PLGC_INIT:
 			if(!gc->isInitialized){
-				gc->usedMemory
+				plMemRequestMemory(gc->memoryBuffer, 1024);
+				gc->usedMemory = 0;
+				gc->maxMemory = 128 * 1024 * 1024;
+				gc->usedPointerAmnt = 0;
+				gc->freePointerAmnt = 0;
+				gc->isInitialized = true;
 			}
 			break;
 		case PLGC_REQMEM:
