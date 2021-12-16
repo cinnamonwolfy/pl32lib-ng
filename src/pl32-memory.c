@@ -88,6 +88,12 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 	return 0;
 }
 
+int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_ptr){
+	if(gc->){
+		
+	}
+}
+
 int plGCManage(plgc_t* gc, int mode, ...){
 	va_list arglist;
 	va_start(arglist, mode);
@@ -104,6 +110,12 @@ int plGCManage(plgc_t* gc, int mode, ...){
 			}
 			break;
 		case PLGC_REQMEM:
+			plmembuf_t* pointer = va_arg(arglist, plmembuf_t*);
+			size_t size = va_arg(arglist, size_t);
+
+			if(plGCRequestMemory(gc, pointer, size, false)){
+				return 1;
+			}
 			break;
 		case PLGC_REQMOREMEM:
 			break;
