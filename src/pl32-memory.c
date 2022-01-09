@@ -68,10 +68,12 @@ void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
 int plMemRequestMemory(plmembuf_t* membuf, size_t size, bool realloc_ptr){
 	void* tempPtr;
 
-	if(realloc_ptr && !(tempPtr = realloc(membuf->pointer, size))){
+	if(!membuf){
 		return 1;
-	}else if(!(tempPtr = malloc(size))){
+	}else if(realloc_ptr && !(tempPtr = realloc(membuf->pointer, size))){
 		return 2;
+	}else if(!(tempPtr = malloc(size))){
+		return 3;
 	}
 
 	membuf->pointer = tempPtr;
@@ -89,10 +91,16 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 }
 
 int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_ptr){
-	if(gc->usedMemory + size > gc->maxMemory){
-		return 0;
-	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size)){
+	if(){
+		
+	}else if(gc->usedMemory + size > gc->maxMemory){
 		return 1;
+	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size)){
+		return 2;
+	}
+
+	if(gc->){
+		
 	}
 }
 
