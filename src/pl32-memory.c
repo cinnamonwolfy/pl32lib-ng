@@ -91,15 +91,17 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 }
 
 int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_ptr){
-	if(){
-		
-	}else if(gc->usedMemory + size > gc->maxMemory){
+	if(gc == NULL){
+		gc = &mainGC
+	}
+
+	if(gc->usedMemory + size > gc->maxMemory){
 		return 1;
 	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size)){
 		return 2;
 	}
 
-	if(gc->){
+	if(gc->freePointersAmnt == 0){
 		
 	}
 }
@@ -107,6 +109,10 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 int plGCManage(plgc_t* gc, int mode, ...){
 	va_list arglist;
 	va_start(arglist, mode);
+
+	if(gc == NULL){
+		gc = &mainGC
+	}
 
 	switch(mode){
 		case PLGC_INIT:
