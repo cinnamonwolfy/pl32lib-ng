@@ -35,6 +35,7 @@ struct plgc {
 	size_t freePointersAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
+	long long int oldPtrOffset;
 	bool isInitialized;
 };
 
@@ -95,15 +96,19 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 		gc = &mainGC
 	}
 
+	void* oldPtr = gc->memoryBuffer.pointer;
+
 	if(gc->usedMemory + size > gc->maxMemory){
 		return 1;
-	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size)){
+	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size), true){
 		return 2;
 	}
 
-	if(gc->freePointersAmnt == 0){
-		
+	if(oldPtr != gc->memoryBuffer.pointer){
+		gc->oldPtrOffset = (long long int)gc->memoryBuffer.pointer - (long long int)oldPtr;
 	}
+
+	
 }
 
 int plGCManage(plgc_t* gc, int mode, ...){
@@ -122,6 +127,7 @@ int plGCManage(plgc_t* gc, int mode, ...){
 				gc->maxMemory = 128 * 1024 * 1024;
 				gc->usedPointerAmnt = 0;
 				gc->freePointerAmnt = 0;
+				gc->oldPtrOffset = 0;
 				gc->isInitialized = true;
 			}
 			break;
@@ -139,4 +145,3 @@ int plGCManage(plgc_t* gc, int mode, ...){
 			break;
 	}
 }
-
