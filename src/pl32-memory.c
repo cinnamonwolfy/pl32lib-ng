@@ -97,6 +97,7 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 	}
 
 	void* oldPtr = gc->memoryBuffer.pointer;
+	int i = 0;
 
 	if(gc->usedMemory + size > gc->maxMemory){
 		return 1;
@@ -106,9 +107,13 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 
 	if(oldPtr != gc->memoryBuffer.pointer){
 		gc->oldPtrOffset = (long long int)gc->memoryBuffer.pointer - (long long int)oldPtr;
+	}else{
+		gc->oldPtrOffset = 0;
 	}
 
-	
+	if(usedPointersAmnt == 0){
+		 membuf->pointer = gc->memoryBuffer.pointer
+	}
 }
 
 int plGCManage(plgc_t* gc, int mode, ...){
@@ -145,3 +150,5 @@ int plGCManage(plgc_t* gc, int mode, ...){
 			break;
 	}
 }
+
+

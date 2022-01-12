@@ -21,6 +21,8 @@
 #define PLGC_REQMEM 1
 #define PLGC_REQMOREMEM 2
 #define PLGC_FREEMEM 3
+#define PLGC_CLEANMEM 4
+#define PLGC_TERMGC 5
 
 typedef struct plmembuf plmembuf_t;
 typedef struct plgc plgc_t;
@@ -29,10 +31,10 @@ typedef struct plarray plarray_t;
 
 plgc_t mainGC;
 
+int plGCGetAddress(plmembuf_t* membuf, plgc_t* gc);
 int plGCManage(plgc_t* gc, int mode, ...);
 
 plmembuf_t* plGCMalloc(size_t size);
 plmembuf_t* plGCCalloc(size_t amount, size_t size);
 plmembuf_t* plGCRealloc(plmembuf_t* membuf, size_t size);
 void plGCFree(void* pointer);
-void plGCClear();
