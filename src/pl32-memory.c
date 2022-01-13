@@ -29,7 +29,7 @@ struct plarray {
 // Garbage Collector
 struct plgc {
 	plmembuf_t memoryBuffer;
-	long long unsigned int* usedPointers;
+	plpointer_t* usedPointers;
 	plpointer_t* freePointers;
 	size_t usedPointersAmnt;
 	size_t freePointersAmnt;
@@ -93,7 +93,7 @@ int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
 
 int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_ptr){
 	if(gc == NULL){
-		gc = &mainGC
+		gc = &mainGC;
 	}
 
 	void* oldPtr = gc->memoryBuffer.pointer;
@@ -111,9 +111,16 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 		gc->oldPtrOffset = 0;
 	}
 
-	if(usedPointersAmnt == 0){
-		 membuf->pointer = gc->memoryBuffer.pointer
+	if(gc->usedPointersAmnt == 0){
+		membuf->pointer = gc->memoryBuffer.pointer;
+		membuf->size = size;
+		gc->usedPointers = malloc(2 * sizeof(plpointer_t));
+		gc->usedPointersAmnt++;
+	}else if(gc->freePointersAmnt != 0){
+		
 	}
+
+	gc->usedMemory+=size;
 }
 
 int plGCManage(plgc_t* gc, int mode, ...){
@@ -121,22 +128,22 @@ int plGCManage(plgc_t* gc, int mode, ...){
 	va_start(arglist, mode);
 
 	if(gc == NULL){
-		gc = &mainGC
+		gc = &mainGC;
 	}
 
 	switch(mode){
 		case PLGC_INIT:
 			if(!gc->isInitialized){
-				plMemRequestMemory(&gc->memoryBuffer, 1024);
+				plMemRequestMemory(&gc->memoryBuffer, 1024, false);
 				gc->usedMemory = 0;
 				gc->maxMemory = 128 * 1024 * 1024;
-				gc->usedPointerAmnt = 0;
-				gc->freePointerAmnt = 0;
+				gc->usedPointersAmnt = 0;
+				gc->freePointersAmnt = 0;
 				gc->oldPtrOffset = 0;
 				gc->isInitialized = true;
 			}
 			break;
-		case PLGC_REQMEM:
+		case PLGC_REQMEM: ;
 			plmembuf_t* pointer = va_arg(arglist, plmembuf_t*);
 			size_t size = va_arg(arglist, size_t);
 
