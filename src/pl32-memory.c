@@ -14,8 +14,8 @@ struct plmembuf {
 // Immutable Pointer
 struct plpointer {
 	union {
-		const void* pointer;
-		const long long unsigned int ptrAsInt;
+		void* pointer;
+		long long unsigned int ptrAsInt;
 	};
 	size_t sizeOfItem;
 };
@@ -117,7 +117,7 @@ int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_
 		gc->usedPointers = malloc(2 * sizeof(plpointer_t));
 		gc->usedPointersAmnt++;
 	}else if(gc->freePointersAmnt != 0){
-		
+		while(gc->freePointers.size != size)
 	}
 
 	gc->usedMemory+=size;
