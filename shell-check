@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ "$1" != "$(pwd)/" ]; then
-	exit 1
-elif [ "$VARS_EXPORTED" = "" ]; then
-	exit 2
-else
-	exit 0
-fi

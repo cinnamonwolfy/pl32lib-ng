@@ -1,4 +1,0 @@
-export SHARED_CFG="config/shared.cfg"
-export STATIC_CFG="config/static.cfg"
-export VARS_EXPORTED="1"
-
