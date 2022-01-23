@@ -20,14 +20,16 @@ extern "C" {
 #define PLGC_INIT 1
 #define PLGC_CLEAN 2
 #define PLGC_STOP 3
+#define PLGC_ADDPTR 4
+#define PLGC_RMPTR 5
 
 typedef struct plgc plgc_t;
 
 int plGCManage(plgc_t* gc, int mode, void* ptr);
 
-plmembuf_t* plGCMalloc(size_t size);
-plmembuf_t* plGCCalloc(size_t amount, size_t size);
-plmembuf_t* plGCRealloc(plmembuf_t* membuf, size_t size);
+void* plGCAlloc(plgc_t* gc, size_t size);
+void* plGCCalloc(plgc_t* gc, size_t amount, size_t size);
+void* plGCRealloc(plgc_t* gc, void* pointer, size_t size);
 void plGCFree(void* pointer);
 
 #ifdef __cplusplus
