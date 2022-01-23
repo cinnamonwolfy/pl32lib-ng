@@ -5,155 +5,36 @@
 \********************************************/
 #include <pl32-memory.h>
 
-// Memory Buffer
-struct plmembuf {
+typedef struct plpointer {
 	void* pointer;
 	size_t size;
-};
+} plptr_t
 
-// Immutable Pointer
-struct plpointer {
-	union {
-		void* pointer;
-		long long unsigned int ptrAsInt;
-	};
-	size_t sizeOfItem;
-};
-
-// Variable Array
-struct plarray {
-	plmembuf_t membuf;
-	size_t sizeOfItem;
-};
-
-// Garbage Collector
+// Garbage Collector Structure
 struct plgc {
-	plmembuf_t memoryBuffer;
-	plpointer_t* usedPointers;
-	plpointer_t* freePointers;
-	size_t usedPointersAmnt;
-	size_t freePointersAmnt;
+	
 	size_t usedMemory;
 	size_t maxMemory;
-	long long int oldPtrOffset;
 	bool isInitialized;
 };
 
-// Find a value in a memory buffer
-void* plMemFindInMembuf(plmembuf_t membuf, plpointer_t pointer, int mode){
-	int i = 0;
-	bool done = false;
-
-	switch(mode){
-		case 0:
-			while(i + pointer.sizeOfItem < membuf.size && !done){
-				if(!memcmp(membuf.pointer + i, pointer.pointer, pointer.sizeOfItem)){
-					return membuf.pointer + i;
-				}
-				i++;
-			}
-			break;
-		case 1:
-			while(i * pointer.sizeOfItem < membuf.size && !done){
-				if(!memcmp(membuf.pointer + (i * pointer.sizeOfItem), pointer.pointer, pointer.sizeOfItem)){
-					return membuf.pointer + (i * pointer.sizeOfItem);
-				}
-				i++;
-			}
-			break;
-	}
-
-	return 0;
-}
-
-int plMemRequestMemory(plmembuf_t* membuf, size_t size, bool realloc_ptr){
-	void* tempPtr;
-
-	if(!membuf){
-		return 1;
-	}else if(realloc_ptr && !(tempPtr = realloc(membuf->pointer, size))){
-		return 2;
-	}else if(!(tempPtr = malloc(size))){
-		return 3;
-	}
-
-	membuf->pointer = tempPtr;
-	membuf->size = size;
-
-	return 0;
-}
-
-int plMemRequestMoreMemory(plmembuf_t* membuf, size_t size){
-	if(plMemRequestMemory(membuf, membuf->size + size, true)){
-		return 1;
-	}
-
-	return 0;
-}
-
-int plGCRequestMemory(plgc_t* gc, plmembuf_t* membuf, size_t size, bool realloc_ptr){
+int plGCManage(plgc_t* gc, int mode, void* ptr){
 	if(gc == NULL){
-		gc = &mainGC;
-	}
-
-	void* oldPtr = gc->memoryBuffer.pointer;
-	int i = 0;
-
-	if(gc->usedMemory + size > gc->maxMemory){
 		return 1;
-	}else if(gc->usedMemory + size > gc->memoryBuffer.size && plMemRequestMoreMemory(&gc->memoryBuffer, gc->usedMemory + size), true){
-		return 2;
-	}
-
-	if(oldPtr != gc->memoryBuffer.pointer){
-		gc->oldPtrOffset = (long long int)gc->memoryBuffer.pointer - (long long int)oldPtr;
-	}else{
-		gc->oldPtrOffset = 0;
-	}
-
-	if(gc->usedPointersAmnt == 0){
-		membuf->pointer = gc->memoryBuffer.pointer;
-		membuf->size = size;
-		gc->usedPointers = malloc(2 * sizeof(plpointer_t));
-		gc->usedPointersAmnt++;
-	}else if(gc->freePointersAmnt != 0){
-		while(gc->freePointers.size != size)
-	}
-
-	gc->usedMemory+=size;
-}
-
-int plGCManage(plgc_t* gc, int mode, ...){
-	va_list arglist;
-	va_start(arglist, mode);
-
-	if(gc == NULL){
-		gc = &mainGC;
 	}
 
 	switch(mode){
 		case PLGC_INIT:
 			if(!gc->isInitialized){
-				plMemRequestMemory(&gc->memoryBuffer, 1024, false);
+				
 				gc->usedMemory = 0;
 				gc->maxMemory = 128 * 1024 * 1024;
-				gc->usedPointersAmnt = 0;
-				gc->freePointersAmnt = 0;
-				gc->oldPtrOffset = 0;
 				gc->isInitialized = true;
 			}
 			break;
-		case PLGC_REQMEM: ;
-			plmembuf_t* pointer = va_arg(arglist, plmembuf_t*);
-			size_t size = va_arg(arglist, size_t);
-
-			if(plGCRequestMemory(gc, pointer, size, false)){
-				return 1;
-			}
+		case PLGC_CLEAN:
 			break;
-		case PLGC_REQMOREMEM:
-			break;
-		case PLGC_FREEMEM:
+		case PLGC_STOP:
 			break;
 	}
 }
