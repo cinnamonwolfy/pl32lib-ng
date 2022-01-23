@@ -41,6 +41,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 			}
 			break;
 		case PLGC_CLEAN:
+
 			break;
 		case PLGC_STOP:
 			break;
