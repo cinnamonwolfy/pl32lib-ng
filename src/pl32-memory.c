@@ -33,6 +33,8 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 		// Initializes the garbage collector
 		case PLGC_INIT:
 			if(!gc->isInitialized){
+				gc->usedPointers = malloc(sizeof(plptr_t) * 2);
+				gc->freedPointers = malloc(sizeof(plptr_t) * 2);
 				gc->upAmnt = 0;
 				gc->fpAmnt = 0;
 				gc->usedMemory = 0;
@@ -43,17 +45,32 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 			break;
 		// Manually makes the garbage collector clean up memory
 		case PLGC_CLEAN:
+			//TODO: Add sweep code
 			break;
 		// Cleans memory for the last time and deallocates the garbage collector
 		case PLGC_STOP:
+			plGCManage(gc, PLGC_CLEAN, NULL, 0);
+			free(gc->usedPointers);
+			free(gc->freedPointers);
+			gc->usedPointers = NULL;
+			gc->freedPointers = NULL;
+			gc->isInitialized = false;
 			break;
 		// Adds pointer reference to the tracking array
 		case PLGC_ADDPTR:
+			if(gc->upAmnt > 1){
+				void* tempPtr = realloc(gc->usedPointers, sizeof(plptr_t) * upAmnt);
+
+				if(!tempPtr){
+					return 1;
+				}
+			}
 			break;
 		// Removes pointer reference from the tracking array
 		case PLGC_RMPTR:
 			break;
 	}
+	return 0;
 }
 
 // malloc() wrapper that interfaces with the garbage collector
