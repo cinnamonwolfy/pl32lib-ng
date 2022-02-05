@@ -1,8 +1,8 @@
-/********************************************\
-* pl32lib, v0.01                             *
-* (c)2021 pocketlinux32, Under Lesser GPLv3  *
-* Memory Management/Garbage Collector module *
-\********************************************/
+/*************************************************\
+* pl32lib, v0.01                                  *
+* (c)2021 pocketlinux32, Under Lesser GPLv3       *
+* Memory Management/Semi-Garbage Collector module *
+\*************************************************/
 #include <pl32-memory.h>
 
 // Internal type for representing internal pointer references
@@ -11,7 +11,7 @@ typedef struct plpointer {
 	size_t size;
 } plptr_t
 
-// Structure of the garbage collector. This garbage collector is thread-specific
+// Structure of the semi-garbage collector. This semi-garbage collector is thread-specific
 struct plgc {
 	plptr_t* usedPointers;
 	plptr_t* freedPointers;
@@ -23,14 +23,14 @@ struct plgc {
 	bool isInitialized;
 };
 
-// Controller for garbage collector
+// Controller for semi-garbage collector
 int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	if(gc == NULL){
 		return 1;
 	}
 
 	switch(mode){
-		// Initializes the garbage collector
+		// Initializes the semi-garbage collector
 		case PLGC_INIT:
 			if(!gc->isInitialized){
 				gc->usedPointers = malloc(sizeof(plptr_t) * 2);
@@ -39,15 +39,10 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 				gc->fpAmnt = 0;
 				gc->usedMemory = 0;
 				gc->maxMemory = 128 * 1024 * 1024;
-				gc->start = ptr;
 				gc->isInitialized = true;
 			}
 			break;
-		// Manually makes the garbage collector clean up memory
-		case PLGC_CLEAN:
-			//TODO: Add sweep code
-			break;
-		// Cleans memory for the last time and deallocates the garbage collector
+		// Cleans memory and deallocates the semi-garbage collector
 		case PLGC_STOP:
 			plGCManage(gc, PLGC_CLEAN, NULL, 0);
 			free(gc->usedPointers);
