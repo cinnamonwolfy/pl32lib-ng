@@ -19,7 +19,6 @@ struct plgc {
 	size_t fpAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
-	void* start;
 	bool isInitialized;
 };
 
@@ -68,7 +67,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	return 0;
 }
 
-// malloc() wrapper that interfaces with the garbage collector
+// malloc() wrapper that interfaces with the semi-garbage collector
 void* plGCAlloc(plgc_t* gc, size_t size){
 	void* tempPtr;
 
@@ -79,7 +78,7 @@ void* plGCAlloc(plgc_t* gc, size_t size){
 	plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
 }
 
-// calloc() wrapper that interfaces with the garbage collector
+// calloc() wrapper that interfaces with the semi-garbage collector
 void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	void* tempPtr;
 
@@ -90,7 +89,7 @@ void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
 }
 
-// realloc() wrapper that interfaces with the garbage collector
+// realloc() wrapper that interfaces with the semi-garbage collector
 void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 	void* tempPtr = realloc(pointer, size);
 
@@ -102,7 +101,7 @@ void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 	plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
 }
 
-// free() wrapper that interfaces with the garbage collector
+// free() wrapper that interfaces with the semi-garbage collector
 void plGCFree(plgc_t* gc, void* pointer){
 	free(pointer);
 	plGCManage(gc, PLGC_RMPTR, tempPtr, 0);
