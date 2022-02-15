@@ -1,8 +1,8 @@
-/********************************************\
-* pl32lib, v0.01                             *
-* (c)2021 pocketlinux32, Under Lesser GPLv3  *
-* Memory Management/Garbage Collector module *
-\********************************************/
+/*************************************************\
+* pl32lib, v0.01                                  *
+* (c)2021 pocketlinux32, Under Lesser GPLv3       *
+* Memory Management/Semi-Garbage Collector module *
+\*************************************************/
 #pragma once
 #ifndef __cplusplus
 #include <stdlib.h>
@@ -18,10 +18,11 @@ extern "C" {
 #endif
 
 #define PLGC_INIT 1
-#define PLGC_CLEAN 2
-#define PLGC_STOP 3
+#define PLGC_STOP 2
+#define PLGC_SEARCHPTR 3
 #define PLGC_ADDPTR 4
 #define PLGC_RMPTR 5
+#define PLGC_MODPTR 6
 
 typedef struct plgc plgc_t;
 
