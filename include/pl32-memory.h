@@ -26,12 +26,12 @@ extern "C" {
 
 typedef struct plgc plgc_t;
 
-int plGCManage(plgc_t* gc, int mode, void* ptr);
+int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size);
 
 void* plGCAlloc(plgc_t* gc, size_t size);
 void* plGCCalloc(plgc_t* gc, size_t amount, size_t size);
 void* plGCRealloc(plgc_t* gc, void* pointer, size_t size);
-void plGCFree(void* pointer);
+void plGCFree(plgc_t* gc, void* pointer);
 
 #ifdef __cplusplus
 }
