@@ -24,3 +24,9 @@ gcc -shared libpl32.o -o libpl32.so
 gcc -c -I../include pl32-memory.c pl32-shell.c pl32-file.c -o libpl32.o
 ar rc libpl32.a libpl32.o
 ```
+
+# Bug Reporting
+
+Currently, you can report bugs to GitHub, but I rarely log into GitHub. A better
+way of reporting bugs would be to DM me on either Discord or Twitter (it's on my
+GitHub profile).
