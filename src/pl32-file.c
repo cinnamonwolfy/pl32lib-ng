@@ -1,17 +1,17 @@
 // pl32lib wrapper for FILE*
-typedef struct plfile {
+struct plfile {
 	FILE* fileptr; // File pointer for actual files
 	char* strbuf; // String pointer for stringstream
 	char* mode; // File open mode
 	size_t seekbyte; // Byte offset from the beginning of buffer
 	size_t bufsize; // Buffer size
-} plfile_t;
+};
 
 plfile_t* plFOpen(char* filename, char* mode){
 	plfile_t* returnStruct = NULL;
 
 	if(mode){
-		returnStruct = malloc(sizeof(plfile_t));
+		returnStruct = plGCMalloc(sizeof(plfile_t));
 		if(!filename){
 			returnStruct->fileptr = NULL;
 		}else{
@@ -19,7 +19,7 @@ plfile_t* plFOpen(char* filename, char* mode){
 		}
 
 		returnStruct->strbuf = NULL;
-		returnStruct->mode = malloc((strlen(mode)+1) * sizeof(char));
+		returnStruct->mode = plGCMalloc((strlen(mode)+1) * sizeof(char));
 		strcpy(returnStruct->mode, mode);
 		returnStruct->bufsize = 0;
 	}
@@ -29,13 +29,13 @@ plfile_t* plFOpen(char* filename, char* mode){
 
 int plFClose(plfile_t* ptr){
 	if(!fileptr){
-		free(ptr->strbuf);
+		plGCFree(ptr->strbuf);
 	}else{
 		fclose(ptr->fileptr);
 	}
 
-	free(ptr->mode);
-	free(ptr);
+	plGCFree(ptr->mode);
+	plGCFree(ptr);
 }
 
 size_t plFRead(const void* ptr, size_t size, size_t nmemb, plfile_t* stream){
@@ -106,13 +106,4 @@ int plFGets(char* string, int num, plfile_t* stream){
 	}else{
 		return 1;
 	}
-}
-
-int plFPrintF(plfile_t* stream, const char* fmt, ...){
-	va_list args;
-	va_start(args, fmt);
-
-	char buffer[4096]
-
-	vsprintf(buffer, fmt, args);
 }

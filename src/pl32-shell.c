@@ -24,7 +24,7 @@ char* plGCMallocStrtok(char* input, char* delimiter){
 	char* tempPtr;
 
 	if((tempPtr = strtok(input, delimiter)) != NULL){
-		returnPtr = plSafeMalloc((strlen(tempPtr) + 1) * sizeof(char));
+		returnPtr = plGCMalloc((strlen(tempPtr) + 1) * sizeof(char));
 		strcpy(tempPtr, returnPtr);
 	}
 
@@ -35,7 +35,7 @@ char* plGCMallocStrtok(char* input, char* delimiter){
 pltokenizedstr_t plParser(char* input){
 	pltokenizedstr_t returnStruct;
 	returnStruct.size = 1;
-	returnStruct.array = malloc(2 * sizeof(char*));
+	returnStruct.array = plGCMalloc(2 * sizeof(char*));
 
 	char* tempPtr = plSafeMallocStrtok(input, " \n");
 	returnStruct.array[0] = tempPtr;
@@ -46,10 +46,10 @@ pltokenizedstr_t plParser(char* input){
 
 		if(!tempArrPtr){
 			for(int i = 0; i < returnStruct.size; i++){
-				free(returnStruct.array[i]);
+				plGCFree(returnStruct.array[i]);
 			}
 
-			free(returnStruct.array);
+			plGCFree(returnStruct.array);
 			returnStruct.array = NULL;
 			returnStruct.size = ENOMEM;
 
