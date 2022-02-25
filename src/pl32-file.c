@@ -1,4 +1,11 @@
-// pl32lib wrapper for FILE*
+/********************************************\
+* pl32lib, v0.01                             *
+* (c)2022 pocketlinux32, Under Lesser GPLv3  *
+* File Management Module                     *
+* Warning: unfinished!                       *
+\********************************************/
+#include <pl32-file.h>
+
 struct plfile {
 	FILE* fileptr; // File pointer for actual files
 	char* strbuf; // String pointer for stringstream

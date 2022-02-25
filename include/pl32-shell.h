@@ -7,6 +7,10 @@
 #pragma once
 #include <pl32-memory.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct pltokenizedstr pltokenizedstr_t;
 typedef struct plfunctionptr plfunctionptr_t;
 
@@ -22,3 +26,7 @@ int plShell(char* command); // Undefined
 int plShellFile(char* filename); // Undefined
 
 void plShellInteractive(char* prompt); // Undefined
+
+#ifdef __cplusplus
+}
+#endif
