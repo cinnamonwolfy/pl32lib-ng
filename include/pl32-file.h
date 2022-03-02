@@ -8,16 +8,19 @@
 #include <pl32-memory.h>
 
 #ifdef __cplusplus
+#include <cstdio>
 extern "C" {
+#else
+#include <stdio.h>
 #endif
 
 typedef struct plfile plfile_t;
 
-plfile_t* plFOpen(char* filename, char* mode);
+plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc);
 int plFClose(plfile_t* ptr);
 
-size_t plFRead(const void* ptr, size_t size, size_t nmemb, plfile_t* stream);
-size_t plFWrite(const void* ptr, size_t size, size_t nmemb, plfile_t* stream);
+size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream);
+size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream);
 
 char plFPutC(char ch, plfile_t* stream);
 char plFGetC(plfile_t* stream);

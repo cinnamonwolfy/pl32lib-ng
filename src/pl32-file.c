@@ -12,21 +12,23 @@ struct plfile {
 	char* mode; // File open mode
 	size_t seekbyte; // Byte offset from the beginning of buffer
 	size_t bufsize; // Buffer size
+	plgc_t* gcptr; // pointer to GC (see pl32-memory.h)
 };
 
-plfile_t* plFOpen(char* filename, char* mode){
+plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 	plfile_t* returnStruct = NULL;
 
 	if(mode){
-		returnStruct = plGCMalloc(sizeof(plfile_t));
+		returnStruct = plGCAlloc(gc, sizeof(plfile_t));
 		if(!filename){
 			returnStruct->fileptr = NULL;
 		}else{
 			returnStruct->fileptr = fopen(filename, mode);
 		}
 
+		returnStruct->gcptr = gc;
 		returnStruct->strbuf = NULL;
-		returnStruct->mode = plGCMalloc((strlen(mode)+1) * sizeof(char));
+		returnStruct->mode = plGCAlloc(gc, (strlen(mode)+1) * sizeof(char));
 		strcpy(returnStruct->mode, mode);
 		returnStruct->bufsize = 0;
 	}
@@ -35,17 +37,18 @@ plfile_t* plFOpen(char* filename, char* mode){
 }
 
 int plFClose(plfile_t* ptr){
-	if(!fileptr){
-		plGCFree(ptr->strbuf);
+	if(!ptr->fileptr){
+		plGCFree(ptr->gcptr, ptr->strbuf);
 	}else{
-		fclose(ptr->fileptr);
+		return fclose(ptr->fileptr);
 	}
 
-	plGCFree(ptr->mode);
-	plGCFree(ptr);
+	plGCFree(ptr->gcptr, ptr->mode);
+	plGCFree(ptr->gcptr, ptr);
+	return 0;
 }
 
-size_t plFRead(const void* ptr, size_t size, size_t nmemb, plfile_t* stream){
+size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
 		int elementAmnt = 0;
 		while(size * elementAmnt > stream->bufsize - stream->seekbyte){
@@ -57,17 +60,18 @@ size_t plFRead(const void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 			return 0;
 		}
 
-		memcpy(ptr, stream->strbuf + seekbyte, size * elementAmnt);
+		memcpy(ptr, stream->strbuf + stream->seekbyte, size * elementAmnt);
 		stream->seekbyte += size * elementAmnt;
+		return size * elementAmnt;
 	}else{
 		return fread(ptr, size, nmemb, stream->fileptr);
 	}
 }
 
-size_t plFWrite(const void* ptr, size_t size, size_t nmemb, plfile_t* stream){
+size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
 		if(size * nmemb > stream->bufsize - stream->seekbyte){
-			void* tempPtr = realloc(stream->strbuf, stream->bufsize + size * nmemb);
+			void* tempPtr = plGCRealloc(stream->gcptr, stream->strbuf, stream->bufsize + size * nmemb);
 			if(!tempPtr){
 				return 0;
 			}
@@ -75,8 +79,9 @@ size_t plFWrite(const void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 			stream->strbuf = tempPtr;
 		}
 
-		memcpy(ptr, stream->strbuf + seekbyte, size * nmemb);
-		stream->seekbyte += size * elementAmnt;
+		memcpy(ptr, stream->strbuf + stream->seekbyte, size * nmemb);
+		stream->seekbyte += size * nmemb;
+		return size * nmemb;
 	}else{
 		return fwrite(ptr, size, nmemb, stream->fileptr);
 	}
