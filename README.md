@@ -2,9 +2,9 @@
 
 pl32lib is a library containing boilerplate routines that I use for every
 project I make. Most of it is strictly C99-compliant and thus fully portable.
-The `pl32-term` module is the only component that isn't fully portable (it uses
-POSIX calls, meaning that while portable to any POSIX system, it won't compile
-on everything).
+The `pl32-term` module (not yet implemented) is the only component that isn't
+fully portable (it uses POSIX calls, meaning that while portable to any POSIX
+system, it won't compile on everything).
 
 # Build instructions
 
@@ -18,11 +18,11 @@ project directory:
 ```
 cd src
 # For shared
-gcc -c -fPIC -I../include pl32-memory.c pl32-shell.c pl32-file.c -o libpl32.o
-gcc -shared libpl32.o -o libpl32.so
+gcc -c -fPIC -I../include pl32-memory.c pl32-shell.c pl32-file.c
+gcc -shared *.o -o libpl32.so
 # For static
-gcc -c -I../include pl32-memory.c pl32-shell.c pl32-file.c -o libpl32.o
-ar rc libpl32.a libpl32.o
+gcc -c -I../include pl32-memory.c pl32-shell.c pl32-file.c
+ar rc libpl32.a *.o
 ```
 
 # Bug Reporting
