@@ -115,6 +115,18 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	return 0;
 }
 
+size_t plGCMemAmnt(int action, plgc_t* gc, size_t size){
+	switch(action){
+		case PLGC_GET_USEDMEM: ;
+			return gc->usedMemory;
+			break;
+		case PLGC_SET_MAXMEM: ;
+			gc->maxMemory = size;
+			break;
+	}
+	return 0;
+}
+
 // malloc() wrapper that interfaces with the semi-garbage collector
 void* plGCAlloc(plgc_t* gc, size_t size){
 	void* tempPtr;

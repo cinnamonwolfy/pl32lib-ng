@@ -23,10 +23,13 @@ extern "C" {
 #define PLGC_ADDPTR 4
 #define PLGC_RMPTR 5
 #define PLGC_MODPTR 6
+#define PLGC_GET_USEDMEM 7
+#define PLGC_SET_MAXMEM 8
 
 typedef struct plgc plgc_t;
 
 int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size);
+size_t plGCMemAmnt(int action, plgc_t* gc, size_t size);
 
 void* plGCAlloc(plgc_t* gc, size_t size);
 void* plGCCalloc(plgc_t* gc, size_t amount, size_t size);
