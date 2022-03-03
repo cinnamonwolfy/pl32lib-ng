@@ -81,6 +81,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 
 			gc->usedPointers[gc->upAmnt].pointer = ptr;
 			gc->usedPointers[gc->upAmnt].size = size;
+			gc->usedMemory += size;
 			break;
 		// Removes pointer reference from the tracking array
 		case PLGC_RMPTR: ;
@@ -110,6 +111,8 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 
 			if(size)
 				free(ptr);
+
+			gc->usedMemory--;
 			break;
 	}
 	return 0;
