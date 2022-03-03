@@ -10,7 +10,11 @@ system, it won't compile on everything).
 
 **NOTICE: This project doesn't have a build system in place, you will need to
 build it manually. This will only cover Unix-like/Cygwin systems with the GCC
-compiler.**
+compiler.
+
+In addition to this, pl32lib is undergoing testing. Currently, `pl32-memory`
+is the only confirmed fully functional module. Other modules might be broken or
+buggy.**
 
 Open a terminal (if on a graphical environment), and run the following from the
 project directory:
