@@ -29,7 +29,7 @@ extern "C" {
 typedef struct plgc plgc_t;
 
 int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size);
-size_t plGCMemAmnt(int action, plgc_t* gc, size_t size);
+size_t plGCMemAmnt(plgc_t* gc, int action, size_t size);
 
 void* plGCAlloc(plgc_t* gc, size_t size);
 void* plGCCalloc(plgc_t* gc, size_t amount, size_t size);

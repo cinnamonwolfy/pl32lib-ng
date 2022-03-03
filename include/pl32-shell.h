@@ -6,6 +6,7 @@
 \********************************************/
 #pragma once
 #include <pl32-memory.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

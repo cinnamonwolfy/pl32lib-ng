@@ -118,7 +118,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	return 0;
 }
 
-size_t plGCMemAmnt(int action, plgc_t* gc, size_t size){
+size_t plGCMemAmnt(plgc_t* gc, int action, size_t size){
 	switch(action){
 		case PLGC_GET_USEDMEM: ;
 			return gc->usedMemory;
