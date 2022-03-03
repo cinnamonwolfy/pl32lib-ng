@@ -10,46 +10,46 @@
 struct pltokenizedstr {
 	char** array;
 	size_t size;
-}
+};
 
 // Function Pointer
 struct plfunctionptr {
 	int (*function)(int, char**);
 	char* name;
-}
+};
 
 // Wrapper for ISO C function strtok() that copies the output of strtok() into a memory-allocated buffer
-char* plGCMallocStrtok(char* input, char* delimiter){
+char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
 	char* returnPtr = NULL;
 	char* tempPtr;
 
 	if((tempPtr = strtok(input, delimiter)) != NULL){
-		returnPtr = plGCMalloc((strlen(tempPtr) + 1) * sizeof(char));
+		returnPtr = plGCAlloc(gc, (strlen(tempPtr) + 1) * sizeof(char));
 		strcpy(tempPtr, returnPtr);
 	}
 
 	return returnPtr;
-}
+};
 
 // Parses a string into an array
-pltokenizedstr_t plParser(char* input){
+pltokenizedstr_t plParser(char* input, plgc_t* gc){
 	pltokenizedstr_t returnStruct;
 	returnStruct.size = 1;
-	returnStruct.array = plGCMalloc(2 * sizeof(char*));
+	returnStruct.array = plGCAlloc(gc, 2 * sizeof(char*));
 
-	char* tempPtr = plSafeMallocStrtok(input, " \n");
+	char* tempPtr = plGCAllocStrtok(input, " \n", gc);
 	returnStruct.array[0] = tempPtr;
 
-	while((tempPtr = plSafeMallocStrtok(NULL, " \n")) != NULL){
+	while((tempPtr = plGCAllocStrtok(NULL, " \n", gc)) != NULL){
 		returnStruct.size++;
-		char** tempArrPtr = realloc(returnStruct.array, returnStruct.size * sizeof(char*));
+		char** tempArrPtr = plGCRealloc(gc, returnStruct.array, returnStruct.size * sizeof(char*));
 
 		if(!tempArrPtr){
 			for(int i = 0; i < returnStruct.size; i++){
-				plGCFree(returnStruct.array[i]);
+				plGCFree(gc, returnStruct.array[i]);
 			}
 
-			plGCFree(returnStruct.array);
+			plGCFree(gc, returnStruct.array);
 			returnStruct.array = NULL;
 			returnStruct.size = ENOMEM;
 

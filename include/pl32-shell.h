@@ -14,10 +14,10 @@ extern "C" {
 typedef struct pltokenizedstr pltokenizedstr_t;
 typedef struct plfunctionptr plfunctionptr_t;
 
-char* plSafeMallocStrtok(char* input, char* delimiter);
-pltokenizedstr_t plParser(char* input);
+char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
+pltokenizedstr_t plParser(char* input, plgc_t* gc);
 
-plfunctionptr_t plCreateFunctionPointer(int (*function)(int, char*), char* name); // Unfinished
+plfunctionptr_t plCreateFunctionPointer(int (*function)(int, char**), char* name); // Unfinished
 
 int plShellAddFunction(plfunctionptr_t functionPtr); // Undefined
 void plShellRemoveFunction(char* name); // Undefined
