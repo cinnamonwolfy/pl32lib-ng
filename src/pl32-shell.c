@@ -6,12 +6,6 @@
 \********************************************/
 #include <pl32-shell.h>
 
-// SafeMalloc()'ed strtok() output
-struct pltokenizedstr {
-	char** array;
-	size_t size;
-};
-
 // Function Pointer
 struct plfunctionptr {
 	int (*function)(int, char**);
@@ -61,6 +55,13 @@ pltokenizedstr_t plParser(char* input, plgc_t* gc){
 	}
 
 	return returnStruct;
+}
+
+void plPrintTokenizedStr(pltokenizedstr_t tokstr){
+	printf("Listing tokenized string list:\n");
+	for(int i = 0; i < tokstr.size; i++){
+		printf("	token[%d]: %s\n", i, tokstr.array[i]);
+	}
 }
 
 // Creates an object containing function pointer
