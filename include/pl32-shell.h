@@ -12,19 +12,21 @@
 extern "C" {
 #endif
 
-typedef struct pltokenizedstr {
+typedef struct plarray {
 	char** array;
 	size_t size;
-} pltokenizedstr_t;
-typedef struct plfunctionptr plfunctionptr_t;
+} plarray_t;
+
+typedef struct plfunctionptr {
+	int (*function)(int, char**);
+	char* name;
+} plfunctionptr_t;
 
 char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
-pltokenizedstr_t plParser(char* input, plgc_t* gc);
-void plPrintTokenizedStr(pltokenizedstr_t tokstr);
+plarray_t* plParser(char* input, plgc_t* gc);
+void plPrintTokenizedStr(plarray_t* tokstr);
 
-plfunctionptr_t plCreateFunctionPointer(int (*function)(int, char**), char* name); // Unfinished
-
-int plShellAddFunction(plfunctionptr_t functionPtr); // Undefined
+int plShellAddFunction(plfunctionptr_t* functionPtr); // Undefined
 void plShellRemoveFunction(char* name); // Undefined
 
 int plShell(char* command); // Undefined

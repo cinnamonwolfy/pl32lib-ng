@@ -13,7 +13,7 @@ char* scanfWithPrompt(char* prompt, plgc_t* gc){
 
 int main(int argc, const char* argv[]){
 	plgc_t* mainGC;
-	pltokenizedstr_t moreNano;
+	pltokenizedstr_t* moreNano;
 	char* nano = scanfWithPrompt("Enter a string (up to 4096 characters): ", mainGC);
 
 	plGCManage(mainGC, PLGC_INIT, NULL, 0);
