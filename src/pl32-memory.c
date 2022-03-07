@@ -22,6 +22,24 @@ struct plgc {
 	bool isInitialized;
 };
 
+plgc_t* plGCInit(size_t maxMemoryInit){
+	plgc_t* returnGC = malloc(sizeof(plgc_t));
+	returnGC->usedPointers = malloc(2 * sizeof(plptr_t));
+	returnGC->freedPointers = malloc(2 * sizeof(plptr_t));
+	returnGC->upAmnt = 0;
+	returnGC->fpAmnt = 0;
+	returnGC->usedMemory = 0;
+	returnGC->isInitialized = true;
+
+	if(!maxMemoryInit){
+		returnGC->maxMemory = 128 * 1024 * 1024;
+	}else{
+		returnGC->maxMemory = maxMemoryInit;
+	}
+
+	return returnGC;
+}
+
 // Controller for semi-garbage collector
 int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	if(gc == NULL){
@@ -29,18 +47,6 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 	}
 
 	switch(mode){
-		// Initializes the semi-garbage collector
-		case PLGC_INIT: ;
-			if(!gc->isInitialized){
-				gc->usedPointers = malloc(2 * sizeof(plptr_t));
-				gc->freedPointers = malloc(2 * sizeof(plptr_t));
-				gc->upAmnt = 0;
-				gc->fpAmnt = 0;
-				gc->usedMemory = 0;
-				gc->maxMemory = 128 * 1024 * 1024;
-				gc->isInitialized = true;
-			}
-			break;
 		// Cleans memory and deallocates the semi-garbage collector
 		case PLGC_STOP: ;
 			for(int i = 0; i < gc->upAmnt; i++){
@@ -48,9 +54,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 			}
 			free(gc->usedPointers);
 			free(gc->freedPointers);
-			gc->usedPointers = NULL;
-			gc->freedPointers = NULL;
-			gc->isInitialized = false;
+			free(gc);
 			break;
 		//Searches pointer address within the usedPointers and freedPointers arrays
 		case PLGC_SEARCHPTR: ;
@@ -121,6 +125,8 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 				free(ptr);
 
 			break;
+		default:
+			return 1;
 	}
 	return 0;
 }

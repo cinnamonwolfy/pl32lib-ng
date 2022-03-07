@@ -12,11 +12,13 @@ char* scanfWithPrompt(char* prompt, plgc_t* gc){
 }
 
 int main(int argc, const char* argv[]){
-	plgc_t* mainGC;
-	pltokenizedstr_t* moreNano;
+	plgc_t* mainGC = plGCInit(131072);
+	plarray_t* moreNano;
 	char* nano = scanfWithPrompt("Enter a string (up to 4096 characters): ", mainGC);
 
-	plGCManage(mainGC, PLGC_INIT, NULL, 0);
-	moreNano = plParser(nano, mainGC);
-	plPrintTokenizedStr(moreNano);
+	printf("%s\n", nano);
+
+	//moreNano = plParser(nano, mainGC);
+	//plPrintTokenizedStr(moreNano);
+	plGCManage(mainGC, PLGC_STOP, NULL, 0);
 }

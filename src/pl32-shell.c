@@ -29,15 +29,15 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	returnStruct->array = plGCAlloc(gc, 2 * sizeof(char*));
 
 	char* tempPtr = plGCAllocStrtok(input, " \n", gc);
-	returnStruct->array[0] = tempPtr;
+	((char**)returnStruct->array)[0] = tempPtr;
 
 	while((tempPtr = plGCAllocStrtok(NULL, " \n", gc)) != NULL){
-		returnStruct.size++;
+		returnStruct->size++;
 		char** tempArrPtr = plGCRealloc(gc, returnStruct->array, returnStruct->size * sizeof(char*));
 
 		if(!tempArrPtr){
 			for(int i = 0; i < returnStruct->size; i++){
-				plGCFree(gc, returnStruct->array[i]);
+				plGCFree(gc, ((char**)returnStruct->array)[i]);
 			}
 
 			plGCFree(gc, returnStruct->array);
@@ -47,7 +47,7 @@ plarray_t* plParser(char* input, plgc_t* gc){
 		}
 
 		returnStruct->array = tempArrPtr;
-		returnStruct->array[returnStruct->size - 1] = tempPtr;
+		((char**)returnStruct->array)[returnStruct->size - 1] = tempPtr;
 	}
 
 	return returnStruct;
@@ -56,7 +56,7 @@ plarray_t* plParser(char* input, plgc_t* gc){
 void plPrintTokenizedStr(plarray_t* tokstr){
 	printf("Listing tokenized string list:\n");
 	for(int i = 0; i < tokstr->size; i++){
-		printf("	token[%d]: %s\n", i, (char*)tokstr->array[i]);
+		printf("	token[%d]: %s\n", i, ((char**)tokstr->array)[i]);
 	}
 }
 
