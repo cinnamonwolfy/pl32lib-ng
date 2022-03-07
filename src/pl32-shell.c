@@ -6,6 +6,9 @@
 \********************************************/
 #include <pl32-shell.h>
 
+plfunctionptr_t* commands = NULL;
+size_t commandAmnt = 0;
+
 // Wrapper for ISO C function strtok() that copies the output of strtok() into a memory-allocated buffer
 char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
 	char* returnPtr = NULL;
@@ -57,6 +60,6 @@ void plPrintTokenizedStr(plarray_t* tokstr){
 	}
 }
 
-int plShellAddFunction(plfunctionptr_t functionPtr){
+int plShellAddFunction(plfunctionptr_t* functionPtr){
 	
 }
