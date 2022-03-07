@@ -1,5 +1,5 @@
 /*************************************************\
-* pl32lib, v0.01                                  *
+* pl32lib, v0.02                                  *
 * (c)2021 pocketlinux32, Under Lesser GPLv3       *
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
@@ -91,7 +91,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 		// Removes pointer reference from the tracking array
 		case PLGC_RMPTR: ;
 			int searchresult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0);
-			if(searchresult > gc->upAmnt || searchresult == -1)
+			if(searchresult >= gc->upAmnt || searchresult == -1)
 				return 1;
 
 			if(gc->fpAmnt){

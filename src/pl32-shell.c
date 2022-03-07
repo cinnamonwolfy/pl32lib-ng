@@ -1,5 +1,5 @@
 /********************************************\
-* pl32lib, v0.01                             *
+* pl32lib, v0.02                             *
 * (c)2021 pocketlinux32, Under Lesser GPLv3  *
 * String manipulation/parsing module         *
 * Warning: unfinished!                       *
@@ -16,7 +16,7 @@ char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
 
 	if((tempPtr = strtok(input, delimiter)) != NULL){
 		returnPtr = plGCAlloc(gc, (strlen(tempPtr) + 1) * sizeof(char));
-		strcpy(tempPtr, returnPtr);
+		strcpy(returnPtr, tempPtr);
 	}
 
 	return returnPtr;

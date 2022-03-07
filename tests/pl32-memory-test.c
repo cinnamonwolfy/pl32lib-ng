@@ -21,8 +21,7 @@ void printCurrentMemUsg(plgc_t* gc){
 }
 
 int main(int argc, const char* argv[]){
-	plgc_t* mainGC;
-	plGCManage(mainGC, PLGC_INIT, NULL, 0);
+	plgc_t* mainGC = plGCInit(2048);
 
 	printCurrentMemUsg(mainGC);
 
@@ -40,6 +39,7 @@ int main(int argc, const char* argv[]){
 
 	printf("Deallocating int array...");
 
+	plGCFree(mainGC, nano);
 	plGCFree(mainGC, nano);
 
 	printf("Done\n");
