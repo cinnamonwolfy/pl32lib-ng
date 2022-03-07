@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 typedef struct plarray {
-	char** array;
+	void* array;
 	size_t size;
 } plarray_t;
 
