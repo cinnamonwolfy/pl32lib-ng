@@ -157,7 +157,7 @@ size_t plGCMemAmnt(plgc_t* gc, int action, size_t size){
 void* plGCAlloc(plgc_t* gc, size_t size){
 	void* tempPtr;
 
-	if((tempPtr = malloc(size)) == NULL)
+	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
 	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
@@ -168,7 +168,7 @@ void* plGCAlloc(plgc_t* gc, size_t size){
 void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	void* tempPtr;
 
-	if((tempPtr = calloc(amount, size)) == NULL)
+	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
 	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
@@ -177,9 +177,9 @@ void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 
 // realloc() wrapper that interfaces with the semi-garbage collector
 void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
-	void* tempPtr = realloc(pointer, size);
+	void* tempPtr;
 
-	if((tempPtr = realloc(pointer, size)) == NULL)
+	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
 
 	plGCManage(gc, PLGC_REALLOC, pointer, size, tempPtr);

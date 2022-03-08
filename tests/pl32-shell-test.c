@@ -20,5 +20,5 @@ int main(int argc, const char* argv[]){
 	moreNano = plParser(nano, mainGC);
 	plPrintTokenizedStr(moreNano);
 	printf("Done parsing, shutting down memory manager...\n");
-	plGCManage(mainGC, PLGC_STOP, NULL, 0);
+	plGCManage(mainGC, PLGC_STOP, NULL, 0, NULL);
 }
