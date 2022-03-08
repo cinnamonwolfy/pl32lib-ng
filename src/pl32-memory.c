@@ -41,7 +41,7 @@ plgc_t* plGCInit(size_t maxMemoryInit){
 }
 
 // Controller for semi-garbage collector
-int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
+int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 	if(gc == NULL){
 		return 1;
 	}
@@ -90,7 +90,7 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 			break;
 		// Removes pointer reference from the tracking array
 		case PLGC_RMPTR: ;
-			int searchresult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0);
+			int searchresult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
 			if(searchresult >= gc->upAmnt || searchresult == -1)
 				return 1;
 
@@ -125,6 +125,16 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size){
 				free(ptr);
 
 			break;
+		// Special mode for just realloc()
+		case PLGC_REALLOC: ;
+			int searchresult2 = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
+			if(searchresult2 >= gc->upAmnt || searchresult2 == -1)
+				return 1;
+
+			gc->usedPointers[searchresult2].pointer = ptr2;
+			gc->usedMemory += (size - gc->usedPointers[searchresult2].size);
+			gc->usedPointers[searchresult2].size = size;
+			break;
 		default:
 			return 1;
 	}
@@ -150,7 +160,7 @@ void* plGCAlloc(plgc_t* gc, size_t size){
 	if((tempPtr = malloc(size)) == NULL)
 		return NULL;
 
-	plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
+	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
 	return tempPtr;
 }
 
@@ -161,7 +171,7 @@ void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	if((tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
-	plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
+	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
 	return tempPtr;
 }
 
@@ -172,17 +182,12 @@ void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 	if((tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
 
-	if(tempPtr == pointer){
-		plGCManage(gc, PLGC_MODPTR, pointer, size);
-	}else{
-		plGCManage(gc, PLGC_RMPTR, pointer, 0);
-		plGCManage(gc, PLGC_ADDPTR, tempPtr, size);
-	}
+	plGCManage(gc, PLGC_REALLOC, pointer, size, tempPtr);
 
 	return tempPtr;
 }
 
 // free() wrapper that interfaces with the semi-garbage collector
 void plGCFree(plgc_t* gc, void* pointer){
-	plGCManage(gc, PLGC_RMPTR, pointer, 1);
+	plGCManage(gc, PLGC_RMPTR, pointer, 1, NULL);
 }

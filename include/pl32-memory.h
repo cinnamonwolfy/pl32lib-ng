@@ -22,14 +22,14 @@ extern "C" {
 #define PLGC_SEARCHPTR 3
 #define PLGC_ADDPTR 4
 #define PLGC_RMPTR 5
-#define PLGC_MODPTR 6
+#define PLGC_REALLOC 6
 #define PLGC_GET_USEDMEM 7
 #define PLGC_SET_MAXMEM 8
 
 typedef struct plgc plgc_t;
 
 plgc_t* plGCInit(size_t maxMemoryAlloc);
-int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size);
+int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2);
 size_t plGCMemAmnt(plgc_t* gc, int action, size_t size);
 
 void* plGCAlloc(plgc_t* gc, size_t size);

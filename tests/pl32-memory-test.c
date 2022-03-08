@@ -37,14 +37,23 @@ int main(int argc, const char* argv[]){
 	printArray(nano, 4);
 	printCurrentMemUsg(mainGC);
 
-	printf("Deallocating int array...");
+	printf("Reallocating int array...");
 
-	plGCFree(mainGC, nano);
-	plGCFree(mainGC, nano);
+	void* tempPtr = plGCRealloc(mainGC, nano, sizeof(int) * 8);
+	if(!tempPtr){
+		printf("Error!\n Error: plGCRealloc() returned NULL\n");
+	}else{
+		printf("Done\n");
+		printCurrentMemUsg(mainGC);
 
+		printf("Deallocating int array...");
+		plGCFree(mainGC, nano);
+		printf("Done\n");
+
+		printCurrentMemUsg(mainGC);
+	}
+
+	printf("Shutting down garbage collector...");
+	plGCManage(mainGC, PLGC_STOP, NULL, 0, NULL);
 	printf("Done\n");
-
-	printCurrentMemUsg(mainGC);
-
-	plGCManage(mainGC, PLGC_STOP, NULL, 0);
 }
