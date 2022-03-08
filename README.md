@@ -13,8 +13,8 @@ build it manually. This will only cover Unix-like/Cygwin systems with the GCC
 compiler.
 
 In addition to this, pl32lib is undergoing testing. Currently, `pl32-memory`
-is the only confirmed fully functional module. Other modules might be broken or
-buggy.**
+and `pl32-shell` are the only confirmed fully functional modules. Other modules
+might be broken or buggy.**
 
 Open a terminal (if on a graphical environment), and run the following from the
 project directory:
