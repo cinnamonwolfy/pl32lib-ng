@@ -75,7 +75,7 @@ int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	if(!tempPtr)
 		return 2;
 
-	if(commands == NULL || commands >= 2)
+	if(commands == NULL || commandAmnt >= 2)
 		commands = tempPtr;
 
 	commands[commandAmnt].function = functionPtr->function;
@@ -112,7 +112,24 @@ int plShell(char* command, plgc_t* gc){
 	plarray_t* parsedCmdLine = plParser(command, gc);
 
 	if(!parsedCmdLine)
-		return;
+		return 1;
 
-	
+	char** array = parsedCmdLine->array;
+
+	if(strcmp(array[0], "print") == 0){
+		for(int i = 1; i < parsedCmdLine->size; i++)
+			printf("%s", array[i]);
+
+		printf("\n");
+	}else if(strcmp(array[0], "version") == 0){
+		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
+		printf("pl32lib v%s\n", PL32LIB_VERSION);
+		printf("src at https://github.com/pocketlinux32/pl32lib\n");
+	}else if(strcmp(array[0], "exit") == 0){
+		int tempNum = 0;
+		if(parsedCmdLine->size < 2)
+			exit(tempNum);
+
+		exit(strtol(array[0])
+	}
 }

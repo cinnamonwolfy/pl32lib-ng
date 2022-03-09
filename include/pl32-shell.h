@@ -25,10 +25,10 @@ typedef struct plfunctionptr {
 char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 
-int plShellAddFunction(plfunctionptr_t* functionPtr);
-void plShellRemoveFunction(char* name);
+int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc);
+void plShellRemoveFunction(char* name, plgc_t* gc);
 
-int plShell(char* command); // Undefined
+int plShell(char* command, plgc_t* gc); // Incomplete
 
 void plShellInteractive(char* prompt); // Undefined
 

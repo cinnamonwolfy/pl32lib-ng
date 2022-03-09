@@ -1,6 +1,6 @@
 #include <pl32-shell.h>
 
-void plPrintTokenizedStr(plarray_t* tokstr){
+void printTokenizedStr(plarray_t* tokstr){
 	printf("Listing tokenized string list:\n");
 	for(int i = 0; i < tokstr->size; i++){
 		printf("	token[%d]: %s\n", i, ((char**)tokstr->array)[i]);

@@ -53,6 +53,10 @@ int main(int argc, const char* argv[]){
 		printCurrentMemUsg(mainGC);
 	}
 
+	printf("Testing double free protection...");
+	plGCFree(mainGC, nano);
+	printf("Done\n");
+
 	printf("Shutting down garbage collector...");
 	plGCManage(mainGC, PLGC_STOP, NULL, 0, NULL);
 	printf("Done\n");

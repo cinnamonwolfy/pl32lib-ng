@@ -17,6 +17,7 @@
 extern "C" {
 #endif
 
+#define PL32LIB_VERSION "0.02"
 #define PLGC_INIT 1
 #define PLGC_STOP 2
 #define PLGC_SEARCHPTR 3
