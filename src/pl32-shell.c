@@ -53,13 +53,7 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	return returnStruct;
 }
 
-void plPrintTokenizedStr(plarray_t* tokstr){
-	printf("Listing tokenized string list:\n");
-	for(int i = 0; i < tokstr->size; i++){
-		printf("	token[%d]: %s\n", i, ((char**)tokstr->array)[i]);
-	}
-}
-
+// Adds a function pointer to the list of user-defined commands
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	void* tempPtr;
 
@@ -93,5 +87,5 @@ void plShellRemoveFunction(char* name){
 }
 
 int plShell(char* command){
-	plarray_t* commands
+	
 }

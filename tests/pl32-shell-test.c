@@ -1,5 +1,12 @@
 #include <pl32-shell.h>
 
+void plPrintTokenizedStr(plarray_t* tokstr){
+	printf("Listing tokenized string list:\n");
+	for(int i = 0; i < tokstr->size; i++){
+		printf("	token[%d]: %s\n", i, ((char**)tokstr->array)[i]);
+	}
+}
+
 char* scanfWithPrompt(char* prompt, plgc_t* gc){
 	char string[4096];
 	printf("%s", prompt);
@@ -18,7 +25,7 @@ int main(int argc, const char* argv[]){
 	char* nano = scanfWithPrompt("Enter a string (up to 4096 characters): ", mainGC);
 
 	moreNano = plParser(nano, mainGC);
-	plPrintTokenizedStr(moreNano);
+	printTokenizedStr(moreNano);
 	printf("Done parsing, shutting down memory manager...\n");
 	plGCManage(mainGC, PLGC_STOP, NULL, 0, NULL);
 }

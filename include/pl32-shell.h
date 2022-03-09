@@ -20,18 +20,15 @@ typedef struct plarray {
 typedef struct plfunctionptr {
 	int (*function)(int, char**);
 	char* name;
-	plarray_t* parameters;
 } plfunctionptr_t;
 
 char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
-void plPrintTokenizedStr(plarray_t* tokstr);
 
 int plShellAddFunction(plfunctionptr_t* functionPtr);
 void plShellRemoveFunction(char* name);
 
 int plShell(char* command); // Undefined
-int plShellFile(char* filename); // Undefined
 
 void plShellInteractive(char* prompt); // Undefined
 
