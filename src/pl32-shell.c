@@ -81,3 +81,17 @@ int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 
 	return 0;
 }
+
+void plShellRemoveFunction(char* name){
+	for(int i = 0; i < commandAmnt; i++){
+		if(strcmp(commands[i].name, name) == 0){
+			commands[i].function = commands[commandAmnt].function;
+			commands[i].name = commands[commandAmnt].name;
+			break;
+		}
+	}
+}
+
+int plShell(char* command){
+	plarray_t* commands
+}
