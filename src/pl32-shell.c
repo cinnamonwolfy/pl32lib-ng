@@ -14,6 +14,9 @@ char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
 	char* returnPtr = NULL;
 	char* tempPtr;
 
+	if(!delimiter || !gc)
+		return NULL;
+
 	if((tempPtr = strtok(input, delimiter)) != NULL){
 		returnPtr = plGCAlloc(gc, (strlen(tempPtr) + 1) * sizeof(char));
 		strcpy(returnPtr, tempPtr);
@@ -24,6 +27,9 @@ char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
 
 // Parses a string into an array
 plarray_t* plParser(char* input, plgc_t* gc){
+	if(!input || !gc)
+		return NULL;
+
 	plarray_t* returnStruct = plGCAlloc(gc, sizeof(plarray_t));
 	returnStruct->size = 1;
 	returnStruct->array = plGCAlloc(gc, 2 * sizeof(char*));
@@ -57,14 +63,17 @@ plarray_t* plParser(char* input, plgc_t* gc){
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	void* tempPtr;
 
+	if(!functionPtr || !gc)
+		return 1;
+
 	if(commands == NULL){
 		tempPtr = plGCAlloc(gc, sizeof(plfunctionptr_t) * 2);
 	}else if(commandAmnt >= 2){
-		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * commandAmnt + 1);
+		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandAmnt + 1));
 	}
 
 	if(!tempPtr)
-		return 1;
+		return 2;
 
 	if(commands == NULL || commands >= 2)
 		commands = tempPtr;
@@ -76,16 +85,34 @@ int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	return 0;
 }
 
-void plShellRemoveFunction(char* name){
-	for(int i = 0; i < commandAmnt; i++){
-		if(strcmp(commands[i].name, name) == 0){
-			commands[i].function = commands[commandAmnt].function;
-			commands[i].name = commands[commandAmnt].name;
-			break;
-		}
+// Removes a function pointer from the list of user-defined commands
+void plShellRemoveFunction(char* name, plgc_t* gc){
+	if(!name, !gc)
+		return;
+
+	int i = 0;
+	while(strcmp(commands[i].name, name) == 0 && i < commandAmnt){
+		i++;
+	}
+
+	if(strcmp(commands[i].name, name) == 0){
+		commands[i].function = commands[commandAmnt].function;
+		commands[i].name = commands[commandAmnt].name;
+		void* tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandAmnt - 1));
+
+		if(!tempPtr)
+			return;
+
+		commands = tempPtr;
 	}
 }
 
-int plShell(char* command){
+// Command Interpreter
+int plShell(char* command, plgc_t* gc){
+	plarray_t* parsedCmdLine = plParser(command, gc);
+
+	if(!parsedCmdLine)
+		return;
+
 	
 }
