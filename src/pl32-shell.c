@@ -60,6 +60,24 @@ void plPrintTokenizedStr(plarray_t* tokstr){
 	}
 }
 
-int plShellAddFunction(plfunctionptr_t* functionPtr){
-	
+int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
+	void* tempPtr;
+
+	if(commands == NULL){
+		tempPtr = plGCAlloc(gc, sizeof(plfunctionptr_t) * 2);
+	}else if(commandAmnt >= 2){
+		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * commandAmnt + 1);
+	}
+
+	if(!tempPtr)
+		return 1;
+
+	if(commands == NULL || commands >= 2)
+		commands = tempPtr;
+
+	commands[commandAmnt].function = functionPtr->function;
+	commands[commandAmnt].name = functionPtr->name;
+	commandAmnt++;
+
+	return 0;
 }

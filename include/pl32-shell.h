@@ -26,7 +26,7 @@ char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 void plPrintTokenizedStr(plarray_t* tokstr);
 
-int plShellAddFunction(plfunctionptr_t* functionPtr); // Undefined
+int plShellAddFunction(plfunctionptr_t* functionPtr);
 void plShellRemoveFunction(char* name); // Undefined
 
 int plShell(char* command); // Undefined
