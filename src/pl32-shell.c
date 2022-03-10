@@ -59,13 +59,13 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	return returnStruct;
 }
 
-void plShellFreeArray(plarray_t* array, bool isStringArray){
+void plShellFreeArray(plarray_t* array, bool isStringArray, plgc_t* gc){
 	if(isStringArray){
 		for(int i = 0; i < parsedCmdLine->size; i++);
-			plGCFree(((char**)array->array)[i]);
+			plGCFree(gc, ((char**)array->array)[i]);
 	}
-	plGCFree(array->array);
-	plGCFree(array);
+	plGCFree(gc, array->array);
+	plGCFree(gc, array);
 }
 
 // Adds a function pointer to the list of user-defined commands
@@ -162,6 +162,7 @@ uint8_t plShell(char* command, plgc_t* gc){
 		}
 	}
 
+	plShellFreeArray(parsedCmdLine, true, gc);
 	return retVar;
 }
 
@@ -176,7 +177,7 @@ void plShellInteractive(char* prompt){
 	while(loop){
 		char cmdline[4096];
 		printf("%s", prompt);
-		scanf("%4096[^\n]");
+		scanf("%4096[^\n]", cmdline);
 
 		plShell(cmdline, shellGC);
 	}
