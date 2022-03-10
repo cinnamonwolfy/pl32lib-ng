@@ -179,7 +179,11 @@ void plShellInteractive(char* prompt){
 		printf("%s", prompt);
 		scanf("%4096[^\n]", cmdline);
 
-		plShell(cmdline, shellGC);
+		if(strcmp(cmdline, "exit-shell") == 0){
+			loop = false;
+		}else{
+			plShell(cmdline, shellGC);
+		}
 	}
 
 	plGCManage(shellGC, PLGC_STOP, NULL, 0, NULL);
