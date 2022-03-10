@@ -59,6 +59,15 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	return returnStruct;
 }
 
+void plShellFreeArray(plarray_t* array, bool isStringArray){
+	if(isStringArray){
+		for(int i = 0; i < parsedCmdLine->size; i++);
+			plGCFree(((char**)array->array)[i]);
+	}
+	plGCFree(array->array);
+	plGCFree(array);
+}
+
 // Adds a function pointer to the list of user-defined commands
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	void* tempPtr;
@@ -115,6 +124,7 @@ uint8_t plShell(char* command, plgc_t* gc){
 		return 1;
 
 	char** array = parsedCmdLine->array;
+	int retVar = 0;
 
 	if(strcmp(array[0], "print") == 0){
 		for(int i = 1; i < parsedCmdLine->size; i++)
@@ -125,7 +135,6 @@ uint8_t plShell(char* command, plgc_t* gc){
 		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
 		printf("pl32lib v%s\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
-		return 0;
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;
 		char* pointer;
@@ -141,20 +150,36 @@ uint8_t plShell(char* command, plgc_t* gc){
 			return 255;
 		}
 
-		while(strcmp(commands[i].name, parsedCmdLine->array[0]) != 0 && i < commandAmnt){
+		while(strcmp(commands[i].name, array[0]) != 0 && i < commandAmnt){
 			i++;
 		}
 
-		if(strcmp(command[i].name, parsedCmdLine->array[0]) != 0){
+		if(strcmp(command[i].name, array[0]) != 0){
+			printf("%s command not found\n")
 			return 255;
+		}else{
+			retVar = command[i].function(parsedCmdLine);
 		}
 	}
+
+	return retVar;
 }
 
 // Interactive frontend to plShell()
 void plShellInteractive(char* prompt){
 	bool loop = true;
+	plgc_t* shellGC = plGCInit(8 * 1024 * 1024);
+
+	if(!prompt)
+		prompt = "(cmd) # ";
+
 	while(loop){
+		char cmdline[4096];
 		printf("%s", prompt);
+		scanf("%4096[^\n]");
+
+		plShell(cmdline, shellGC);
 	}
+
+	plGCManage(shellGC, PLGC_STOP, NULL, 0, NULL);
 }
