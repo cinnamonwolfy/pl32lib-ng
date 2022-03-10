@@ -18,7 +18,7 @@ typedef struct plarray {
 } plarray_t;
 
 typedef struct plfunctionptr {
-	int (*function)(int, char**);
+	int (*function)(plarray_t*);
 	char* name;
 } plfunctionptr_t;
 
