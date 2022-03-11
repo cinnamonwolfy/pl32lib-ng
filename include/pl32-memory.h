@@ -18,14 +18,13 @@ extern "C" {
 #endif
 
 #define PL32LIB_VERSION "0.02"
-#define PLGC_INIT 1
-#define PLGC_STOP 2
-#define PLGC_SEARCHPTR 3
-#define PLGC_ADDPTR 4
-#define PLGC_RMPTR 5
-#define PLGC_REALLOC 6
-#define PLGC_GET_USEDMEM 7
-#define PLGC_SET_MAXMEM 8
+#define PLGC_STOP 1
+#define PLGC_SEARCHPTR 2
+#define PLGC_ADDPTR 3
+#define PLGC_RMPTR 4
+#define PLGC_REALLOC 5
+#define PLGC_GET_USEDMEM 6
+#define PLGC_SET_MAXMEM 7
 
 typedef struct plgc plgc_t;
 

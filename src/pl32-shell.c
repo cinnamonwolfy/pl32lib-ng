@@ -61,7 +61,7 @@ plarray_t* plParser(char* input, plgc_t* gc){
 
 void plShellFreeArray(plarray_t* array, bool isStringArray, plgc_t* gc){
 	if(isStringArray){
-		for(int i = 0; i < parsedCmdLine->size; i++);
+		for(int i = 0; i < array->size; i++)
 			plGCFree(gc, ((char**)array->array)[i]);
 	}
 	plGCFree(gc, array->array);
@@ -141,12 +141,12 @@ uint8_t plShell(char* command, plgc_t* gc){
 		if(parsedCmdLine->size < 2)
 			exit(tempNum);
 
-		exit(strtol(array[0], &pointer, 10);
+		exit(strtol(array[0], &pointer, 10));
 	}else{
 		int i = 0;
 
 		if(!commandAmnt){
-			printf("%s: command not found\n");
+			printf("%s: command not found\n", array[0]);
 			return 255;
 		}
 
@@ -154,11 +154,11 @@ uint8_t plShell(char* command, plgc_t* gc){
 			i++;
 		}
 
-		if(strcmp(command[i].name, array[0]) != 0){
-			printf("%s command not found\n")
+		if(strcmp(commands[i].name, array[0]) != 0){
+			printf("%s command not found\n", array[0]);
 			return 255;
 		}else{
-			retVar = command[i].function(parsedCmdLine);
+			retVar = commands[i].function(parsedCmdLine);
 		}
 	}
 
@@ -178,6 +178,7 @@ void plShellInteractive(char* prompt){
 		char cmdline[4096];
 		printf("%s", prompt);
 		scanf("%4096[^\n]", cmdline);
+		getchar();
 
 		if(strcmp(cmdline, "exit-shell") == 0){
 			loop = false;

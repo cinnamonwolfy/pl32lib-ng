@@ -74,14 +74,14 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 			return -1;
 		// Adds pointer reference to the tracking array
 		case PLGC_ADDPTR: ;
-			if(gc->upAmnt > 1){
-				void* tempPtr = realloc(gc->usedPointers, (gc->upAmnt + 1) * sizeof(plptr_t));
+//			if(gc->upAmnt > 1){
+				void* tempPtr = realloc(gc->usedPointers, (gc->upAmnt + 2) * sizeof(plptr_t));
 
 				if(!tempPtr)
 					return 1;
 
 				gc->usedPointers = tempPtr;
-			}
+//			}
 
 			gc->usedPointers[gc->upAmnt].pointer = ptr;
 			gc->usedPointers[gc->upAmnt].size = size;
@@ -94,12 +94,12 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 			if(searchresult >= gc->upAmnt || searchresult == -1)
 				return 1;
 
-			if(gc->fpAmnt){
-				void* tempPtr = realloc(gc->freedPointers, (gc->fpAmnt + 1) * sizeof(plptr_t));
+//			if(gc->fpAmnt > 1){
+				void* tempPtr2 = realloc(gc->freedPointers, (gc->fpAmnt + 2) * sizeof(plptr_t));
 
-				if(!tempPtr)
+				if(!tempPtr2)
 					return 1;
-			}
+//			}
 
 			gc->freedPointers[gc->fpAmnt].pointer = gc->usedPointers[searchresult].pointer;
 			gc->freedPointers[gc->fpAmnt].size = gc->usedPointers[searchresult].size;
@@ -110,9 +110,9 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 			if(gc->upAmnt > 1){
 				gc->usedPointers[searchresult].pointer = gc->usedPointers[gc->upAmnt - 1].pointer;
 				gc->usedPointers[searchresult].size = gc->usedPointers[gc->upAmnt - 1].size;
-				void* tempPtr = realloc(gc->usedPointers, (gc->upAmnt - 1) * sizeof(plptr_t));
+				void* tempPtr3 = realloc(gc->usedPointers, (gc->upAmnt - 1) * sizeof(plptr_t));
 
-				if(tempPtr)
+				if(tempPtr3)
 					gc->usedPointers = tempPtr;
 			}else{
 				free(gc->usedPointers);

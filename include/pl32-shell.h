@@ -7,6 +7,7 @@
 #pragma once
 #include <pl32-memory.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,9 +29,9 @@ plarray_t* plParser(char* input, plgc_t* gc);
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc);
 void plShellRemoveFunction(char* name, plgc_t* gc);
 
-int plShell(char* command, plgc_t* gc); // Incomplete
+uint8_t plShell(char* command, plgc_t* gc);
 
-void plShellInteractive(char* prompt); // Undefined
+void plShellInteractive(char* prompt);
 
 #ifdef __cplusplus
 }
