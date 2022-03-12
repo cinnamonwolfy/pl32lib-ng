@@ -187,5 +187,5 @@ void plShellInteractive(char* prompt){
 		}
 	}
 
-	plGCManage(shellGC, PLGC_STOP, NULL, 0, NULL);
+	plGCStop(shellGC);
 }

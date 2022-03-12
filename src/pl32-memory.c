@@ -13,23 +13,20 @@ typedef struct plpointer {
 
 // Structure of the semi-garbage collector. This semi-garbage collector is thread-specific
 struct plgc {
-	plptr_t* usedPointers;
-	plptr_t* freedPointers;
-	size_t upAmnt;
-	size_t fpAmnt;
+	plptr_t* ptrList;
+	size_t listAmnt;
+	size_t allocListAmnt;
 	size_t usedMemory;
 	size_t maxMemory;
-	bool isInitialized;
 };
 
+// Creates and initializes a semi-garbage collector
 plgc_t* plGCInit(size_t maxMemoryInit){
 	plgc_t* returnGC = malloc(sizeof(plgc_t));
-	returnGC->usedPointers = malloc(2 * sizeof(plptr_t));
-	returnGC->freedPointers = malloc(2 * sizeof(plptr_t));
-	returnGC->upAmnt = 0;
-	returnGC->fpAmnt = 0;
+	returnGC->ptrList = malloc(2 * sizeof(plptr_t));
+	returnGC->listAmnt = 0;
+	returnGC->allocListAmnt = 2;
 	returnGC->usedMemory = 0;
-	returnGC->isInitialized = true;
 
 	if(!maxMemoryInit){
 		returnGC->maxMemory = 128 * 1024 * 1024;
@@ -40,6 +37,15 @@ plgc_t* plGCInit(size_t maxMemoryInit){
 	return returnGC;
 }
 
+// Frees all pointers currently in
+void plGCStop(plgc_t* gc){
+	for(int i = 0; i < gc->listAmnt; i++){
+		free(gc->ptrList[i].pointer);
+	}
+	free(gc->ptrList);
+	free(gc);
+}
+
 // Controller for semi-garbage collector
 int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 	if(gc == NULL){
@@ -47,93 +53,58 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 	}
 
 	switch(mode){
-		// Cleans memory and deallocates the semi-garbage collector
-		case PLGC_STOP: ;
-			for(int i = 0; i < gc->upAmnt; i++){
-				free(gc->usedPointers[i].pointer);
-			}
-			free(gc->usedPointers);
-			free(gc->freedPointers);
-			free(gc);
-			break;
-		//Searches pointer address within the usedPointers and freedPointers arrays
+		//Searches pointer address within the tracking array
 		case PLGC_SEARCHPTR: ;
 			int i = 0;
-			while(gc->usedPointers[i].pointer != ptr && i < gc->upAmnt)
+			while(gc->ptrList[i].pointer != ptr && i < gc->listAmnt)
 				i++;
 
-			if(gc->usedPointers[i].pointer == ptr)
+			if(gc->ptrList[i].pointer == ptr)
 				return i;
-
-			while(gc->freedPointers[i].pointer != ptr && i < gc->fpAmnt)
-				i++;
-
-			if(gc->freedPointers[i].pointer == ptr)
-				return gc->upAmnt + i;
 
 			return -1;
 		// Adds pointer reference to the tracking array
 		case PLGC_ADDPTR: ;
-//			if(gc->upAmnt > 1){
-				void* tempPtr = realloc(gc->usedPointers, (gc->upAmnt + 2) * sizeof(plptr_t));
+			if(gc->listAmnt >= gc->allocListAmnt){
+				void* tempPtr = realloc(gc->ptrList, (gc->listAmnt + 1) * sizeof(plptr_t));
 
 				if(!tempPtr)
 					return 1;
 
-				gc->usedPointers = tempPtr;
-//			}
+				gc->ptrList = tempPtr;
+				gc->allocListAmnt++;
+			}
 
-			gc->usedPointers[gc->upAmnt].pointer = ptr;
-			gc->usedPointers[gc->upAmnt].size = size;
-			gc->upAmnt++;
+			gc->ptrList[gc->listAmnt].pointer = ptr;
+			gc->ptrList[gc->listAmnt].size = size;
+			gc->listAmnt++;
 			gc->usedMemory += size;
 			break;
 		// Removes pointer reference from the tracking array
 		case PLGC_RMPTR: ;
-			int searchresult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
-			if(searchresult >= gc->upAmnt || searchresult == -1)
+			int rmPtrResult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
+			if(rmPtrResult == -1)
 				return 1;
 
-//			if(gc->fpAmnt > 1){
-				void* tempPtr2 = realloc(gc->freedPointers, (gc->fpAmnt + 2) * sizeof(plptr_t));
+			gc->usedMemory -= gc->ptrList[rmPtrResult].size;
+			gc->ptrList[rmPtrResult].pointer = gc->ptrList[gc->listAmnt - 1].pointer;
+			gc->ptrList[rmPtrResult].size = gc->ptrList[gc->listAmnt - 1].size;
+			gc->ptrList[gc->listAmnt - 1].pointer = NULL;
+			gc->ptrList[gc->listAmnt - 1].size = 0;
+			gc->listAmnt--;
 
-				if(!tempPtr2)
-					return 1;
-//			}
-
-			gc->freedPointers[gc->fpAmnt].pointer = gc->usedPointers[searchresult].pointer;
-			gc->freedPointers[gc->fpAmnt].size = gc->usedPointers[searchresult].size;
-			gc->fpAmnt++;
-
-			gc->usedMemory -= gc->usedPointers[searchresult].size;
-
-			if(gc->upAmnt > 1){
-				gc->usedPointers[searchresult].pointer = gc->usedPointers[gc->upAmnt - 1].pointer;
-				gc->usedPointers[searchresult].size = gc->usedPointers[gc->upAmnt - 1].size;
-				void* tempPtr3 = realloc(gc->usedPointers, (gc->upAmnt - 1) * sizeof(plptr_t));
-
-				if(tempPtr3)
-					gc->usedPointers = tempPtr;
-			}else{
-				free(gc->usedPointers);
-				gc->usedPointers = malloc(2 * sizeof(plptr_t));
-			}
-
-			gc->upAmnt--;
-
-			if(size)
-				free(ptr);
+			free(ptr);
 
 			break;
 		// Special mode for just realloc()
 		case PLGC_REALLOC: ;
-			int searchresult2 = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
-			if(searchresult2 >= gc->upAmnt || searchresult2 == -1)
+			int reallocResult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
+			if(reallocResult == -1)
 				return 1;
 
-			gc->usedPointers[searchresult2].pointer = ptr2;
-			gc->usedMemory += (size - gc->usedPointers[searchresult2].size);
-			gc->usedPointers[searchresult2].size = size;
+			gc->ptrList[reallocResult].pointer = ptr2;
+			gc->usedMemory += (size - gc->ptrList[reallocResult].size);
+			gc->ptrList[reallocResult].size = size;
 			break;
 		default:
 			return 1;
@@ -189,5 +160,5 @@ void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 
 // free() wrapper that interfaces with the semi-garbage collector
 void plGCFree(plgc_t* gc, void* pointer){
-	plGCManage(gc, PLGC_RMPTR, pointer, 1, NULL);
+	plGCManage(gc, PLGC_RMPTR, pointer, 0, NULL);
 }

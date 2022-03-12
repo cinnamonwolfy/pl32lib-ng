@@ -28,10 +28,6 @@ int main(int argc, const char* argv[]){
 	printf("Allocating and initializing int array (4 ints)...");
 
 	int* nano = plGCAlloc(mainGC, sizeof(int) * 4);
-	char* nano2 = plGCAlloc(mainGC, sizeof(char) * 16);
-	char** nano3 = plGCAlloc(mainGC, sizeof(char*) * 4);
-	int* nano4 = plGCAlloc(mainGC, sizeof(int) * 10);
-	int* nano5 = plGCAlloc(mainGC, sizeof(int) * 20);
 	for(int i = 0; i < 4; i++){
 		nano[i] = i + 1;
 	}
@@ -47,28 +43,42 @@ int main(int argc, const char* argv[]){
 	if(!tempPtr){
 		printf("Error!\n Error: plGCRealloc() returned NULL\n");
 	}else{
+		nano = tempPtr;
 		printf("Done\n");
 		printCurrentMemUsg(mainGC);
 
 		printf("Deallocating int array...");
 		plGCFree(mainGC, nano);
 		printf("Done\n");
-
 		printCurrentMemUsg(mainGC);
 
 		printf("Testing double free protection...");
 		plGCFree(mainGC, nano);
 		printf("Done\n");
 
-		plGCFree(mainGC, nano);
+		printf("Allocating multiple arrays of multiple sizes...");
+
+		char* nano2 = plGCAlloc(mainGC, sizeof(char) * 16);
+		char** nano3 = plGCAlloc(mainGC, sizeof(char*) * 4);
+		int* nano4 = plGCAlloc(mainGC, sizeof(int) * 10);
+		int* nano5 = plGCAlloc(mainGC, sizeof(int) * 20);
+
+		printf("Done\n");
+		printCurrentMemUsg(mainGC);
+
+		printf("Deallocating arrays...");
+
 		plGCFree(mainGC, nano2);
 		plGCFree(mainGC, nano3);
 		plGCFree(mainGC, nano4);
 		plGCFree(mainGC, nano5);
+
+		printf("Done\n");
+		printCurrentMemUsg(mainGC);
 	}
 
 
 	printf("Shutting down garbage collector...");
-	plGCManage(mainGC, PLGC_STOP, NULL, 0, NULL);
+	plGCStop(mainGC);
 	printf("Done\n");
 }
