@@ -1,6 +1,6 @@
 /*************************************************\
-* pl32lib, v0.02                                  *
-* (c)2021 pocketlinux32, Under Lesser GPLv3       *
+* pl32lib, v0.04                                  *
+* (c)2022 pocketlinux32, Under Lesser GPLv3       *
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
 #include <pl32-memory.h>
@@ -131,7 +131,11 @@ void* plGCAlloc(plgc_t* gc, size_t size){
 	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
-	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
+	if(plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL)){
+		free(tempPtr);
+		return NULL;
+	}
+
 	return tempPtr;
 }
 
@@ -142,7 +146,11 @@ void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
-	plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL);
+	if(plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL)){
+		free(tempPtr);
+		return NULL;
+	}
+
 	return tempPtr;
 }
 
@@ -153,7 +161,10 @@ void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
 
-	plGCManage(gc, PLGC_REALLOC, pointer, size, tempPtr);
+	if(plGCManage(gc, PLGC_REALLOC, pointer, size, tempPtr)){
+		free(tempPtr);
+		return NULL;
+	}
 
 	return tempPtr;
 }

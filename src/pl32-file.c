@@ -1,5 +1,5 @@
 /********************************************\
-* pl32lib, v0.02                             *
+* pl32lib, v0.04                             *
 * (c)2022 pocketlinux32, Under Lesser GPLv3  *
 * File Management Module                     *
 * Warning: unfinished!                       *

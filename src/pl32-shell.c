@@ -1,6 +1,6 @@
 /********************************************\
-* pl32lib, v0.02                             *
-* (c)2021 pocketlinux32, Under Lesser GPLv3  *
+* pl32lib, v0.04                             *
+* (c)2022 pocketlinux32, Under Lesser GPLv3  *
 * String manipulation/parsing module         *
 * Warning: unfinished!                       *
 \********************************************/
@@ -127,13 +127,13 @@ uint8_t plShell(char* command, plgc_t* gc){
 	int retVar = 0;
 
 	if(strcmp(array[0], "print") == 0){
-		for(int i = 1; i < parsedCmdLine->size; i++)
-			printf("%s", array[i]);
+		for(int i = 1; i < parsedCmdLine->size - 1; i++)
+			printf("%s ", array[i]);
 
-		printf("\n");
+		printf("%s\n", array[parsedCmdLine->size - 1]);
 	}else if(strcmp(array[0], "version") == 0){
 		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
-		printf("pl32lib v%s\n", PL32LIB_VERSION);
+		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;
@@ -174,18 +174,22 @@ void plShellInteractive(char* prompt){
 	if(!prompt)
 		prompt = "(cmd) # ";
 
+	plShell("version", shellGC);
 	while(loop){
 		char cmdline[4096];
 		printf("%s", prompt);
 		scanf("%4096[^\n]", cmdline);
 		getchar();
 
-		if(strcmp(cmdline, "exit-shell") == 0){
+		if(strcmp(cmdline, "exit-shell") == 0 || feof(stdin)){
 			loop = false;
 		}else{
 			plShell(cmdline, shellGC);
 		}
 	}
+
+	if(feof(stdin))
+		printf("\n");
 
 	plGCStop(shellGC);
 }
