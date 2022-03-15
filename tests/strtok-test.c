@@ -4,45 +4,46 @@
 #include <stdbool.h>
 
 char* tokenizeString(char* string, char** leftoverStr){
-	char* retVar;
-	char* startVar1 = strchr(string, '"');
-	char* startVar2 = strchr(string, ' ');
+	char* tempVar[2] = { strchr(string, '"'), strchr(string, ' ') };
+	char* startVar;
 	char* endVar;
-	char* searchLimit = string + strlen(string);
-	size_t strSize;
+	char* retVar;
 
-	if(!startVar1 && startVar2 && startVar2 > string + 1){
-		strSize = (string - startVar2);
-	}else if(startVar1){
-		endVar = strchr(startVar1+1, '"');
-		strSize = (endVar - startVar1);
+	if(){
+		
+	}
+
+	endVar = strchr(startVar+1, '"');
+
+	if(!startVar || !endVar){
+		if(strlen(string) != 0){
+			retVar = malloc(strlen(string) + 1 * sizeof(char));
+			memcpy(retVar, string, strlen(string));
+			*leftoverStr = NULL;
+		}else{
+			return NULL;
+		}
 	}else{
-		return NULL;
+		size_t strSize = (endVar - startVar);
+		printf("%ld\n", strSize);
+
+		retVar = malloc(strSize * sizeof(char));
+		memcpy(retVar, startVar + 1, strSize - 1);
+
+		*leftoverStr = endVar+1;
 	}
-
-	if(!endVar)
-		return NULL;
-
-	printf("%ld\n", strSize);
-
-	retVar = malloc(strSize * sizeof(char));
-	memcpy(retVar, startVar1 + 1, strSize - 1);
-
-	int i = 0;
-	while(*(endVar + i) == ' ' && endVar + i < searchLimit){
-		i++;
-	}
-
-	*leftoverStr = endVar+1;
-
 	return retVar;
 }
 
 int main(){
-	char nano[128] = "printf \"this is a test sample text\" not nano \"nano\"";
+	char nano[128];
 	char* charHead;
-	char* garbage;
+	//char* garbage;
 	int i = 2;
+
+	printf("Give a string (up to 128 chars): ");
+	scanf("%128[^\n]", nano);
+	getchar();
 
 	char* nanoRet = tokenizeString(nano, &charHead);
 
@@ -51,7 +52,8 @@ int main(){
 
 	printf("String 1: %s\n", nanoRet);
 	free(nanoRet);
-	while((nanoRet = tokenizeString(charHead, &charHead)) != NULL){
+	while(charHead != NULL && nanoRet != NULL){
+		nanoRet = tokenizeString(charHead, &charHead);
 		printf("String %d: %s\n", i, nanoRet);
 		free(nanoRet);
 		i++;
