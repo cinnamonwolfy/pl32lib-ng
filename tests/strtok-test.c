@@ -4,18 +4,39 @@
 #include <stdbool.h>
 
 char* tokenizeString(char* string, char** leftoverStr){
-	char* tempVar[2] = { strchr(string, '"'), strchr(string, ' ') };
-	char* startVar;
-	char* endVar;
-	char* retVar;
-
-	if(){
-		
+	if(string == NULL){
+		return NULL;
 	}
 
-	endVar = strchr(startVar+1, '"');
+	char* tempVar[2] = { strchr(string, '"'), strchr(string, ' ') };
+	char* searchLimit = string + strlen(string);
+	char* startVar = NULL;
+	char* endVar = NULL;
+	char* retVar;
 
-	if(!startVar || !endVar){
+	if(strlen(string) == 0){
+		return NULL;
+	}
+
+	if(*string == ' '){
+		while(*string == ' ' && string < searchLimit) string++;
+		if(tempVar[1] < string){
+			tempVar[1] = strchr(string, ' ');
+		}
+	}
+
+	if((!tempVar[0] && tempVar[1]) || (tempVar[1] && tempVar[1] < tempVar[0])){
+		startVar = string;
+		endVar = tempVar[1];
+	}else if(tempVar[0]){
+		startVar = tempVar[0] + 1;
+		endVar = strchr(tempVar[0] + 1, '"');
+	}
+
+	size_t strSize = (endVar - startVar);
+	printf("%ld\n", strSize);
+
+	if(!startVar || !endVar || !strSize){
 		if(strlen(string) != 0){
 			retVar = malloc(strlen(string) + 1 * sizeof(char));
 			memcpy(retVar, string, strlen(string));
@@ -24,11 +45,8 @@ char* tokenizeString(char* string, char** leftoverStr){
 			return NULL;
 		}
 	}else{
-		size_t strSize = (endVar - startVar);
-		printf("%ld\n", strSize);
-
 		retVar = malloc(strSize * sizeof(char));
-		memcpy(retVar, startVar + 1, strSize - 1);
+		memcpy(retVar, startVar, strSize);
 
 		*leftoverStr = endVar+1;
 	}
@@ -52,8 +70,7 @@ int main(){
 
 	printf("String 1: %s\n", nanoRet);
 	free(nanoRet);
-	while(charHead != NULL && nanoRet != NULL){
-		nanoRet = tokenizeString(charHead, &charHead);
+	while((nanoRet = tokenizeString(charHead, &charHead)) != NULL){
 		printf("String %d: %s\n", i, nanoRet);
 		free(nanoRet);
 		i++;
