@@ -19,11 +19,11 @@ typedef struct plarray {
 } plarray_t;
 
 typedef struct plfunctionptr {
-	int (*function)(plarray_t*);
+	int (*function)(plarray_t*, plgc_t*);
 	char* name;
 } plfunctionptr_t;
 
-char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc);
+char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc);

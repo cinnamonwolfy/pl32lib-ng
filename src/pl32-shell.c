@@ -9,35 +9,69 @@
 plfunctionptr_t* commands = NULL;
 size_t commandAmnt = 0;
 
-// Wrapper for ISO C function strtok() that copies the output of strtok() into a memory-allocated buffer
-char* plGCAllocStrtok(char* input, char* delimiter, plgc_t* gc){
-	char* returnPtr = NULL;
-	char* tempPtr;
-
-	if(!delimiter || !gc)
+// Tokenizes string in a similar way an interactive command line would
+char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
+	if(!string || !gc)
 		return NULL;
 
-	if((tempPtr = strtok(input, delimiter)) != NULL){
-		returnPtr = plGCAlloc(gc, (strlen(tempPtr) + 1) * sizeof(char));
-		strcpy(returnPtr, tempPtr);
+	char* tempPtr[2] = { strchr(string, '"'), strchr(string, ' ') };
+	char* searchLimit = string + strlen(string);
+	char* startPtr = NULL;
+	char* endPtr = NULL;
+	char* retPtr;
+
+	if(strlen(string) == 0){
+		return NULL;
 	}
 
-	return returnPtr;
-};
+	if(*string == ' '){
+		while(*string == ' ' && string < searchLimit) string++;
+		if(tempPtr[1] < string){
+			tempPtr[1] = strchr(string, ' ');
+		}
+	}
+
+	if((!tempPtr[0] && tempPtr[1]) || (tempPtr[1] && tempPtr[1] < tempPtr[0])){
+		startPtr = string;
+		endPtr = tempPtr[1];
+	}else if(tempPtr[0]){
+		startPtr = tempPtr[0] + 1;
+		endPtr = strchr(tempPtr[0] + 1, '"');
+	}
+
+	size_t strSize = (endPtr - startPtr);
+
+	if(!startPtr || !endPtr || !strSize){
+		if(strlen(string) != 0){
+			retPtr = plGCAlloc(gc, strlen(string) + 1 * sizeof(char));
+			memcpy(retPtr, string, strlen(string));
+			*leftoverStr = NULL;
+		}else{
+			return NULL;
+		}
+	}else{
+		retPtr = plGCAlloc(gc, strSize * sizeof(char));
+		memcpy(retPtr, startPtr, strSize);
+
+		*leftoverStr = endPtr+1;
+	}
+	return retPtr;
+}
 
 // Parses a string into an array
 plarray_t* plParser(char* input, plgc_t* gc){
 	if(!input || !gc)
 		return NULL;
 
+	char* leftoverStr;
 	plarray_t* returnStruct = plGCAlloc(gc, sizeof(plarray_t));
 	returnStruct->size = 1;
 	returnStruct->array = plGCAlloc(gc, 2 * sizeof(char*));
 
-	char* tempPtr = plGCAllocStrtok(input, " \n", gc);
+	char* tempPtr = plTokenize(input, &leftoverStr, gc);
 	((char**)returnStruct->array)[0] = tempPtr;
 
-	while((tempPtr = plGCAllocStrtok(NULL, " \n", gc)) != NULL){
+	while((tempPtr = plTokenize(leftoverStr, &leftoverStr, gc)) != NULL){
 		returnStruct->size++;
 		char** tempArrPtr = plGCRealloc(gc, returnStruct->array, returnStruct->size * sizeof(char*));
 
@@ -127,6 +161,9 @@ uint8_t plShell(char* command, plgc_t* gc){
 	int retVar = 0;
 
 	if(strcmp(array[0], "print") == 0){
+		if(parsedCmdLine->size < 2)
+			return 1;
+
 		for(int i = 1; i < parsedCmdLine->size - 1; i++)
 			printf("%s ", array[i]);
 
@@ -158,7 +195,7 @@ uint8_t plShell(char* command, plgc_t* gc){
 			printf("%s command not found\n", array[0]);
 			return 255;
 		}else{
-			retVar = commands[i].function(parsedCmdLine);
+			retVar = commands[i].function(parsedCmdLine, gc);
 		}
 	}
 
