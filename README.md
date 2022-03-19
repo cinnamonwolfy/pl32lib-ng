@@ -12,7 +12,7 @@ system, it won't compile on everything).
 at this time are `pl32-memory` and `pl32-shell`. The other modules might be
 broken, incomplete, and/or buggy**
 
-Just run `./compile` in from the project directory and it will compile
+Just run `./compile build` in from the project directory and it will compile
 everything, including the test programs. This might change in a later release.
 
 # Bug Reporting
