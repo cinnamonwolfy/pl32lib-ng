@@ -1,4 +1,6 @@
 bin
+core
 *.o
 *.a
 *.so
+*.out
