@@ -6,9 +6,6 @@
 \********************************************/
 #include <pl32-shell.h>
 
-plfunctionptr_t* commands = NULL;
-size_t commandAmnt = 0;
-
 // Tokenizes string in a similar way an interactive command line would
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 	if(!string || !gc)
@@ -102,6 +99,8 @@ void plShellFreeArray(plarray_t* array, bool isStringArray, plgc_t* gc){
 	plGCFree(gc, array);
 }
 
+//NOTICE: this will be deleted at some point
+/*
 // Adds a function pointer to the list of user-defined commands
 int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 	void* tempPtr;
@@ -111,19 +110,19 @@ int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
 
 	if(commands == NULL){
 		tempPtr = plGCAlloc(gc, sizeof(plfunctionptr_t) * 2);
-	}else if(commandAmnt >= 2){
-		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandAmnt + 1));
+	}else if(commandBuf->size >= 2){
+		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandBuf->size + 1));
 	}
 
 	if(!tempPtr)
 		return 2;
 
-	if(commands == NULL || commandAmnt >= 2)
+	if(commands == NULL || commandBuf->size >= 2)
 		commands = tempPtr;
 
-	commands[commandAmnt].function = functionPtr->function;
-	commands[commandAmnt].name = functionPtr->name;
-	commandAmnt++;
+	commands[commandBuf->size].function = functionPtr->function;
+	commands[commandBuf->size].name = functionPtr->name;
+	commandBuf->size++;
 
 	return 0;
 }
@@ -134,14 +133,15 @@ void plShellRemoveFunction(char* name, plgc_t* gc){
 		return;
 
 	int i = 0;
-	while(strcmp(commands[i].name, name) != 0 && i < commandAmnt){
+	while(strcmp(commands[i].name, name) != 0 && i < commandBuf->size){
 		i++;
 	}
 
 	if(strcmp(commands[i].name, name) == 0){
-		commands[i].function = commands[commandAmnt].function;
-		commands[i].name = commands[commandAmnt].name;
-		void* tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandAmnt - 1));
+		plGCFree(commands[i].name);
+		commands[i].function = commands[commandBuf->size].function;
+		commands[i].name = commands[commandBuf->size].name;
+		void* tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandBuf->size - 1));
 
 		if(!tempPtr)
 			return;
@@ -149,9 +149,10 @@ void plShellRemoveFunction(char* name, plgc_t* gc){
 		commands = tempPtr;
 	}
 }
+*/
 
 // Command Interpreter
-uint8_t plShell(char* command, plgc_t* gc){
+uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 	plarray_t* parsedCmdLine = plParser(command, gc);
 
 	if(!parsedCmdLine)
@@ -168,10 +169,21 @@ uint8_t plShell(char* command, plgc_t* gc){
 			printf("%s ", array[i]);
 
 		printf("%s\n", array[parsedCmdLine->size - 1]);
-	}else if(strcmp(array[0], "version") == 0){
+	}else if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
 		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
 		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
+		printf("Built-in commands: print, version, help, exit\n");
+		if(!commandBuf || commandBuf->size == 0){
+			printf("No user-defined commands loaded\n");
+		}else{
+			printf("%ld user-defined commands loaded\n", commandBuf->size);
+			printf("User-defined commands: ");
+			for(int i = 0; i < commandBuf->size - 1; i++)
+				printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
+
+			printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+		}
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;
 		char* pointer;
@@ -182,20 +194,20 @@ uint8_t plShell(char* command, plgc_t* gc){
 	}else{
 		int i = 0;
 
-		if(!commandAmnt){
+		if(!commandBuf || commandBuf->size == 0){
 			printf("%s: command not found\n", array[0]);
 			return 255;
 		}
 
-		while(strcmp(commands[i].name, array[0]) != 0 && i < commandAmnt){
+		while(strcmp(((plfunctionptr_t*)commandBuf->array)[i].name, array[0]) != 0 && i < commandBuf->size - 1){
 			i++;
 		}
 
-		if(strcmp(commands[i].name, array[0]) != 0){
-			printf("%s command not found\n", array[0]);
+		if(strcmp(((plfunctionptr_t*)commandBuf->array)[i].name, array[0]) != 0){
+			printf("%s: command not found\n", array[0]);
 			return 255;
 		}else{
-			retVar = commands[i].function(parsedCmdLine, gc);
+			retVar = ((plfunctionptr_t*)commandBuf->array)[i].function(parsedCmdLine, gc);
 		}
 	}
 
@@ -204,24 +216,26 @@ uint8_t plShell(char* command, plgc_t* gc){
 }
 
 // Interactive frontend to plShell()
-void plShellInteractive(char* prompt){
+void plShellInteractive(char* prompt, plarray_t* commandBuf, plgc_t* shellGC){
 	bool loop = true;
-	plgc_t* shellGC = plGCInit(8 * 1024 * 1024);
+
+	if(!shellGC)
+		shellGC = plGCInit(8 * 1024 * 1024);
 
 	if(!prompt)
 		prompt = "(cmd) # ";
 
-	plShell("version", shellGC);
+	plShell("help", commandBuf, shellGC);
 	while(loop){
-		char cmdline[4096];
+		char cmdline[4096] = "";
 		printf("%s", prompt);
 		scanf("%4096[^\n]", cmdline);
 		getchar();
 
 		if(strcmp(cmdline, "exit-shell") == 0 || feof(stdin)){
 			loop = false;
-		}else{
-			plShell(cmdline, shellGC);
+		}else if(strlen(cmdline) > 0){
+			plShell(cmdline, commandBuf, shellGC);
 		}
 	}
 

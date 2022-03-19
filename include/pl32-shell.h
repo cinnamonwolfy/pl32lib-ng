@@ -26,12 +26,9 @@ typedef struct plfunctionptr {
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 
-int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc);
-void plShellRemoveFunction(char* name, plgc_t* gc);
+uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc);
 
-uint8_t plShell(char* command, plgc_t* gc);
-
-void plShellInteractive(char* prompt);
+void plShellInteractive(char* prompt, plarray_t* comamndBuf, plgc_t* shellGC);
 
 #ifdef __cplusplus
 }
