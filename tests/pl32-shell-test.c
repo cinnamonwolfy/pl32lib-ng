@@ -9,10 +9,10 @@ int testLoop(char* strToTokenize, plgc_t* gc){
 		return 1;
 
 	printf("Token 1: %s\n", result);
-	free(result);
+	plGCFree(gc, result);
 	while((result = plTokenize(holder, &holder, gc)) != NULL){
 		printf("Token %d: %s\n", i, result);
-		free(result);
+		plGCFree(gc, result);
 		i++;
 	}
 }
@@ -20,7 +20,7 @@ int testLoop(char* strToTokenize, plgc_t* gc){
 int plShellTest(plarray_t* args, plgc_t* gc){
 	char* holder;
 	char* token;
-	char* testStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \" and now quotes at the back\"", "\"just quotes lol\"" };
+	char* testStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
 
 	printf("This is a test of the new pl32-shell tokenizer\n");
 

@@ -8,27 +8,12 @@ system, it won't compile on everything).
 
 # Build instructions
 
-**NOTICE: This project doesn't have a build system in place, you will need to
-build it manually. This will only cover Unix-like/Cygwin systems with the GCC
-compiler.
+**NOTICE: This project is undergoing testing. The only fully functional modules
+at this time are `pl32-memory` and `pl32-shell`. The other modules might be
+broken, incomplete, and/or buggy**
 
-In addition to this, pl32lib is undergoing testing. Currently, `pl32-memory`
-and `pl32-shell` are the only confirmed fully functional modules. `pl32-memory`
-is the only module that is complete Other modules might be broken, incomplete
-or buggy.**
-
-Open a terminal (if on a graphical environment), and run the following from the
-project directory:
-
-```
-cd src
-# For shared
-gcc -c -fPIC -I../include pl32-memory.c pl32-shell.c pl32-file.c
-gcc -shared *.o -o libpl32.so
-# For static
-gcc -c -I../include pl32-memory.c pl32-shell.c pl32-file.c
-ar rc libpl32.a *.o
-```
+Just run `./compile` in from the project directory and it will compile
+everything, including the test programs. This might change in a later release.
 
 # Bug Reporting
 

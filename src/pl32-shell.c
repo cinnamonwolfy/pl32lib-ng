@@ -31,7 +31,7 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 	if((!tempPtr[0] && tempPtr[1]) || (tempPtr[1] && tempPtr[1] < tempPtr[0])){
 		startPtr = string;
 		endPtr = tempPtr[1];
-	}else if(tempPtr[0]){
+	}else if(tempPtr[0] && tempPtr[0] == string){
 		startPtr = tempPtr[0] + 1;
 		endPtr = strchr(tempPtr[0] + 1, '"');
 	}
@@ -40,18 +40,21 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 
 	if(!startPtr || !endPtr || !strSize){
 		if(strlen(string) != 0){
-			retPtr = plGCAlloc(gc, strlen(string) + 1 * sizeof(char));
+			retPtr = plGCAlloc(gc, (strlen(string) + 1) * sizeof(char));
 			memcpy(retPtr, string, strlen(string));
 			*leftoverStr = NULL;
+			strSize = strlen(string);
 		}else{
 			return NULL;
 		}
 	}else{
-		retPtr = plGCAlloc(gc, strSize * sizeof(char));
+		retPtr = plGCAlloc(gc, (strSize + 1) * sizeof(char));
 		memcpy(retPtr, startPtr, strSize);
 
 		*leftoverStr = endPtr+1;
 	}
+
+	retPtr[strSize] = '\0';
 	return retPtr;
 }
 
