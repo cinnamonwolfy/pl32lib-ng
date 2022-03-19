@@ -40,19 +40,18 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 
 	if(!startPtr || !endPtr || !strSize){
 		if(strlen(string) != 0){
-			retPtr = plGCAlloc(gc, (strlen(string) + 1) * sizeof(char));
-			memcpy(retPtr, string, strlen(string));
-			*leftoverStr = NULL;
 			strSize = strlen(string);
+			*leftoverStr = NULL;
+			startPtr = string;
 		}else{
 			return NULL;
 		}
 	}else{
-		retPtr = plGCAlloc(gc, (strSize + 1) * sizeof(char));
-		memcpy(retPtr, startPtr, strSize);
-
 		*leftoverStr = endPtr+1;
 	}
+
+	retPtr = plGCAlloc(gc, (strSize + 1) * sizeof(char));
+	memcpy(retPtr, startPtr, strSize);
 
 	retPtr[strSize] = '\0';
 	return retPtr;
