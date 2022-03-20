@@ -2,7 +2,6 @@
 * pl32lib, v0.04                             *
 * (c)2022 pocketlinux32, Under Lesser GPLv3  *
 * String manipulation/parsing module         *
-* Warning: unfinished!                       *
 \********************************************/
 #include <pl32-shell.h>
 
@@ -101,58 +100,6 @@ void plShellFreeArray(plarray_t* array, bool isStringArray, plgc_t* gc){
 	plGCFree(gc, array);
 }
 
-//NOTICE: this will be deleted at some point
-/*
-// Adds a function pointer to the list of user-defined commands
-int plShellAddFunction(plfunctionptr_t* functionPtr, plgc_t* gc){
-	void* tempPtr;
-
-	if(!functionPtr || !gc)
-		return 1;
-
-	if(commands == NULL){
-		tempPtr = plGCAlloc(gc, sizeof(plfunctionptr_t) * 2);
-	}else if(commandBuf->size >= 2){
-		tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandBuf->size + 1));
-	}
-
-	if(!tempPtr)
-		return 2;
-
-	if(commands == NULL || commandBuf->size >= 2)
-		commands = tempPtr;
-
-	commands[commandBuf->size].function = functionPtr->function;
-	commands[commandBuf->size].name = functionPtr->name;
-	commandBuf->size++;
-
-	return 0;
-}
-
-// Removes a function pointer from the list of user-defined commands
-void plShellRemoveFunction(char* name, plgc_t* gc){
-	if(!name, !gc)
-		return;
-
-	int i = 0;
-	while(strcmp(commands[i].name, name) != 0 && i < commandBuf->size){
-		i++;
-	}
-
-	if(strcmp(commands[i].name, name) == 0){
-		plGCFree(commands[i].name);
-		commands[i].function = commands[commandBuf->size].function;
-		commands[i].name = commands[commandBuf->size].name;
-		void* tempPtr = plGCRealloc(gc, commands, sizeof(plfunctionptr_t) * (commandBuf->size - 1));
-
-		if(!tempPtr)
-			return;
-
-		commands = tempPtr;
-	}
-}
-*/
-
 // Command Interpreter
 uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 	plarray_t* parsedCmdLine = plParser(command, gc);
@@ -175,16 +122,18 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
 		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
-		printf("Built-in commands: print, version, help, exit\n");
-		if(!commandBuf || commandBuf->size == 0){
-			printf("No user-defined commands loaded\n");
-		}else{
-			printf("%ld user-defined commands loaded\n", commandBuf->size);
-			printf("User-defined commands: ");
-			for(int i = 0; i < commandBuf->size - 1; i++)
-				printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
+		if(strcmp(array[0], "help") == 0){
+			printf("Built-in commands: print, version, help, exit\n");
+			if(!commandBuf || commandBuf->size == 0){
+				printf("No user-defined commands loaded\n");
+			}else{
+				printf("%ld user-defined commands loaded\n", commandBuf->size);
+				printf("User-defined commands: ");
+				for(int i = 0; i < commandBuf->size - 1; i++)
+					printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
 
-			printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+				printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+			}
 		}
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;

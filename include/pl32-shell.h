@@ -2,7 +2,6 @@
 * pl32lib, v0.04                             *
 * (c)2022 pocketlinux32, Under Lesser GPLv3  *
 * String manipulation/Shell/Parser module    *
-* Warning: unfinished!                       *
 \********************************************/
 #pragma once
 #include <pl32-memory.h>
