@@ -7,9 +7,9 @@ case $1 in
 		;;
 
 	build)
-		cc -c -Iinclude src/pl32-memory.c src/pl32-shell.c
+		cc -c -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c
 		ar rc libpl32.a *.o
-		cc -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c
+		cc -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c
 		cc -shared *.o -o libpl32.so
 		cc --static -Iinclude tests/pl32-memory-test.c *.o -o pl32-memory-test.out
 		cc --static -Iinclude tests/pl32-shell-test.c *.o -o pl32-shell-test.out

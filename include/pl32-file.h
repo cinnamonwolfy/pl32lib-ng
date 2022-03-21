@@ -17,6 +17,7 @@ extern "C" {
 typedef struct plfile plfile_t;
 
 plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc);
+plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc);
 int plFClose(plfile_t* ptr);
 
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream);
@@ -26,7 +27,9 @@ char plFPutC(char ch, plfile_t* stream);
 char plFGetC(plfile_t* stream);
 
 int plFPuts(char* string, plfile_t* stream);
-int plGets(char* string, int num, plfile_t* stream);
+int plFGets(char* string, int num, plfile_t* stream);
+
+int plFSeek(plfile_t* stream, long int offset, int whence);
 
 #ifdef __cplusplus
 }

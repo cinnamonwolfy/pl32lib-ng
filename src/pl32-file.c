@@ -28,6 +28,7 @@ plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 
 		returnStruct->gcptr = gc;
 		returnStruct->strbuf = NULL;
+		returnStruct->seekbyte = 0;
 		returnStruct->mode = plGCAlloc(gc, (strlen(mode)+1) * sizeof(char));
 		strcpy(returnStruct->mode, mode);
 		returnStruct->bufsize = 0;
@@ -36,11 +37,18 @@ plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 	return returnStruct;
 }
 
+plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc){
+	plfile_t* returnPointer = plFOpen(NULL, mode, gc);
+	returnPointer->fileptr = pointer;
+	return returnPointer;
+}
+
 int plFClose(plfile_t* ptr){
 	if(!ptr->fileptr){
 		plGCFree(ptr->gcptr, ptr->strbuf);
 	}else{
-		return fclose(ptr->fileptr);
+		if(fclose(ptr->fileptr))
+			return 1;
 	}
 
 	plGCFree(ptr->gcptr, ptr->mode);
@@ -117,5 +125,39 @@ int plFGets(char* string, int num, plfile_t* stream){
 		return 0;
 	}else{
 		return 1;
+	}
+}
+
+int plFSeek(plfile_t* stream, long int offset, int whence){
+	if(!stream->fileptr){
+		switch(whence){
+			case SEEK_SET:
+				if(offset < stream->bufsize){
+					stream->seekbyte = offset;
+				}else{
+					return 1;
+				}
+				break;
+			case SEEK_CUR:
+				if(stream->seekbyte + offset < stream->bufsize){
+					stream->seekbyte += offset;
+				}else{
+					return 1;
+				}
+				break;
+			case SEEK_END:
+				if(stream->bufsize - offset >= 0){
+					stream->seekbyte = stream->bufsize - offset;
+				}else{
+					return 1;
+				}
+				break;
+			default:
+				return 1;
+		}
+
+		return 0;
+	}else{
+		return fseek(stream->fileptr, offset, whence);
 	}
 }
