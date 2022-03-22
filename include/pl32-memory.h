@@ -24,7 +24,9 @@ extern "C" {
 #define PLGC_RMPTR 4
 #define PLGC_REALLOC 5
 #define PLGC_GET_USEDMEM 6
-#define PLGC_SET_MAXMEM 7
+#define PLGC_GET_MAXMEM 7
+#define PLGC_SET_MAXMEM 8
+
 
 typedef struct plgc plgc_t;
 

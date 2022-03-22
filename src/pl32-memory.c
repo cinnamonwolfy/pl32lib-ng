@@ -116,7 +116,8 @@ size_t plGCMemAmnt(plgc_t* gc, int action, size_t size){
 	switch(action){
 		case PLGC_GET_USEDMEM: ;
 			return gc->usedMemory;
-			break;
+		case PLGC_GET_MAXMEM: ;
+			return gc->maxMemory;
 		case PLGC_SET_MAXMEM: ;
 			gc->maxMemory = size;
 			break;
