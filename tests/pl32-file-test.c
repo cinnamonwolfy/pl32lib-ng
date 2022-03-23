@@ -5,6 +5,7 @@ int main(int argc, const char* argv[]){
 
 	printf("Opening an existing file")
 	plfile_t* realFile = plFOpen("include/pl32-file.h", "r", gc);
+	plfile_t* memFile = plFOpen(NULL, "w+", gc);
 
 	if(!realFile){
 		printf("Error opening file. Exiting...");
