@@ -1,8 +1,7 @@
 /********************************************\
-* pl32lib, v0.04                             *
+* pl32lib, v0.05                             *
 * (c)2022 pocketlinux32, Under Lesser GPLv3  *
 * File Management Module                     *
-* Warning: unfinished!                       *
 \********************************************/
 #include <pl32-file.h>
 
@@ -82,7 +81,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
-		if(size * nmemb < stream->bufsize - stream->seekbyte){
+		if(size * nmemb > stream->bufsize - stream->seekbyte){
 			void* tempPtr = plGCRealloc(stream->gcptr, stream->strbuf, stream->bufsize + size * nmemb);
 			if(!tempPtr){
 				return 0;
@@ -91,7 +90,7 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 			stream->strbuf = tempPtr;
 		}
 
-		memcpy(ptr, stream->strbuf + stream->seekbyte, size * nmemb);
+		memcpy(stream->strbuf + stream->seekbyte, ptr, size * nmemb);
 		stream->seekbyte += size * nmemb;
 		return size * nmemb;
 	}else{

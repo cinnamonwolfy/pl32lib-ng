@@ -16,8 +16,9 @@ int main(int argc, const char* argv[]){
 	plFGets(stringBuffer, 4095, realFile);
 	printf("Contents of include/pl32-file.h:\n%s\n", stringBuffer);
 
-	printf("Reading and writing to file-in-memory");
+	printf("Reading and writing to file-in-memory...");
 	plFPuts("test string getting sent to the yes", memFile);
+	plFSeek(memFile, 0, SEEK_SET);
 	plFGets(stringBuffer, 4095, memFile);
 	printf("Done\n");
 	printf("Contents of file-in-memory:\n%s\n", stringBuffer);

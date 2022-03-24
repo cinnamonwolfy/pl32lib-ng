@@ -1,5 +1,5 @@
 /*************************************************\
-* pl32lib, v0.04                                  *
+* pl32lib, v0.05                                  *
 * (c)2022 pocketlinux32, Under Lesser GPLv3       *
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#define PL32LIB_VERSION "0.04"
+#define PL32LIB_VERSION "0.05"
 #define PLGC_STOP 1
 #define PLGC_SEARCHPTR 2
 #define PLGC_ADDPTR 3
