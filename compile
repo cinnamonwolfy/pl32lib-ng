@@ -14,4 +14,8 @@ case $1 in
 		cc --static -Iinclude pl32-test.c *.o -o pl32-test.out -g
 		rm *.o
 		;;
+	install)
+		cp include/* /usr/include
+		mv libpl32.* /usr/lib
+		;;
 esac

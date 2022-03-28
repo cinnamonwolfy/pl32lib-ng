@@ -118,12 +118,14 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 			printf("%s ", array[i]);
 
 		printf("%s\n", array[parsedCmdLine->size - 1]);
+	}else if(strcmp(array[0], "clear") == 0){
+		printf("\033c");
 	}else if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
 		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
 		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
 		if(strcmp(array[0], "help") == 0){
-			printf("Built-in commands: print, version, help, exit\n");
+			printf("Built-in commands: print, clear, version, help, exit\n");
 			if(!commandBuf || commandBuf->size == 0){
 				printf("No user-defined commands loaded\n");
 			}else{
