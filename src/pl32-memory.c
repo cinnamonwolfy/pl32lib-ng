@@ -1,6 +1,6 @@
 /*************************************************\
 * pl32lib, v0.05                                  *
-* (c)2022 pocketlinux32, Under Lesser GPLv3       *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1     *
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
 #include <pl32-memory.h>

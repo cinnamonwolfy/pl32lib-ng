@@ -1,12 +1,10 @@
-/********************************************\
-* pl32lib, v0.05                             *
-* (c)2022 pocketlinux32, Under Lesser GPLv3  *
-* String manipulation/Shell/Parser module    *
-\********************************************/
+/*********************************************\
+* pl32lib, v0.05                              *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
+* String manipulation/Shell/Parser module     *
+\*********************************************/
 #pragma once
 #include <pl32-memory.h>
-#include <stdio.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {

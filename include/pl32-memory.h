@@ -1,16 +1,20 @@
 /*************************************************\
 * pl32lib, v0.05                                  *
-* (c)2022 pocketlinux32, Under Lesser GPLv3       *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1     *
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
 #pragma once
 #ifndef __cplusplus
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <string.h>
 #else
+#include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 #include <cerrno>
 #include <cstring>
 

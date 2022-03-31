@@ -1,8 +1,8 @@
-/********************************************\
-* pl32lib, v0.05                             *
-* (c)2022 pocketlinux32, Under Lesser GPLv3  *
-* String manipulation/parsing module         *
-\********************************************/
+/*********************************************\
+* pl32lib, v0.05                              *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
+* String manipulation/parsing module          *
+\*********************************************/
 #include <pl32-shell.h>
 
 // Tokenizes string in a similar way an interactive command line would
