@@ -11,9 +11,13 @@
 
 typedef struct plterminal {
 	int fDesc;
-	struct termios termOptions;
-};
+	struct termios* termOptions;
+} plterminal_t;
 
-int plOpenTerminal(char path);
+plterminal_t* plOpenTerminal(char path, plgc_t* gc);
+void plCloseTerminal(plterminal_t*, plgc_t* gc);
+
+void plTermRawInit(plterminal_t* terminalSession);
 void plTermSend(char* string);
 char* plTermGet(int bytes);
+void plTermInteractive(plterminal_t* terminalSession);
