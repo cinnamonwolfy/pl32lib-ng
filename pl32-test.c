@@ -2,8 +2,8 @@
 * pl32-test: pl32lib testcase               *
 * (c)2022 pocketlinux32, Under Lesser GPLv3 *
 \*******************************************/
-#include <pl32-shell.h>
 #include <pl32-file.h>
+#include <pl32-term.h>
 
 void printArray(int* array, size_t size){
 	printf("Printing out array:\n");
@@ -139,12 +139,30 @@ int plShellTest(plarray_t* args, plgc_t* gc){
 	}
 }
 
+int plTermTest(plarray_t* args, plgc_t* gc){
+	if(args->size < 2){
+		printf("Error: Not enough args\n");
+		printf("Usage: %s [serial-port]\n", ((char**)args->array)[0]);
+		return 1;
+	}
+
+	plterminal_t* terminal = plOpenTerminal(((char**)args->array)[1], gc);
+	if(!terminal)
+		return 2;
+
+	plTermRawInit(terminal);
+	plTermInteractive(terminal);
+	plCloseTerminal(terminal, gc);
+
+	return 0;
+}
+
 int main(int argc, const char* argv[]){
 	plgc_t* mainGC = plGCInit(8 * 1024 * 1024);
 	plarray_t commandBuf;
 
-	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 4);
-	commandBuf.size = 3;
+	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 5);
+	commandBuf.size = 4;
 
 	((plfunctionptr_t*)commandBuf.array)[0].function = plShellTest;
 	((plfunctionptr_t*)commandBuf.array)[0].name = "parser-test";
@@ -152,6 +170,8 @@ int main(int argc, const char* argv[]){
 	((plfunctionptr_t*)commandBuf.array)[1].name = "memory-test";
 	((plfunctionptr_t*)commandBuf.array)[2].function = plFileTest;
 	((plfunctionptr_t*)commandBuf.array)[2].name = "file-test";
+	((plfunctionptr_t*)commandBuf.array)[3].function = plTermTest;
+	((plfunctionptr_t*)commandBuf.array)[3].name = "term-test";
 
 	plShellInteractive(NULL, &commandBuf, mainGC);
 }

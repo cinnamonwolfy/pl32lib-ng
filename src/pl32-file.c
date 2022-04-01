@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v0.05                              *
+* pl32lib, v0.06                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * File Management Module                      *
 \*********************************************/
@@ -14,6 +14,7 @@ struct plfile {
 	plgc_t* gcptr; // pointer to GC (see pl32-memory.h)
 };
 
+// Opens a file stream. If filename is NULL, a file-in-memory is returned
 plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 	plfile_t* returnStruct = NULL;
 
@@ -38,6 +39,7 @@ plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 	return returnStruct;
 }
 
+// Converts a FILE pointer into a plfile_t pointer
 plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc){
 	plfile_t* returnPointer = plFOpen(NULL, mode, gc);
 	returnPointer->fileptr = pointer;
@@ -46,6 +48,7 @@ plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc){
 	return returnPointer;
 }
 
+// Closes a file stream
 int plFClose(plfile_t* ptr){
 	if(!ptr->fileptr){
 		plGCFree(ptr->gcptr, ptr->strbuf);
@@ -59,6 +62,7 @@ int plFClose(plfile_t* ptr){
 	return 0;
 }
 
+// Reads size * nmemb amount of bytes from the file stream
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
 		int elementAmnt = 0;
@@ -79,6 +83,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	}
 }
 
+// Writes size * nmemb amount of bytes from the file stream
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
 		if(size * nmemb > stream->bufsize - stream->seekbyte){
@@ -98,6 +103,7 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	}
 }
 
+// Puts a character into the file stream
 char plFPutC(char ch, plfile_t* stream){
 	if(!plFWrite(&ch, sizeof(char), 1, stream)){
 		return '\0';
@@ -106,6 +112,7 @@ char plFPutC(char ch, plfile_t* stream){
 	}
 }
 
+// Gets a character from the file stream
 char plFGetC(plfile_t* stream){
 	char ch;
 	if(!plFRead(&ch, sizeof(char), 1, stream)){
@@ -115,6 +122,7 @@ char plFGetC(plfile_t* stream){
 	}
 }
 
+// Puts a string into the file stream
 int plFPuts(char* string, plfile_t* stream){
 	if(!plFWrite(string, strlen(string)+1, 1, stream)){
 		return 0;
@@ -123,6 +131,7 @@ int plFPuts(char* string, plfile_t* stream){
 	}
 }
 
+// Gets a string from the file stream
 int plFGets(char* string, int num, plfile_t* stream){
 	if(!plFRead(string, num, 1, stream)){
 		return 0;
@@ -131,6 +140,7 @@ int plFGets(char* string, int num, plfile_t* stream){
 	}
 }
 
+// Moves the seek position offset amount of bytes relative from whence
 int plFSeek(plfile_t* stream, long int offset, int whence){
 	if(!stream->fileptr){
 		switch(whence){

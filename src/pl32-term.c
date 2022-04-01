@@ -1,10 +1,11 @@
 /*********************************************\
-* pl32lib v0.05                               *
+* pl32lib, v0.06                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * Serial Communication module                 *
 \*********************************************/
 #include <pl32-term.h>
 
+// Opens a terminal session
 plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
 	plterminal_t* returnTerminal = NULL;
 
@@ -14,7 +15,7 @@ plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
 
 	if(fileDesc > 0){
 		returnTerminal = plGCAlloc(gc, sizeof(plterminal_t));
-		returnTerminal->terminalOptions = plGCAlloc(gc, sizeof(struct termios));
+		returnTerminal->termOptions = plGCAlloc(gc, sizeof(struct termios));
 
 		returnTerminal->fDesc = fileDesc;
 	}
@@ -22,32 +23,38 @@ plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
 	return returnTerminal;
 }
 
+// Closes a terminal session
 void plCloseTerminal(plterminal_t* terminalSession, plgc_t* gc){
 	close(terminalSession->fDesc);
-	plGCFree(terminalSession->terminalOptions);
-	plGCFree(terminalSession);
+	plGCFree(gc, terminalSession->termOptions);
+	plGCFree(gc, terminalSession);
 }
 
+// Initializes the terminal session with settings similar to BSD raw mode
+// It's not a 100% match to BSD raw mode
 void plTermRawInit(plterminal_t* terminalSession){
-	cfmakeraw(terminalSession->terminalOptions);
-	cfsetispeed(terminalSession->terminalOptions, B9600);
-	cfsetospeed(terminalSession->terminalOptions, B9600);
+	cfmakeraw(terminalSession->termOptions);
+	cfsetispeed(terminalSession->termOptions, B9600);
+	cfsetospeed(terminalSession->termOptions, B9600);
 
-	terminalSession->terminalOptions->c_cflags |= (CLOCAL | CREAD);
-	terminalSession->terminalOptions->c_cc[VMIN] = 1;
-	terminalSession->terminalOptions->c_cc[VTIME] = 0;
+	terminalSession->termOptions->c_cflag |= (CLOCAL | CREAD);
+	terminalSession->termOptions->c_cc[VMIN] = 1;
+	terminalSession->termOptions->c_cc[VTIME] = 0;
 
-	tcsetattr(terminalSession->fDesc, TCSANOW, terminalSession->terminalOptions);
+	tcsetattr(terminalSession->fDesc, TCSANOW, terminalSession->termOptions);
 }
 
-void plTermSend(plterminal_t* terminalSession, char* string){
-	write(terminalSession, string, strlen(string));
+// Sends byte array to the terminal session
+void plTermSend(plterminal_t* terminalSession, plarray_t* string){
+	write(terminalSession->fDesc, string->array, string->size);
 }
 
+// Sends one byte to the terminal session
 void plTermSendC(plterminal_t* terminalSession, char c){
-	write(terminalSession, &c, 1);
+	write(terminalSession->fDesc, &c, 1);
 }
 
+// Gets byte array from the terminal session
 plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc){
 	plarray_t* returnString = plGCAlloc(gc, sizeof(plarray_t));
 	char readChar;
@@ -60,8 +67,8 @@ plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc){
 			void* tempVar = plGCAlloc(gc, (returnString->size + 1) * sizeof(char));
 
 			if(!tempVar){
-				plGCFree(returnString->array);
-				plGCFree(returnString);
+				plGCFree(gc, returnString->array);
+				plGCFree(gc, returnString);
 				return NULL;
 			}
 
@@ -73,23 +80,26 @@ plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc){
 	}
 }
 
-char plTermGetC(plterminal_t* terminalSesion){
+// Get one byte from the terminal session
+char plTermGetC(plterminal_t* terminalSession){
 	char c;
-	if(read(terminalSession, &c, 1) > 0)
+	if(read(terminalSession->fDesc, &c, 1) > 0)
 		return c;
 
 	return 0;
 }
 
+// Sets up terminal for an interactive session, basically an oversimplified picocom
 void plTermInteractive(plterminal_t* terminalSession){
 	struct termios stdio;
-	char iochar;
+	int fcstdio = fcntl(STDIN_FILENO, F_GETFL);
+	char iochar = 0;
 	tcgetattr(STDIN_FILENO, &stdio);
 
-	tcsetattr(terminalSession->fDesc, TCSANOW, terminalSession->terminalOptions);
-	tcsetattr(STDOUT_FILENO, TCSANOW, terminalSession->terminalOptions);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, terminalSession->terminalOptions);
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCKING);
+	tcsetattr(terminalSession->fDesc, TCSANOW, terminalSession->termOptions);
+	tcsetattr(STDOUT_FILENO, TCSANOW, terminalSession->termOptions);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, terminalSession->termOptions);
+	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
 	while(iochar != 1){
 		while(read(terminalSession->fDesc, &iochar, 1) > 0)
@@ -98,4 +108,8 @@ void plTermInteractive(plterminal_t* terminalSession){
 		while(read(STDIN_FILENO, &iochar, 1) > 0)
 			write(terminalSession->fDesc, &iochar, 1);
 	}
+
+	tcsetattr(STDIN_FILENO, 0, &stdio);
+	tcsetattr(STDOUT_FILENO, 0, &stdio);
+	fcntl(STDIN_FILENO, F_SETFL, fcstdio);
 }

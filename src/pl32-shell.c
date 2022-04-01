@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v0.05                              *
+* pl32lib, v0.06                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * String manipulation/parsing module          *
 \*********************************************/
@@ -92,7 +92,7 @@ plarray_t* plParser(char* input, plgc_t* gc){
 }
 
 // Frees a plarray_t
-void plShellFreeArray(plarray_t* array, bool is2DArr, plgc_t* gc){
+void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 	if(is2DArray){
 		for(int i = 0; i < array->size; i++)
 			plGCFree(gc, ((void**)array->array)[i]);
