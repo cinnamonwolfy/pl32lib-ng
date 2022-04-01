@@ -22,6 +22,7 @@ typedef struct plfunctionptr {
 
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
+void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
 
 uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc);
 

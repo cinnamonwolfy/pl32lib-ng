@@ -91,10 +91,11 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	return returnStruct;
 }
 
-void plShellFreeArray(plarray_t* array, bool isStringArray, plgc_t* gc){
-	if(isStringArray){
+// Frees a plarray_t
+void plShellFreeArray(plarray_t* array, bool is2DArr, plgc_t* gc){
+	if(is2DArray){
 		for(int i = 0; i < array->size; i++)
-			plGCFree(gc, ((char**)array->array)[i]);
+			plGCFree(gc, ((void**)array->array)[i]);
 	}
 	plGCFree(gc, array->array);
 	plGCFree(gc, array);
