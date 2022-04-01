@@ -7,11 +7,11 @@ case $1 in
 		;;
 
 	build)
-		cc -c -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c -g
+		cc -c -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $FLAGS
 		ar rc libpl32.a *.o
-		cc -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c -g
+		cc -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $FLAGS
 		cc -shared *.o -o libpl32.so
-		cc --static -Iinclude pl32-test.c *.o -o pl32-test.out -g
+		cc --static -Iinclude -L. pl32-test.c -o pl32-test.out -lpl32 $FLAGS
 		rm *.o
 		;;
 	install)
