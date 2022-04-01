@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v0.06                              *
+* pl32lib, v1.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * String manipulation/parsing module          *
 \*********************************************/
