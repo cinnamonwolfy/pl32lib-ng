@@ -10,6 +10,8 @@
 extern "C" {
 #endif
 
+bool showHelpAtStart;
+
 typedef struct plarray {
 	void* array;
 	size_t size;

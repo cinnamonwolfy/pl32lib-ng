@@ -161,6 +161,7 @@ int main(int argc, const char* argv[]){
 	plgc_t* mainGC = plGCInit(8 * 1024 * 1024);
 	plarray_t commandBuf;
 
+	showHelpAtStart = true;
 	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 5);
 	commandBuf.size = 4;
 

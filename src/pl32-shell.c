@@ -126,7 +126,7 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
 		printf("src at https://github.com/pocketlinux32/pl32lib\n");
 		if(strcmp(array[0], "help") == 0){
-			printf("Built-in commands: print, clear, version, help, exit\n");
+			printf("Built-in commands: print, clear, show-memusg, version, help, exit\n");
 			if(!commandBuf || commandBuf->size == 0){
 				printf("No user-defined commands loaded\n");
 			}else{
@@ -138,6 +138,8 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 				printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
 			}
 		}
+	}else if(strcmp(array[0], "show-memusg") == 0){
+		printf("%ld bytes free\n", plGCMemAmnt(gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(gc, PLGC_GET_USEDMEM, 0));
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;
 		char* pointer;
@@ -179,7 +181,11 @@ void plShellInteractive(char* prompt, plarray_t* commandBuf, plgc_t* shellGC){
 	if(!prompt)
 		prompt = "(cmd) # ";
 
-	plShell("help", commandBuf, shellGC);
+	if(showHelpAtStart){
+		plShell("help", commandBuf, shellGC);
+		plShell("show-memusg", commandBuf, shellGC);
+	}
+
 	while(loop){
 		char cmdline[4096] = "";
 		printf("%s", prompt);
