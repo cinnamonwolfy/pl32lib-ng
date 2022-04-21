@@ -1,5 +1,21 @@
 #!/bin/sh
 
+if [ "$CC" = "" ]; then
+	CC="cc"
+fi
+
+if [ "$AR" = "" ]; then
+	AR="ar"
+fi
+
+if [ "$CFLAGS" = "" ]; then
+	CFLAGS="-s -O2"
+fi
+
+if [ "$DESTDIR" = "" ]; then
+	DESTDIR="/usr"
+fi
+
 case $1 in
 	clean)
 		rm *.out *.a *.so core -f
@@ -7,15 +23,15 @@ case $1 in
 		;;
 
 	build)
-		cc -c -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $FLAGS
-		ar rc libpl32.a *.o
-		cc -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $FLAGS
-		cc -shared *.o -o libpl32.so
-		cc --static -Iinclude -L. pl32-test.c -o pl32-test.out -lpl32 $FLAGS
+		$CC -c -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $CFLAGS
+		$AR rc libpl32.a *.o
+		$CC -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $CFLAGS
+		$CC -shared *.o -o libpl32.so
+		$CC --static -Iinclude -L. pl32-test.c -o pl32-test.out -lpl32 $CFLAGS
 		rm *.o
 		;;
 	install)
-		cp include/* /usr/include
-		mv libpl32.* /usr/lib
+		cp include/* $DESTDIR/include
+		mv libpl32.* $DESTDIR/lib
 		;;
 esac

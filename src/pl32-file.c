@@ -174,3 +174,9 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 		return fseek(stream->fileptr, offset, whence);
 	}
 }
+
+int plFPToFile(plfile_t* stream, char* filename){
+	FILE* realFile = fopen(filename, "w");
+
+	return fputs(realFile, strbuf);
+}
