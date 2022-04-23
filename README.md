@@ -2,13 +2,11 @@
 
 pl32lib is a library containing boilerplate routines that I use for every
 project I make. Most of it is strictly C99-compliant and thus fully portable.
-The `pl32-term` module (not yet implemented) is the only component that isn't
-fully portable (it uses POSIX calls, meaning that while portable to any POSIX
-system, it won't compile on everything).
+The `pl32-term` module is the only component that isn't fully portable. (it 
+uses POSIX calls, meaning that while portable to any POSIX system, it won't
+compile on everything).
 
 # Build instructions
-
-**NOTICE: This build system is temporary and will be replaced at some point**
 
 Just run `./compile build` in from the project directory and it will compile
 everything, including the test programs. This might change in a later release.

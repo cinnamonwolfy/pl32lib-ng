@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v1.00                              *
+* pl32lib, v1.02                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * File Management Module                      *
 \*********************************************/
@@ -175,8 +175,22 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 	}
 }
 
-int plFPToFile(plfile_t* stream, char* filename){
-	FILE* realFile = fopen(filename, "w");
+int plFPToFile(char* filename, plfile_t* stream){
+	if(!stream || !filename || !stream->strbuf)
+		return -1;
 
-	return fputs(realFile, strbuf);
+	FILE* realFile = fopen(filename, "w");
+	return fputs(realFile, stream->strbuf);
+}
+
+void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){
+	plFSeek(dest, 0, destWhence);
+	plFSeek(src, 0, srcWhence);
+	char ch;
+
+	while((ch = plFGetC) != '\0')
+		plFPutC(ch, dest);
+
+	if(closeSrc)
+		plFClose(src);
 }

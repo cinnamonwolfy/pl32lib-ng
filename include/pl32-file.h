@@ -30,7 +30,8 @@ int plFGets(char* string, int num, plfile_t* stream);
 
 int plFSeek(plfile_t* stream, long int offset, int whence);
 
-int plFPToFile(plfile_t* stream, char* filename);
+int plFPToFile(char* filename, plfile_t* stream);
+int plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc);
 
 #ifdef __cplusplus
 }
