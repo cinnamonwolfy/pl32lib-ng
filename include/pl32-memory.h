@@ -4,19 +4,19 @@
 * Memory Management/Semi-Garbage Collector module *
 \*************************************************/
 #pragma once
-#ifndef __cplusplus
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <cerrno>
+#include <cstring>
+#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <string.h>
-#else
-#include <cstdio>
-#include <cstdlib>
-#include <cstdint>
-#include <cerrno>
-#include <cstring>
 
 extern "C" {
 #endif
