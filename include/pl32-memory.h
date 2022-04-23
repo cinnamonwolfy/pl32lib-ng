@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <cerrno>
 #include <cstring>
+
+extern "C" {
 #else
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,8 +19,6 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <string.h>
-
-extern "C" {
 #endif
 
 #define PL32LIB_VERSION "1.00"
