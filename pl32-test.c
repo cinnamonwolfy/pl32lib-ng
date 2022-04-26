@@ -161,7 +161,6 @@ int main(int argc, const char* argv[]){
 	plgc_t* mainGC = plGCInit(8 * 1024 * 1024);
 	plarray_t commandBuf;
 
-	showHelpAtStart = true;
 	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 5);
 	commandBuf.size = 4;
 
@@ -174,5 +173,5 @@ int main(int argc, const char* argv[]){
 	((plfunctionptr_t*)commandBuf.array)[3].function = plTermTest;
 	((plfunctionptr_t*)commandBuf.array)[3].name = "term-test";
 
-	plShellInteractive(NULL, &commandBuf, mainGC);
+	plShellInteractive(NULL, true, &commandBuf, mainGC);
 }

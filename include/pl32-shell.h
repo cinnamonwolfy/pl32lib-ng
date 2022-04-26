@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v1.03                              *
+* pl32lib, v2.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * String manipulation/Shell/Parser module     *
 \*********************************************/
@@ -9,8 +9,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-bool showHelpAtStart;
 
 typedef struct plarray {
 	void* array;
@@ -28,7 +26,7 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
 
 uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc);
 
-void plShellInteractive(char* prompt, plarray_t* comamndBuf, plgc_t* shellGC);
+void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* comamndBuf, plgc_t* shellGC);
 
 #ifdef __cplusplus
 }

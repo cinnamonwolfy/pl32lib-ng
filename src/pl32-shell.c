@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v1.03                              *
+* pl32lib, v2.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * String manipulation/parsing module          *
 \*********************************************/
@@ -172,7 +172,7 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 }
 
 // Interactive frontend to plShell()
-void plShellInteractive(char* prompt, plarray_t* commandBuf, plgc_t* shellGC){
+void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* commandBuf, plgc_t* shellGC){
 	bool loop = true;
 
 	if(!shellGC)

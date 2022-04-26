@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v1.03                              *
+* pl32lib, v2.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * Serial Communication module                 *
 \*********************************************/

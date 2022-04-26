@@ -27,7 +27,7 @@ case $1 in
 		$AR rc libpl32.a *.o
 		$CC -c -fPIC -Iinclude src/pl32-memory.c src/pl32-shell.c src/pl32-file.c src/pl32-term.c $CFLAGS
 		$CC -shared *.o -o libpl32.so
-		$CC --static -Iinclude -L. pl32-test.c -o pl32-test.out -lpl32 $CFLAGS
+		$CC --static -Iinclude -L. $LDFLAGS  pl32-test.c -o pl32-test.out -lpl32 $CFLAGS
 		rm *.o
 		;;
 	install)
