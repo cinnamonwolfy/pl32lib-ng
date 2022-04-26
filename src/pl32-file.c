@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v1.02                              *
+* pl32lib, v1.03                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * File Management Module                      *
 \*********************************************/
@@ -172,6 +172,16 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 		return 0;
 	}else{
 		return fseek(stream->fileptr, offset, whence);
+	}
+}
+
+// Tells you the current seek position
+size_t plFTell(plfile_t* stream){
+	if(!stream->fileptr){
+		return stream->seekbyte;
+	}else{
+		fflush(stream->fileptr);
+		return ftell(stream->fileptr);
 	}
 }
 
