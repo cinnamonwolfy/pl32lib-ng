@@ -16,6 +16,10 @@ if [ "$DESTDIR" = "" ]; then
 	DESTDIR="/usr"
 fi
 
+if [ "$LIBDIR" = "" ]; then
+	LIBDIR="lib"
+fi
+
 case $1 in
 	clean)
 		rm *.out *.a *.so core -f
@@ -32,6 +36,6 @@ case $1 in
 		;;
 	install)
 		cp include/* $DESTDIR/include
-		mv libpl32.* $DESTDIR/lib
+		mv libpl32.* $DESTDIR/$LIBDIR
 		;;
 esac
