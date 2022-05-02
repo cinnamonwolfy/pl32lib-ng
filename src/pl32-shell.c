@@ -188,11 +188,14 @@ uint8_t plShellFrontEnd(char* cmdline, plarray_t* variableBuf, plarray_t* comman
 	}else{
 		retVar = plShell(parsedCmdLine, commandBuf, *gc);
 	}
+
+	return retVar;
 }
 
 // Interactive frontend to plShellFrontEnd()
 void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t* shellGC){
 	bool loop = true;
+	bool showRetVal = false;
 
 	if(!shellGC)
 		shellGC = plGCInit(8 * 1024 * 1024);
@@ -207,15 +210,25 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 
 	while(loop){
 		char cmdline[4096] = "";
+		int retVal = 0;
 		printf("%s", prompt);
 		scanf("%4096[^\n]", cmdline);
 		getchar();
 
 		if(strcmp(cmdline, "exit-shell") == 0 || feof(stdin)){
 			loop = false;
+		}else if(strcmp(cmdline, "show-exitval") == 0){
+			if(showRetVal){
+				showRetVal = false;
+			}else{
+				showRetVal = true;
+			}
 		}else if(strlen(cmdline) > 0){
-			plShellFrontEnd(cmdline, variableBuf, commandBuf, &shellGC);
+			retVal = plShellFrontEnd(cmdline, variableBuf, commandBuf, &shellGC);
 		}
+
+		if(showRetVal)
+			printf("\nretVal = %d\n", retVal);
 	}
 
 	if(feof(stdin))
