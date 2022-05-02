@@ -102,48 +102,24 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 }
 
 // Command Interpreter
-uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
-	plarray_t* parsedCmdLine = plParser(command, gc);
-
-	if(!parsedCmdLine)
-		return 1;
-
-	char** array = parsedCmdLine->array;
+uint8_t plShell(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
+	char** array = command->array;
 	int retVar = 0;
 
 	if(strcmp(array[0], "print") == 0){
-		if(parsedCmdLine->size < 2)
+		if(command->size < 2)
 			return 1;
 
-		for(int i = 1; i < parsedCmdLine->size - 1; i++)
+		for(int i = 1; i < command->size - 1; i++)
 			printf("%s ", array[i]);
 
-		printf("%s\n", array[parsedCmdLine->size - 1]);
+		printf("%s\n", array[command->size - 1]);
 	}else if(strcmp(array[0], "clear") == 0){
 		printf("\033c");
-	}else if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
-		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
-		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
-		printf("src at https://github.com/pocketlinux32/pl32lib\n");
-		if(strcmp(array[0], "help") == 0){
-			printf("Built-in commands: print, clear, show-memusg, version, help, exit\n");
-			if(!commandBuf || commandBuf->size == 0){
-				printf("No user-defined commands loaded\n");
-			}else{
-				printf("%ld user-defined commands loaded\n", commandBuf->size);
-				printf("User-defined commands: ");
-				for(int i = 0; i < commandBuf->size - 1; i++)
-					printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
-
-				printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
-			}
-		}
-	}else if(strcmp(array[0], "show-memusg") == 0){
-		printf("%ld bytes free\n", plGCMemAmnt(gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(gc, PLGC_GET_USEDMEM, 0));
 	}else if(strcmp(array[0], "exit") == 0){
 		int tempNum = 0;
 		char* pointer;
-		if(parsedCmdLine->size < 2)
+		if(command->size < 2)
 			exit(tempNum);
 
 		exit(strtol(array[0], &pointer, 10));
@@ -163,16 +139,59 @@ uint8_t plShell(char* command, plarray_t* commandBuf, plgc_t* gc){
 			printf("%s: command not found\n", array[0]);
 			return 255;
 		}else{
-			retVar = ((plfunctionptr_t*)commandBuf->array)[i].function(parsedCmdLine, gc);
+			retVar = ((plfunctionptr_t*)commandBuf->array)[i].function(command, gc);
 		}
 	}
 
-	plShellFreeArray(parsedCmdLine, true, gc);
+	plShellFreeArray(command, true, gc);
 	return retVar;
 }
 
-// Interactive frontend to plShell()
-void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* commandBuf, plgc_t* shellGC){
+// Complete Shell Interpreter
+uint8_t plShellFrontEnd(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc){
+	if(!gc)
+		return 1;
+
+	plarray_t* parsedCmdLine = plParser(cmdline, *gc);
+
+	if(!parsedCmdLine)
+		return 1;
+
+	char** array = parsedCmdLine->array;
+	int retVar = 0;
+
+	if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
+		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
+		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
+		printf("src at https://github.com/pocketlinux32/pl32lib\n");
+		if(strcmp(array[0], "help") == 0){
+			printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
+			if(!commandBuf || commandBuf->size == 0){
+				printf("No user-defined commands loaded\n");
+			}else{
+				printf("%ld user-defined commands loaded\n", commandBuf->size);
+				printf("User-defined commands: ");
+				for(int i = 0; i < commandBuf->size - 1; i++)
+					printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
+
+				printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+			}
+		}
+	}else if(strcmp(array[0], "show-memusg") == 0){
+		printf("%ld bytes free\n", plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(*gc, PLGC_GET_USEDMEM, 0));
+	}else if(strcmp(array[0], "reset-mem") == 0){
+		size_t size = plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0);
+		plGCStop(*gc);
+		*gc = plGCInit(size);
+		printf("Memory has been reset\n");
+		return retVar;
+	}else{
+		retVar = plShell(parsedCmdLine, commandBuf, *gc);
+	}
+}
+
+// Interactive frontend to plShellFrontEnd()
+void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t* shellGC){
 	bool loop = true;
 
 	if(!shellGC)
@@ -182,8 +201,8 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* commandBu
 		prompt = "(cmd) # ";
 
 	if(showHelpAtStart){
-		plShell("help", commandBuf, shellGC);
-		plShell("show-memusg", commandBuf, shellGC);
+		plShellFrontEnd("help", variableBuf, commandBuf, &shellGC);
+		plShellFrontEnd("show-memusg", variableBuf, commandBuf, &shellGC);
 	}
 
 	while(loop){
@@ -195,7 +214,7 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* commandBu
 		if(strcmp(cmdline, "exit-shell") == 0 || feof(stdin)){
 			loop = false;
 		}else if(strlen(cmdline) > 0){
-			plShell(cmdline, commandBuf, shellGC);
+			plShellFrontEnd(cmdline, variableBuf, commandBuf, &shellGC);
 		}
 	}
 

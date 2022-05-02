@@ -173,5 +173,5 @@ int main(int argc, const char* argv[]){
 	((plfunctionptr_t*)commandBuf.array)[3].function = plTermTest;
 	((plfunctionptr_t*)commandBuf.array)[3].name = "term-test";
 
-	plShellInteractive(NULL, true, &commandBuf, mainGC);
+	plShellInteractive(NULL, true, NULL, &commandBuf, mainGC);
 }
