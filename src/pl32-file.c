@@ -124,19 +124,37 @@ char plFGetC(plfile_t* stream){
 
 // Puts a string into the file stream
 int plFPuts(char* string, plfile_t* stream){
-	if(!plFWrite(string, strlen(string)+1, 1, stream)){
-		return 0;
-	}else{
+	if(!stream->fileptr){
+		if(plFWrite(string, 1, strlen(string)+1, stream))
+			return 0;
+
 		return 1;
+	}else{
+		return fputs(string, stream->fileptr);
 	}
 }
 
 // Gets a string from the file stream
-int plFGets(char* string, int num, plfile_t* stream){
-	if(!plFRead(string, num, 1, stream)){
-		return 0;
+char* plFGets(char* string, int num, plfile_t* stream){
+	if(!stream->fileptr){
+		char* endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
+		unsigned int writeNum = 0;
+		if(!endMark)
+			endMark = stream->strbuf + stream->bufsize - 1;
+
+		writeNum = endMark - (stream->strbuf + stream->seekbyte);
+
+		if(writeNum == 0)
+			return NULL;
+
+		if(writeNum > num)
+			writeNum = num;
+
+		memcpy(string, stream->strbuf + stream->seekbyte, writeNum);
+		stream->seekbyte += writeNum;
+		return string;
 	}else{
-		return 1;
+		return fgets(string, num, stream->fileptr);
 	}
 }
 

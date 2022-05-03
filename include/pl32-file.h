@@ -26,7 +26,7 @@ char plFPutC(char ch, plfile_t* stream);
 char plFGetC(plfile_t* stream);
 
 int plFPuts(char* string, plfile_t* stream);
-int plFGets(char* string, int num, plfile_t* stream);
+char* plFGets(char* string, int num, plfile_t* stream);
 
 int plFSeek(plfile_t* stream, long int offset, int whence);
 size_t plFTell(plfile_t* stream);
