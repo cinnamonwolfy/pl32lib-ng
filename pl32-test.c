@@ -107,8 +107,9 @@ int plFileTest(plarray_t* args, plgc_t* gc){
 	}
 
 	printf("Done\n");
-	plFGets(stringBuffer, 4095, realFile);
-	printf("Contents of include/pl32-file.h:\n%s\n", stringBuffer);
+	printf("Contents of include/pl32-file.h:\n\n");
+	while(plFGets(stringBuffer, 4095, realFile) != NULL)
+		printf("%s", stringBuffer);
 
 	printf("Reading and writing to file-in-memory...");
 	plFPuts("test string getting sent to the yes", memFile);
