@@ -10,10 +10,21 @@
 extern "C" {
 #endif
 
+#define PLSHVAR_INT 0
+#define PLSHVAR_STRING 1
+#define PLSHVAR_BOOL 2
+#define PLSHVAR_FLOAT 3
+
 typedef struct plarray {
 	void* array;
 	size_t size;
 } plarray_t;
+
+typedef struct plvariable {
+	void* varptr;
+	int type;
+	char* name;
+}
 
 typedef struct plfunctionptr {
 	int (*function)(plarray_t*, plgc_t*);
