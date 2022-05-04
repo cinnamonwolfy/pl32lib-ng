@@ -91,6 +91,16 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	return returnStruct;
 }
 
+// A string tokenizer that is a lot simpler than plTokenize and is a lot more similar to the
+// 'cut' Unix command-line utiliy
+plarray_t* plSplit(char* string, char* delimeter, plgc_t* gc){
+	if(!string | !delimeter | !gc)
+		return NULL;
+
+	char* leftoverStr;
+	size_t delimSize = strlen(delimeter);
+}
+
 // Frees a plarray_t
 void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 	if(is2DArray){
@@ -101,8 +111,19 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 	plGCFree(gc, array);
 }
 
+// Variable Manager
+uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
+	if(!gc | !cmdline | !*cmdline | !cmdlineIsModified | !variableBuf)
+		return 255;
+
+	char* nonPtrCmdline = *cmdline;
+}
+
 // Command Interpreter
-uint8_t plShell(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
+uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
+	if(!gc | !*gc | !command)
+		return 1;
+
 	char** array = command->array;
 	int retVar = 0;
 
@@ -148,9 +169,14 @@ uint8_t plShell(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
 }
 
 // Complete Shell Interpreter
-uint8_t plShellFrontEnd(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc){
-	if(!gc)
+uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc){
+	if(!gc | !*gc)
 		return 1;
+
+	bool cmdlineIsNotCommand = false;
+
+	if(strchr(cmdline, '$') | strchr(cmdline, '='))
+		plShellVarMgmt(&cmdline, &cmdlineIsNotCommand, variableBuf, *gc);
 
 	plarray_t* parsedCmdLine = plParser(cmdline, *gc);
 
@@ -186,7 +212,7 @@ uint8_t plShellFrontEnd(char* cmdline, plarray_t* variableBuf, plarray_t* comman
 		printf("Memory has been reset\n");
 		return retVar;
 	}else{
-		retVar = plShell(parsedCmdLine, commandBuf, *gc);
+		retVar = plShellComInt(parsedCmdLine, commandBuf, *gc);
 	}
 
 	return retVar;
@@ -204,8 +230,8 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 		prompt = "(cmd) # ";
 
 	if(showHelpAtStart){
-		plShellFrontEnd("help", variableBuf, commandBuf, &shellGC);
-		plShellFrontEnd("show-memusg", variableBuf, commandBuf, &shellGC);
+		plShell("help", variableBuf, commandBuf, &shellGC);
+		plShell("show-memusg", variableBuf, commandBuf, &shellGC);
 	}
 
 	while(loop){
@@ -224,7 +250,7 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 				showRetVal = true;
 			}
 		}else if(strlen(cmdline) > 0){
-			retVal = plShellFrontEnd(cmdline, variableBuf, commandBuf, &shellGC);
+			retVal = plShell(cmdline, variableBuf, commandBuf, &shellGC);
 		}
 
 		if(showRetVal)

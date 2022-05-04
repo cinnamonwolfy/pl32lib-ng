@@ -45,13 +45,13 @@ void plTermRawInit(plterminal_t* terminalSession){
 }
 
 // Sends byte array to the terminal session
-void plTermSend(plterminal_t* terminalSession, plarray_t* string){
-	write(terminalSession->fDesc, string->array, string->size);
+ssize_t plTermSend(plterminal_t* terminalSession, plarray_t* string){
+	return write(terminalSession->fDesc, string->array, string->size);
 }
 
 // Sends one byte to the terminal session
-void plTermSendC(plterminal_t* terminalSession, char c){
-	write(terminalSession->fDesc, &c, 1);
+ssize_t plTermSendC(plterminal_t* terminalSession, char c){
+	return write(terminalSession->fDesc, &c, 1);
 }
 
 // Gets byte array from the terminal session

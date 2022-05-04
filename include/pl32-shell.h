@@ -10,10 +10,11 @@
 extern "C" {
 #endif
 
-#define PLSHVAR_INT 0
-#define PLSHVAR_STRING 1
-#define PLSHVAR_BOOL 2
-#define PLSHVAR_FLOAT 3
+#define PLSHVAR_NULL 0
+#define PLSHVAR_INT 1
+#define PLSHVAR_STRING 2
+#define PLSHVAR_BOOL 3
+#define PLSHVAR_FLOAT 4
 
 typedef struct plarray {
 	void* array;
@@ -24,7 +25,8 @@ typedef struct plvariable {
 	void* varptr;
 	int type;
 	char* name;
-}
+	bool isMemAlloc;
+} plvariable_t;
 
 typedef struct plfunctionptr {
 	int (*function)(plarray_t*, plgc_t*);
@@ -35,8 +37,9 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
 
-uint8_t plShell(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);
-uint8_t plShellFrontEnd(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc);
+uint8_t plShellVarMgmt(char** cmdline, plarray_t* variableBuf, plgc_t* gc);
+uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);
+uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc);
 
 void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* comamndBuf, plgc_t* shellGC);
 

@@ -19,8 +19,8 @@ plterminal_t* plOpenTerminal(char* path, plgc_t* gc);
 void plCloseTerminal(plterminal_t*, plgc_t* gc);
 void plTermRawInit(plterminal_t* terminalSession);
 
-void plTermSend(plterminal_t* terminalSession, plarray_t* string);
-void plTermSendC(plterminal_t* terminalSession, char c);
+ssize_t plTermSend(plterminal_t* terminalSession, plarray_t* string);
+ssize_t plTermSendC(plterminal_t* terminalSession, char c);
 plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc);
 char plTermGetC(plterminal_t* terminalSession);
 
