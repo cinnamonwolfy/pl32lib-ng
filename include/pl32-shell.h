@@ -34,6 +34,7 @@ typedef struct plfunctionptr {
 } plfunctionptr_t;
 
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
+plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
 

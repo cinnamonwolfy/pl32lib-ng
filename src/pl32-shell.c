@@ -56,6 +56,47 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 	return retPtr;
 }
 
+// A string tokenizer that is a lot simpler than plTokenize and is a lot more similar to the
+// 'cut' Unix command-line utility
+plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
+	if(!string | !delimeter | !gc)
+		return NULL;
+
+	plarray_t* returnArray = plGCAlloc(gc, sizeof(plarray_t));
+	returnArray->array = plGCAlloc(gc, 2 * sizeof(char*));
+	returnArray->size = 1;
+	size_t delimSize = strlen(delimiter);
+	size_t strSize = workPtr - string;
+
+	char* workPtr = strstr(string, delimiter);
+	char* leftoverStr = workPtr + delimSize;
+
+	((char**)returnArray->array)[0] = plGCAlloc(gc, strSize + 1);
+	memcpy(((char**)returnArray->array)[0], string, strSize);
+	((char**)returnArray->array)[0][strSize] = '\0';
+
+	while((workPtr = strstr(leftoverStr, delimiter)) != NULL){
+		if(returnArray->size > 1){
+			void* tempPtr = plGCRealloc(gc, (returnArray->size + 1) * sizeof(char*));
+			if(!tempPtr){
+				for(int i = 0; i < returnArray->size; i++)
+					plGCFree(gc, ((char**)returnArray->array)[i]);
+
+				plGCFree(gc, returnArray->array);
+				plGCFree(gc, returnArray);
+
+				return NULL;
+			}
+		}
+
+		memcpy(((char**)returnArray->array)[returnArray->size], workPtr);
+		returnArray->size++;
+		leftoverStr = workPtr + delimSize;
+	}
+
+	return returnArray;
+}
+
 // Parses a string into an array
 plarray_t* plParser(char* input, plgc_t* gc){
 	if(!input || !gc)
@@ -74,9 +115,8 @@ plarray_t* plParser(char* input, plgc_t* gc){
 		char** tempArrPtr = plGCRealloc(gc, returnStruct->array, returnStruct->size * sizeof(char*));
 
 		if(!tempArrPtr){
-			for(int i = 0; i < returnStruct->size; i++){
+			for(int i = 0; i < returnStruct->size; i++)
 				plGCFree(gc, ((char**)returnStruct->array)[i]);
-			}
 
 			plGCFree(gc, returnStruct->array);
 			plGCFree(gc, returnStruct);
@@ -89,16 +129,6 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	}
 
 	return returnStruct;
-}
-
-// A string tokenizer that is a lot simpler than plTokenize and is a lot more similar to the
-// 'cut' Unix command-line utiliy
-plarray_t* plSplit(char* string, char* delimeter, plgc_t* gc){
-	if(!string | !delimeter | !gc)
-		return NULL;
-
-	char* leftoverStr;
-	size_t delimSize = strlen(delimeter);
 }
 
 // Frees a plarray_t
@@ -117,6 +147,10 @@ uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* var
 		return 255;
 
 	char* nonPtrCmdline = *cmdline;
+
+	if(strchr(nonPtrCmdline, '=')){
+		//TODO: thingie
+	}
 }
 
 // Command Interpreter
