@@ -141,7 +141,10 @@ int plShellTest(plarray_t* args, plgc_t* gc){
 
 	printf("\nTesting plSplit...\n");
 
-	for
+	for(int i = 0; i < 5; i++){
+		printf("Test %d:\n", i);
+		plarray_t* result = plSplit()
+	}
 }
 
 int plTermTest(plarray_t* args, plgc_t* gc){

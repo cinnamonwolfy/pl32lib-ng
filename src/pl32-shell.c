@@ -65,11 +65,11 @@ plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
 	plarray_t* returnArray = plGCAlloc(gc, sizeof(plarray_t));
 	returnArray->array = plGCAlloc(gc, 2 * sizeof(char*));
 	returnArray->size = 1;
-	size_t delimSize = strlen(delimiter);
-	size_t strSize = workPtr - string;
 
+	size_t delimSize = strlen(delimiter);
 	char* workPtr = strstr(string, delimiter);
 	char* leftoverStr = workPtr + delimSize;
+	size_t strSize = workPtr - string;
 
 	((char**)returnArray->array)[0] = plGCAlloc(gc, strSize + 1);
 	memcpy(((char**)returnArray->array)[0], string, strSize);
@@ -77,7 +77,7 @@ plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
 
 	while((workPtr = strstr(leftoverStr, delimiter)) != NULL){
 		if(returnArray->size > 1){
-			void* tempPtr = plGCRealloc(gc, (returnArray->size + 1) * sizeof(char*));
+			void* tempPtr = plGCRealloc(gc, returnArray->array, (returnArray->size + 1) * sizeof(char*));
 			if(!tempPtr){
 				for(int i = 0; i < returnArray->size; i++)
 					plGCFree(gc, ((char**)returnArray->array)[i]);
@@ -87,9 +87,12 @@ plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
 
 				return NULL;
 			}
+
+			returnArray->array = tempPtr;
 		}
 
-		memcpy(((char**)returnArray->array)[returnArray->size], workPtr);
+		memcpy(((char**)returnArray->array)[returnArray->size], workPtr, strSize);
+		((char**)returnArray->array)[returnArray->size][strSize] = '\0';
 		returnArray->size++;
 		leftoverStr = workPtr + delimSize;
 	}
@@ -143,14 +146,14 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 
 // Variable Manager
 uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
-	if(!gc || !cmdline || !*cmdline || !cmdlineIsModified || !variableBuf)
+	if(!gc || !cmdline || !*cmdline || !cmdlineIsNotCommand || !variableBuf)
 		return 255;
 
 	char* nonPtrCmdline = *cmdline;
 
 	if(strchr(nonPtrCmdline, '=')){
 		*cmdlineIsNotCommand = true;
-		plarray_t* tokenizedCmdline = plSplit(cmdline, "=");
+		plarray_t* tokenizedCmdline = plSplit(*cmdline, "=", gc);
 
 		//TODO: thingie
 	}
