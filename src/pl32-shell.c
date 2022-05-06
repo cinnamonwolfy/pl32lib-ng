@@ -59,7 +59,7 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 // A string tokenizer that is a lot simpler than plTokenize and is a lot more similar to the
 // 'cut' Unix command-line utility
 plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
-	if(!string | !delimeter | !gc)
+	if(!string || !delimiter || !gc)
 		return NULL;
 
 	plarray_t* returnArray = plGCAlloc(gc, sizeof(plarray_t));
@@ -143,19 +143,22 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 
 // Variable Manager
 uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
-	if(!gc | !cmdline | !*cmdline | !cmdlineIsModified | !variableBuf)
+	if(!gc || !cmdline || !*cmdline || !cmdlineIsModified || !variableBuf)
 		return 255;
 
 	char* nonPtrCmdline = *cmdline;
 
 	if(strchr(nonPtrCmdline, '=')){
+		*cmdlineIsNotCommand = true;
+		plarray_t* tokenizedCmdline = plSplit(cmdline, "=");
+
 		//TODO: thingie
 	}
 }
 
 // Command Interpreter
 uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
-	if(!gc | !*gc | !command)
+	if(!gc || !command)
 		return 1;
 
 	char** array = command->array;
@@ -204,12 +207,12 @@ uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
 
 // Complete Shell Interpreter
 uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc){
-	if(!gc | !*gc)
+	if(!gc || !*gc)
 		return 1;
 
 	bool cmdlineIsNotCommand = false;
 
-	if(strchr(cmdline, '$') | strchr(cmdline, '='))
+	if(strchr(cmdline, '$') || strchr(cmdline, '='))
 		plShellVarMgmt(&cmdline, &cmdlineIsNotCommand, variableBuf, *gc);
 
 	plarray_t* parsedCmdLine = plParser(cmdline, *gc);

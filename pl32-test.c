@@ -125,19 +125,23 @@ int plFileTest(plarray_t* args, plgc_t* gc){
 }
 
 int plShellTest(plarray_t* args, plgc_t* gc){
-	char* holder;
-	char* token;
-	char* testStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
+	char* tknTestStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
+	char* spltTestStrings[5] = { "just simple spaces", "assigning = aVariable", "1 += 2", "65 *= 2", "is this == to this?" };
 
-	printf("This is a test of the new pl32-shell tokenizer\n");
+	printf("This is a test of the pl32-shell tokenizers\n\n");
+	printf("Testing plTokenize...\n");
 
 	for(int i = 0; i < 5; i++){
 		printf("Test %d:\n", i);
-		if(testLoop(testStrings[i], gc)){
+		if(testLoop(tknTestStrings[i], gc)){
 			printf("An error occurred. Exiting...\n");
 			return 1;
 		}
 	}
+
+	printf("\nTesting plSplit...\n");
+
+	for
 }
 
 int plTermTest(plarray_t* args, plgc_t* gc){
