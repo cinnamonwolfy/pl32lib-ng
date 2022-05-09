@@ -56,50 +56,6 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 	return retPtr;
 }
 
-// A string tokenizer that is a lot simpler than plTokenize and is a lot more similar to the
-// 'cut' Unix command-line utility
-plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc){
-	if(!string || !delimiter || !gc)
-		return NULL;
-
-	plarray_t* returnArray = plGCAlloc(gc, sizeof(plarray_t));
-	returnArray->array = plGCAlloc(gc, 2 * sizeof(char*));
-	returnArray->size = 1;
-
-	size_t delimSize = strlen(delimiter);
-	char* workPtr = strstr(string, delimiter);
-	char* leftoverStr = workPtr + delimSize;
-	size_t strSize = workPtr - string;
-
-	((char**)returnArray->array)[0] = plGCAlloc(gc, strSize + 1);
-	memcpy(((char**)returnArray->array)[0], string, strSize);
-	((char**)returnArray->array)[0][strSize] = '\0';
-
-	while((workPtr = strstr(leftoverStr, delimiter)) != NULL){
-		if(returnArray->size > 1){
-			void* tempPtr = plGCRealloc(gc, returnArray->array, (returnArray->size + 1) * sizeof(char*));
-			if(!tempPtr){
-				for(int i = 0; i < returnArray->size; i++)
-					plGCFree(gc, ((char**)returnArray->array)[i]);
-
-				plGCFree(gc, returnArray->array);
-				plGCFree(gc, returnArray);
-
-				return NULL;
-			}
-
-			returnArray->array = tempPtr;
-		}
-
-		memcpy(((char**)returnArray->array)[returnArray->size], workPtr, strSize);
-		((char**)returnArray->array)[returnArray->size][strSize] = '\0';
-		returnArray->size++;
-		leftoverStr = workPtr + delimSize;
-	}
-
-	return returnArray;
-}
-
 // Parses a string into an array
 plarray_t* plParser(char* input, plgc_t* gc){
 	if(!input || !gc)
@@ -145,17 +101,14 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 }
 
 // Variable Manager
-uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
-	if(!gc || !cmdline || !*cmdline || !cmdlineIsNotCommand || !variableBuf)
+uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
+	if(!gc || !cmdline || !cmdlineIsNotCommand || !variableBuf)
 		return 255;
 
-	char* nonPtrCmdline = *cmdline;
+	char** array = cmdline->array;
 
-	if(strchr(nonPtrCmdline, '=')){
+	if(strchr(array[0], '=') == 0 || strchr(array[1], '=') == 0){
 		*cmdlineIsNotCommand = true;
-		plarray_t* tokenizedCmdline = plSplit(*cmdline, "=", gc);
-
-		//TODO: thingie
 	}
 }
 
@@ -204,7 +157,6 @@ uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
 		}
 	}
 
-	plShellFreeArray(command, true, gc);
 	return retVar;
 }
 
@@ -214,47 +166,49 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 		return 1;
 
 	bool cmdlineIsNotCommand = false;
-
-	if(strchr(cmdline, '$') || strchr(cmdline, '='))
-		plShellVarMgmt(&cmdline, &cmdlineIsNotCommand, variableBuf, *gc);
-
 	plarray_t* parsedCmdLine = plParser(cmdline, *gc);
 
 	if(!parsedCmdLine)
 		return 1;
 
+	if(strchr(cmdline, '$') || strchr(cmdline, '='))
+		plShellVarMgmt(parsedCmdLine, &cmdlineIsNotCommand, variableBuf, *gc);
+
 	char** array = parsedCmdLine->array;
 	int retVar = 0;
 
-	if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
-		printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
-		printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
-		printf("src at https://github.com/pocketlinux32/pl32lib\n");
-		if(strcmp(array[0], "help") == 0){
-			printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
-			if(!commandBuf || commandBuf->size == 0){
-				printf("No user-defined commands loaded\n");
-			}else{
-				printf("%ld user-defined commands loaded\n", commandBuf->size);
-				printf("User-defined commands: ");
-				for(int i = 0; i < commandBuf->size - 1; i++)
-					printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
+	if(!cmdlineIsNotCommand){
+		if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
+			printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
+			printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
+			printf("src at https://github.com/pocketlinux32/pl32lib\n");
+			if(strcmp(array[0], "help") == 0){
+				printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
+				if(!commandBuf || commandBuf->size == 0){
+					printf("No user-defined commands loaded\n");
+				}else{
+					printf("%ld user-defined commands loaded\n", commandBuf->size);
+					printf("User-defined commands: ");
+					for(int i = 0; i < commandBuf->size - 1; i++)
+						printf("%s, ", ((plfunctionptr_t*)commandBuf->array)[i].name);
 
-				printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+					printf("%s\n", ((plfunctionptr_t*)commandBuf->array)[commandBuf->size - 1].name);
+				}
 			}
+		}else if(strcmp(array[0], "show-memusg") == 0){
+			printf("%ld bytes free\n", plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(*gc, PLGC_GET_USEDMEM, 0));
+		}else if(strcmp(array[0], "reset-mem") == 0){
+			size_t size = plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0);
+			plGCStop(*gc);
+			*gc = plGCInit(size);
+			printf("Memory has been reset\n");
+			return retVar;
+		}else{
+			retVar = plShellComInt(parsedCmdLine, commandBuf, *gc);
 		}
-	}else if(strcmp(array[0], "show-memusg") == 0){
-		printf("%ld bytes free\n", plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(*gc, PLGC_GET_USEDMEM, 0));
-	}else if(strcmp(array[0], "reset-mem") == 0){
-		size_t size = plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0);
-		plGCStop(*gc);
-		*gc = plGCInit(size);
-		printf("Memory has been reset\n");
-		return retVar;
-	}else{
-		retVar = plShellComInt(parsedCmdLine, commandBuf, *gc);
 	}
 
+	plShellFreeArray(parsedCmdLine, true, *gc);
 	return retVar;
 }
 

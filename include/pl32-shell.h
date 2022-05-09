@@ -34,11 +34,10 @@ typedef struct plfunctionptr {
 } plfunctionptr_t;
 
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
-plarray_t* plSplit(char* string, char* delimiter, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
 
-uint8_t plShellVarMgmt(char** cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc);
+uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc);
 uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);
 uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc);
 
