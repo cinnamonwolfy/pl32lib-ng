@@ -65,8 +65,8 @@ int plFClose(plfile_t* ptr){
 // Reads size * nmemb amount of bytes from the file stream
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
-		int elementAmnt = 0;
-		while(size * elementAmnt < stream->bufsize - stream->seekbyte){
+		int elementAmnt = 1;
+		while(size * elementAmnt < stream->bufsize - stream->seekbyte && elementAmnt < nmemb){
 			elementAmnt++;
 		}
 		elementAmnt--;
@@ -104,21 +104,35 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 }
 
 // Puts a character into the file stream
-char plFPutC(char ch, plfile_t* stream){
-	if(!plFWrite(&ch, sizeof(char), 1, stream)){
-		return '\0';
-	}else{
+int plFPutC(char ch, plfile_t* stream){
+	if(!stream->fileptr){
+		if(stream->bufsize - stream->seekbyte < 1){
+			void* tempPtr = plGCRealloc(stream->gcptr, stream->strbuf, stream->bufsize + 1);
+
+			if(!tempPtr)
+				return '\0';
+
+			stream->strbuf = tempPtr;
+		}
+
 		return ch;
+	}else{
+		fputc(ch, stream->fileptr);
 	}
 }
 
 // Gets a character from the file stream
-char plFGetC(plfile_t* stream){
-	char ch;
-	if(!plFRead(&ch, sizeof(char), 1, stream)){
-		return '\0';
-	}else{
+int plFGetC(plfile_t* stream){
+	char ch = '\0';
+	if(!stream->fileptr){
+		if(stream->seekbyte > stream->bufsize){
+			ch = *(stream->strbuf + stream->seekbyte);
+			stream->seekbyte++;
+		}
+
 		return ch;
+	}else{
+		return fgetc(stream->fileptr);
 	}
 }
 
@@ -140,18 +154,25 @@ char* plFGets(char* string, int num, plfile_t* stream){
 		char* endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
 		unsigned int writeNum = 0;
 		if(!endMark)
-			endMark = stream->strbuf + stream->bufsize - 1;
+			endMark = strchr(stream->strbuf + stream->seekbyte, '\0');
 
 		writeNum = endMark - (stream->strbuf + stream->seekbyte);
+
+		if(writeNum > num)
+			writeNum = num - 1;
 
 		if(writeNum == 0)
 			return NULL;
 
-		if(writeNum > num)
-			writeNum = num;
-
 		memcpy(string, stream->strbuf + stream->seekbyte, writeNum);
-		stream->seekbyte += writeNum;
+		string[writeNum] = '\n';
+
+		if(stream->seekbyte + writeNum + 1 > stream->bufsize){
+			stream->seekbyte = stream->bufsize - 1;
+		}else{
+			stream->seekbyte += (writeNum + 1);
+		}
+
 		return string;
 	}else{
 		return fgets(string, num, stream->fileptr);
@@ -208,7 +229,9 @@ int plFPToFile(char* filename, plfile_t* stream){
 		return -1;
 
 	FILE* realFile = fopen(filename, "w");
-	return fputs(stream->strbuf, realFile);
+	int retVar = fputs(stream->strbuf, realFile);
+	fclose(realFile);
+	return retVar;
 }
 
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){

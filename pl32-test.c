@@ -108,15 +108,22 @@ int plFileTest(plarray_t* args, plgc_t* gc){
 
 	printf("Done\n");
 	printf("Contents of include/pl32-file.h:\n\n");
-	while(plFGets(stringBuffer, 4095, realFile) != NULL)
+	while(plFGets(stringBuffer, 4095, realFile) != NULL){
 		printf("%s", stringBuffer);
+		for(int i = 0; i < 4096; i++)
+			stringBuffer[i] = 0;
+	}
 
 	printf("Reading and writing to file-in-memory...");
-	plFPuts("test string getting sent to the yes", memFile);
+	plFPuts("test string getting sent to the yes\nnano", memFile);
 	plFSeek(memFile, 0, SEEK_SET);
-	plFGets(stringBuffer, 4095, memFile);
 	printf("Done\n");
-	printf("Contents of file-in-memory:\n%s\n", stringBuffer);
+	printf("Contents of file-in-memory:\n", stringBuffer);
+	while(plFGets(stringBuffer, 4095, memFile) != NULL){
+		printf("%s", stringBuffer);
+		for(int i = 0; i < 4096; i++)
+			stringBuffer[i] = 0;
+	}
 
 	plFClose(realFile);
 	plFClose(memFile);

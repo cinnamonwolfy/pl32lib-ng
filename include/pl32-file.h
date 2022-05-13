@@ -22,8 +22,8 @@ int plFClose(plfile_t* ptr);
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream);
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream);
 
-char plFPutC(char ch, plfile_t* stream);
-char plFGetC(plfile_t* stream);
+int plFPutC(char ch, plfile_t* stream);
+int plFGetC(plfile_t* stream);
 
 int plFPuts(char* string, plfile_t* stream);
 char* plFGets(char* string, int num, plfile_t* stream);
