@@ -1,7 +1,7 @@
 /*********************************************\
-* pl32lib, v3.00                              *
+* pl32lib, v4.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* Serial Communication module                 *
+* POSIX-Only routuines                        *
 \*********************************************/
 #include <pl32-term.h>
 

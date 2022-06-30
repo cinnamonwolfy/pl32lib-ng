@@ -1,5 +1,5 @@
 /*********************************************\
-* pl32lib, v3.00                              *
+* pl32lib, v4.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
 * String manipulation/parsing module          *
 \*********************************************/
@@ -110,6 +110,8 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 	if(strchr(array[0], '=') == 0 || strchr(array[1], '=') == 0){
 		*cmdlineIsNotCommand = true;
 	}
+
+        if(strchr(array[0], '$') == 0)
 }
 
 // Command Interpreter
