@@ -36,6 +36,7 @@ typedef struct plfunctionptr {
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
 void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
+void plShellFreeVarBuf(plarray_t* array, plgc_t* gc);
 
 uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc);
 uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);

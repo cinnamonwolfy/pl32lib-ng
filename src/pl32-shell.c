@@ -106,12 +106,20 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		return 255;
 
 	char** array = cmdline->array;
+	plvariable_t* workVarBuf = variableBuf->array;
 
-	if(strchr(array[0], '=') == 0 || strchr(array[1], '=') == 0){
+	if(strchr(array[0], '=') == array[0] + strlen(array[0]) - 1 || strchr(array[1], '=') == array[0]){
 		*cmdlineIsNotCommand = true;
 	}
 
-        if(strchr(array[0], '$') == 0)
+        if(strchr(array[i], '$') == array[0]){
+		char* workVar = array[0] + 1;
+		int i = 0;
+
+		while(strcmp(workVar, workVarBuf[i]->name) != 0 && i < variableBuf->size){
+			
+		}
+	}
 }
 
 // Command Interpreter
