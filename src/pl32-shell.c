@@ -1,7 +1,7 @@
 /*********************************************\
 * pl32lib, v4.00                              *
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* String manipulation/parsing module          *
+* String manipulation/Shell/Parser module     *
 \*********************************************/
 #include <pl32-shell.h>
 
@@ -20,16 +20,25 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 		return NULL;
 	}
 
+	// If string starts with a space and string pointer is lower than the search limit,
+	// keep increasing string pointer until it equals tempPtr[1]
 	if(*string == ' '){
-		while(*string == ' ' && string < searchLimit) string++;
-		if(tempPtr[1] < string){
+		while(*string == ' ' && string < searchLimit)
+			string++;
+
+		if(tempPtr[1] < string)
 			tempPtr[1] = strchr(string, ' ');
-		}
 	}
 
+	// If there are no string in quotes, or if the quotes come after a whitespace,
+	// assign the beginning of the string to be returned as the pointer of the given
+	// string and the end of the string as the next whitespase
 	if((!tempPtr[0] && tempPtr[1]) || (tempPtr[1] && tempPtr[1] < tempPtr[0])){
 		startPtr = string;
 		endPtr = tempPtr[1];
+	// Else, if the beginning of the given string begins with a quote, assign the beginning
+	// of the string to be returned as the opening quote + 1 and the end of the string as the
+	// closing quote
 	}else if(tempPtr[0] && tempPtr[0] == string){
 		startPtr = tempPtr[0] + 1;
 		endPtr = strchr(tempPtr[0] + 1, '"');
@@ -37,6 +46,7 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 
 	size_t strSize = (endPtr - startPtr);
 
+	// If there's no whitespace or quotes in the given string, return the given string.
 	if(!startPtr || !endPtr || !strSize){
 		if(strlen(string) != 0){
 			strSize = strlen(string);
@@ -46,9 +56,12 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 			return NULL;
 		}
 	}else{
+	// Else what remains of the given string into the leftover variable
 		*leftoverStr = endPtr+1;
 	}
 
+	// Allocate memory for return string, copy the selected part of the string,
+	// and null-terminate the return string
 	retPtr = plGCAlloc(gc, (strSize + 1) * sizeof(char));
 	memcpy(retPtr, startPtr, strSize);
 
@@ -66,9 +79,11 @@ plarray_t* plParser(char* input, plgc_t* gc){
 	returnStruct->size = 1;
 	returnStruct->array = plGCAlloc(gc, 2 * sizeof(char*));
 
+	// First token
 	char* tempPtr = plTokenize(input, &leftoverStr, gc);
 	((char**)returnStruct->array)[0] = tempPtr;
 
+	// Keep tokenizing until there is no more string left to tokenize
 	while((tempPtr = plTokenize(leftoverStr, &leftoverStr, gc)) != NULL){
 		returnStruct->size++;
 		char** tempArrPtr = plGCRealloc(gc, returnStruct->array, returnStruct->size * sizeof(char*));
@@ -106,17 +121,36 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		return 255;
 
 	char** array = cmdline->array;
+	int assignVal = -1;
 	plvariable_t* workVarBuf = variableBuf->array;
 
-	if(strchr(array[0], '=') == array[0] + strlen(array[0]) - 1 || strchr(array[1], '=') == array[0]){
+	if(strchr(array[0], '=') != NULL || strchr(array[1], '=') == array[1]){
 		*cmdlineIsNotCommand = true;
+		if(strchr(array[0], '=') != NULL)
+			assignVal = 0;
+		else
+			assignVal = 1;
 	}
 
-        if(strchr(array[i], '$') == array[0]){
-		char* workVar = array[0] + 1;
-		int i = 0;
+	int i = 0, j = -1;
+	while(strchr(array[i], '$') == NULL && i < cmdline->size)
+		i++;
 
-		while(strcmp(workVar, workVarBuf[i]->name) != 0 && i < variableBuf->size){
+        if(i < cmdline->size && (strchr(array[i], '$') == array[i] || strchr(array[i], '$') == array[i] + 1)){
+		char* workVar = strchr(array[i], '$') + 1;
+		j = 0;
+
+		while(strcmp(workVar, workVarBuf[j]->name) != 0 && j < variableBuf->size)
+			j++;
+
+		if(j == variableBuf->size){
+			printf("%s: Non-existent variable");
+			return 255;
+		}
+	}
+
+	if(assignVal > -1){
+		if(assignVal == 0){
 			
 		}
 	}

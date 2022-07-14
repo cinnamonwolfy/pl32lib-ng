@@ -22,6 +22,10 @@ extern "C" {
 #endif
 
 #define PL32LIB_VERSION "4.00"
+#define PL32LIB_API_VER 4
+#define PL32LIB_FEATURELVL 0
+#define PL32LIB_PATCHLVL 0
+
 #define PLGC_STOP 1
 #define PLGC_SEARCHPTR 2
 #define PLGC_ADDPTR 3
