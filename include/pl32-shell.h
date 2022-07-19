@@ -16,6 +16,9 @@ extern "C" {
 #define PLSHVAR_BOOL 3
 #define PLSHVAR_FLOAT 4
 
+char* productString = "PocketLinux Shell, (c)2022 pocketlinux32"
+char* srcUrl = NULL;
+
 typedef struct plarray {
 	void* array;
 	size_t size;

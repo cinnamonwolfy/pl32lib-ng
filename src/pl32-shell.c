@@ -126,11 +126,14 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 	if(strchr(array[0], '=') != NULL || strchr(array[1], '=') == array[1]){
 		*cmdlineIsNotCommand = true;
-		if(strchr(array[0], '=') != NULL)
+		if(strchr(array[0], '=') != array[0] + strlen(array[0]))
 			assignVal = 0;
+		else if(strchr(array[1], '=') == array[1])
+			assignVal = 2;
 		else
 			assignVal = 1;
 	}
+
 
 	int i = 0, j = -1;
 	while(strchr(array[i], '$') == NULL && i < cmdline->size)
@@ -149,8 +152,56 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		}
 	}
 
-	if(assignVal > -1){
-		if(assignVal == 0){
+	if(!*cmdlineIsNotCommand && j > -1){
+		void* valToExpand = workVarBuf[j].varptr;
+		char holderString[1024] = "";
+		char* outputString = NULL;
+
+		switch(workVarBuf[j].type){
+			case PLSHVAR_INT: ;
+				snprintf(holderString, 1023, "%d", *((int*)valToExpand));
+				break;
+			case PLSHVAR_STRING: ;
+				outputString = (char*)valToExpand;
+				break;
+			case PLSHVAR_BOOL: ;
+				bool tempBool = *((bool*)valToExpand);
+
+				if(tempBool)
+					strcmp(holderString, "true");
+				else
+					strcmp(holderString, "false");
+				break;
+			case PLSHVAR_FLOAT: ;
+				snprintf(holderString, 1023, "%f", *((float*)valToExpand));
+				break;
+		}
+
+		if(!outputString)
+			outputString = holderString;
+
+		plGCFree(gc, array[i]);
+		array[i] = plGCAlloc(gc, strlen(outputString));
+	}else if(assignVal > -1){
+		char* varToAssign = NULL;
+		char* valToAssign = NULL;
+
+		if(assignVal < 2){
+			char* workVar = strchr(array[0], '=')
+			size_t sizeToCopy = workVar - array[0];
+			varToAssign = plGCAlloc(gc, sizeToCopy + 1);
+			memcpy(varToAssign, array[0], sizeToCopy);
+			varToAssign[sizeToCopy] = 0;
+		}else{
+			varToAssign = array[0];
+		}
+
+		if(j == -1){
+			switch(assignVal){
+				case 0:
+					
+			}
+		}else{
 			
 		}
 	}
@@ -223,8 +274,11 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 
 	if(!cmdlineIsNotCommand){
 		if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
-			printf("PocketLinux Shell, (c)2022 pocketlinux32\n");
-			printf("pl32lib v%s, Under Lesser GPLv3\n", PL32LIB_VERSION);
+			printf("%s\n", productString);
+			if(srcUrl)
+				printf("src at %s\n", srcUrl);
+
+			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1\n", PL32LIB_VERSION);
 			printf("src at https://github.com/pocketlinux32/pl32lib\n");
 			if(strcmp(array[0], "help") == 0){
 				printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
