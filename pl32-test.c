@@ -167,10 +167,17 @@ int plTermTest(plarray_t* args, plgc_t* gc){
 
 int main(int argc, const char* argv[]){
 	plgc_t* mainGC = plGCInit(8 * 1024 * 1024);
-	plarray_t commandBuf;
+	plarray_t commandBuf, variableBuf;
 
-	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 5);
+	int plmajorver = 4;
+	int plminorver = 0;
+	int birthyear = 2020;
+	char string[16] = "Hello, World!"
+
+	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 4);
 	commandBuf.size = 4;
+	variableBuf.array = plGCAlloc(mainGC, sizeof(plvariable_t) * 4);
+	variableBuf.size = 4;
 
 	((plfunctionptr_t*)commandBuf.array)[0].function = plShellTest;
 	((plfunctionptr_t*)commandBuf.array)[0].name = "parser-test";
@@ -181,5 +188,22 @@ int main(int argc, const char* argv[]){
 	((plfunctionptr_t*)commandBuf.array)[3].function = plTermTest;
 	((plfunctionptr_t*)commandBuf.array)[3].name = "term-test";
 
-	plShellInteractive(NULL, true, NULL, &commandBuf, mainGC);
+	((plvariable_t*)variableBuf.array)[0].varptr = &plmajorver;
+	((plvariable_t*)variableBuf.array)[0].type = PLSHVAR_INT;
+	((plvariable_t*)variableBuf.array)[0].name = "plver";
+	((plvariable_t*)variableBuf.array)[0].isMemAlloc = false;
+	((plvariable_t*)variableBuf.array)[1].varptr = &plminorver;
+	((plvariable_t*)variableBuf.array)[1].type = PLSHVAR_INT;
+	((plvariable_t*)variableBuf.array)[1].name = "plfeatlvl";
+	((plvariable_t*)variableBuf.array)[1].isMemAlloc = false;
+	((plvariable_t*)variableBuf.array)[2].varptr = &birthyear;
+	((plvariable_t*)variableBuf.array)[2].type = PLSHVAR_INT;
+	((plvariable_t*)variableBuf.array)[2].name = "birthyear";
+	((plvariable_t*)variableBuf.array)[2].isMemAlloc = false;
+	((plvariable_t*)variableBuf.array)[3].varptr = string;
+	((plvariable_t*)variableBuf.array)[3].type = PLSHVAR_INT;
+	((plvariable_t*)variableBuf.array)[3].name = "test_string";
+	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
+
+	plShellInteractive(NULL, true, variableBuf, &commandBuf, mainGC);
 }

@@ -16,12 +16,10 @@ extern "C" {
 #define PLSHVAR_BOOL 3
 #define PLSHVAR_FLOAT 4
 
-char* productString = "PocketLinux Shell, (c)2022 pocketlinux32"
-char* srcUrl = NULL;
-
 typedef struct plarray {
 	void* array;
 	size_t size;
+	bool isMemAlloc;
 } plarray_t;
 
 typedef struct plvariable {
@@ -35,6 +33,8 @@ typedef struct plfunctionptr {
 	int (*function)(plarray_t*, plgc_t*);
 	char* name;
 } plfunctionptr_t;
+
+void setProductStrings(char* productStr, char* srcUrl);
 
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);

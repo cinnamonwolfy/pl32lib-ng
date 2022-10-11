@@ -5,6 +5,15 @@
 \*********************************************/
 #include <pl32-shell.h>
 
+char productString[4096] = "PocketLinux Shell, (c)2022 pocketlinux32";
+char srcUrlString[4096] = "\0";
+
+void setProductStrings(char* productStr, char* srcUrl){
+	strcpy(productString, productStr);
+	if(srcUrl)
+		strcpy(srcUrlString, srcUrl);
+}
+
 // Tokenizes string in a similar way an interactive command line would
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 	if(!string || !gc)
@@ -143,11 +152,11 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		char* workVar = strchr(array[i], '$') + 1;
 		j = 0;
 
-		while(strcmp(workVar, workVarBuf[j]->name) != 0 && j < variableBuf->size)
+		while(strcmp(workVar, workVarBuf[j].name) != 0 && j < variableBuf->size)
 			j++;
 
 		if(j == variableBuf->size){
-			printf("%s: Non-existent variable");
+			printf("%s: Non-existent variable", workVar);
 			return 255;
 		}
 	}
@@ -180,14 +189,18 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		if(!outputString)
 			outputString = holderString;
 
+		size_t sizeOfOut = strlen(outputString);
 		plGCFree(gc, array[i]);
-		array[i] = plGCAlloc(gc, strlen(outputString));
+		array[i] = plGCAlloc(gc, sizeOfOut);
+		memcpy(array[i], outputString, sizeOfOut);
+		array[i][sizeOfOut] = 0;
 	}else if(assignVal > -1){
 		char* varToAssign = NULL;
 		char* valToAssign = NULL;
+		char* workVar = strchr(array[0], '=');
+		int type = PLSHVAR_NULL;
 
-		if(assignVal < 2){
-			char* workVar = strchr(array[0], '=')
+		if(assignVal < 2 && workVar){
 			size_t sizeToCopy = workVar - array[0];
 			varToAssign = plGCAlloc(gc, sizeToCopy + 1);
 			memcpy(varToAssign, array[0], sizeToCopy);
@@ -199,10 +212,95 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		if(j == -1){
 			switch(assignVal){
 				case 0:
-					
+					size_t sizeToCopy = (array[0] + strlen(array[0])) - workVar;
+					valToAssign = plGCAlloc(gc, sizeToCopy + 1);
+					memcpy(valToAssign, workVar + 1, sizeToCopy);
+					valToAssign[sizeToCopy] = 0;
+					break;
+				case 1:
+					if(workVar){
+						valToAssign = array[1];
+					}else{
+						size_t sizeToCopy = strlen(array[1]) - 1;
+						valToAssign = plGCAlloc(gc, sizeToCopy + 1);
+						memcpy(valToAssign, workVar + 1, sizeToCopy);
+						valToAssign[sizeToCopy] = 0;
+					}
+					break;
+				case 2:
+					varToAssign = array[2];
+					break;
 			}
 		}else{
-			
+			valToAssign = workVarBuf[j].varptr;
+		}
+
+		i = 0;
+		while(workVarBuf[i].varptr == NULL && i < variableBuf->size)
+			i++;
+
+		if(i == variableBuf->size && !variableBuf->isMemAlloc){
+			printf("Error: Variable buffer is full\n");
+			return ENOMEM;
+		}else{
+			if(i == variableBuf->size){
+				void* tempPtr = plGCRealloc(gc, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
+				if(!tempPtr)
+					return ENOMEM;
+
+				variableBuf->array = tempPtr;
+				workVarBuf = variableBuf->array;
+			}
+
+			if(j == -1){
+				char* leftoverStr = NULL;
+				int number;
+				bool boolean;
+				float decimal;
+				void* pointer;
+
+				number = strtol(valToAssign, &leftoverStr, 10);
+				if(leftoverStr != NULL && *leftoverStr != '\0'){
+					decimal = strtof(valToAssign, &leftoverStr, 10);
+					if(leftoverStr != NULL && *leftoverStr != '\0'){
+						if(strcmp("true", valToAssign) == 0){
+							boolean = true;
+							if(!(pointer = plGCAlloc(gc, sizeof(bool))){
+								return ENOMEM;
+
+							*((bool*)pointer) = boolean
+							type = PLSHVAR_BOOL;
+						}else if(strcmp("false", valToAssign) == 0){
+							boolean = false;
+							if(!(pointer = plGCAlloc(gc, sizeof(bool))){
+								return ENOMEM;
+
+							*((bool*)pointer) = boolean
+							type = PLSHVAR_BOOL;
+						}else{
+							if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char))){
+								return ENOMEM;
+
+							strcpy(pointer, valToAssign);
+							type = PLSHVAR_STRING;
+						}
+					}else{
+						if(!(pointer = plGCAlloc(gc, sizeof(float))){
+							return ENOMEM;
+
+						*((float*)pointer) = decimal;
+						type = PLSHVAR_FLOAT;
+					}
+				}else{
+					if(!(pointer = plGCAlloc(gc, sizeof(int))){
+						return ENOMEM;
+
+					*((int*)pointer) = number;
+					type = PLSHVAR_INT;
+				}
+			}else{
+				workVarBuf[i].varptr = valToAssign;
+			}
 		}
 	}
 }
@@ -275,8 +373,8 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 	if(!cmdlineIsNotCommand){
 		if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
 			printf("%s\n", productString);
-			if(srcUrl)
-				printf("src at %s\n", srcUrl);
+			if(srcUrlString)
+				printf("src at %s\n", srcUrlString);
 
 			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1\n", PL32LIB_VERSION);
 			printf("src at https://github.com/pocketlinux32/pl32lib\n");
