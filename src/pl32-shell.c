@@ -6,7 +6,7 @@
 #include <pl32-shell.h>
 
 char productString[4096] = "PocketLinux Shell, (c)2022 pocketlinux32";
-char srcUrlString[4096] = "\0";
+char srcUrlString[4096] = "";
 
 void setProductStrings(char* productStr, char* srcUrl){
 	strcpy(productString, productStr);
@@ -384,7 +384,7 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 	if(!cmdlineIsNotCommand){
 		if(strcmp(array[0], "version") == 0 || strcmp(array[0], "help") == 0){
 			printf("%s\n", productString);
-			if(srcUrlString)
+			if(strlen(srcUrlString) > 0)
 				printf("src at %s\n", srcUrlString);
 
 			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1\n", PL32LIB_VERSION);

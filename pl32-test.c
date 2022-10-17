@@ -172,7 +172,7 @@ int main(int argc, const char* argv[]){
 	int plmajorver = 4;
 	int plminorver = 0;
 	int birthyear = 2020;
-	char string[16] = "Hello, World!"
+	char string[16] = "Hello, World!";
 
 	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 4);
 	commandBuf.size = 4;
@@ -205,5 +205,5 @@ int main(int argc, const char* argv[]){
 	((plvariable_t*)variableBuf.array)[3].name = "test_string";
 	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
 
-	plShellInteractive(NULL, true, variableBuf, &commandBuf, mainGC);
+	plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainGC);
 }
