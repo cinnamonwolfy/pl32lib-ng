@@ -261,39 +261,50 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 				number = strtol(valToAssign, &leftoverStr, 10);
 				if(leftoverStr != NULL && *leftoverStr != '\0'){
-					decimal = strtof(valToAssign, &leftoverStr, 10);
+					decimal = strtof(valToAssign, &leftoverStr);
 					if(leftoverStr != NULL && *leftoverStr != '\0'){
 						if(strcmp("true", valToAssign) == 0){
 							boolean = true;
-							if(!(pointer = plGCAlloc(gc, sizeof(bool))){
+							if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+								printf("Error: Out of memory\n");
 								return ENOMEM;
+							}
 
-							*((bool*)pointer) = boolean
+							*((bool*)pointer) = boolean;
 							type = PLSHVAR_BOOL;
 						}else if(strcmp("false", valToAssign) == 0){
 							boolean = false;
-							if(!(pointer = plGCAlloc(gc, sizeof(bool))){
+							if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+								printf("Error: Out of memory\n");
 								return ENOMEM;
+							}
 
-							*((bool*)pointer) = boolean
+
+							*((bool*)pointer) = boolean;
 							type = PLSHVAR_BOOL;
 						}else{
-							if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char))){
+							if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char)))){
+								printf("Error: Out of memory\n");
 								return ENOMEM;
+							}
 
 							strcpy(pointer, valToAssign);
 							type = PLSHVAR_STRING;
 						}
 					}else{
-						if(!(pointer = plGCAlloc(gc, sizeof(float))){
+						if(!(pointer = plGCAlloc(gc, sizeof(float)))){
+							printf("Error: Out of memory\n");
 							return ENOMEM;
+						}
 
 						*((float*)pointer) = decimal;
 						type = PLSHVAR_FLOAT;
 					}
 				}else{
-					if(!(pointer = plGCAlloc(gc, sizeof(int))){
+					if(!(pointer = plGCAlloc(gc, sizeof(int)))){
+						printf("Error: Out of memory\n");
 						return ENOMEM;
+					}
 
 					*((int*)pointer) = number;
 					type = PLSHVAR_INT;
