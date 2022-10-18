@@ -148,7 +148,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 	while(i < cmdline->size && strchr(array[i], '$') == NULL)
 		i++;
 
-        if(i < cmdline->size && (strchr(array[i], '$') == array[i] || strchr(array[i], '$') == array[i] + 1)){
+	if(i < cmdline->size && (strchr(array[i], '$') == array[i] || strchr(array[i], '$') == array[i] + 1)){
 		char* workVar = strchr(array[i], '$') + 1;
 		j = 0;
 
