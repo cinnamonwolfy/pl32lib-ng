@@ -1,8 +1,8 @@
-/*********************************************\
-* pl32lib, v4.00                              *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* POSIX-Only routuines                        *
-\*********************************************/
+/******************************************************\
+* pl32lib, v4.00                                       *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
+* POSIX-Only routuines                                 *
+\******************************************************/
 #include <pl32-term.h>
 
 // Opens a terminal session

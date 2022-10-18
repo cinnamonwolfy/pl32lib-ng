@@ -1,7 +1,7 @@
-/*******************************************\
-* pl32-test: pl32lib testcase               *
-* (c)2022 pocketlinux32, Under Lesser GPLv3 *
-\*******************************************/
+/******************************************************\
+* pl32-test: pl32lib testcase                          *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
+\******************************************************/
 #include <pl32-file.h>
 #include <pl32-term.h>
 

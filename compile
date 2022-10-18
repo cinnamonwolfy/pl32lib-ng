@@ -87,7 +87,7 @@ install_lib(){
 printf "PocketLinux32's Generic C Library Build System v0.02\n\n"
 case $1 in
 	--clean)
-		rm *.o *.out *.a *.so core -f
+		rm *.o *.out *.a *.so core* -f
 		echo "Project directory has been cleaned"
 		exit 0
 		;;

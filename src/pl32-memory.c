@@ -1,8 +1,8 @@
-/*************************************************\
-* pl32lib, v4.00                                  *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1     *
-* Memory Management/Semi-Garbage Collector module *
-\*************************************************/
+/******************************************************\
+* pl32lib, v4.00                                       *
+* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
+* Memory Management/Semi-Garbage Collector module      *
+\******************************************************/
 #include <pl32-memory.h>
 
 // Internal type for representing internal pointer references
