@@ -211,13 +211,13 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 		if(j == -1){
 			switch(assignVal){
-				case 0:
+				case 0: ;
 					size_t sizeToCopy = (array[0] + strlen(array[0])) - workVar;
 					valToAssign = plGCAlloc(gc, sizeToCopy + 1);
 					memcpy(valToAssign, workVar + 1, sizeToCopy);
 					valToAssign[sizeToCopy] = 0;
 					break;
-				case 1:
+				case 1: ;
 					if(workVar){
 						valToAssign = array[1];
 					}else{
@@ -227,7 +227,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 						valToAssign[sizeToCopy] = 0;
 					}
 					break;
-				case 2:
+				case 2: ;
 					varToAssign = array[2];
 					break;
 			}
