@@ -97,17 +97,22 @@ int plMemoryTest(plarray_t* args, plgc_t* gc){
 
 int plFileTest(plarray_t* args, plgc_t* gc){
 	char stringBuffer[4096] = "";
+	char filepath[256] = "src/pl32-file.c";
+	if(args->size > 1)
+		strcpy(filepath, ((char**)args->array)[1]);
 
 	printf("Opening an existing file...");
-	plfile_t* realFile = plFOpen("include/pl32-file.h", "r", gc);
+	plfile_t* realFile = plFOpen(filepath, "r", gc);
 	plfile_t* memFile = plFOpen(NULL, "w+", gc);
 
 	if(!realFile){
-		printf("Error opening file. Exiting...\n");
+		printf("Error!\nError opening file. Exiting...\n");
+		plFClose(memFile);
+		return 1;
 	}
 
 	printf("Done\n");
-	printf("Contents of include/pl32-file.h:\n\n");
+	printf("Contents of %s:\n\n", filepath);
 	while(plFGets(stringBuffer, 4095, realFile) != NULL){
 		printf("%s", stringBuffer);
 		for(int i = 0; i < 4096; i++)
@@ -176,8 +181,10 @@ int main(int argc, const char* argv[]){
 
 	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 4);
 	commandBuf.size = 4;
+	commandBuf.isMemAlloc = true;
 	variableBuf.array = plGCAlloc(mainGC, sizeof(plvariable_t) * 4);
 	variableBuf.size = 4;
+	variableBuf.isMemAlloc = false;
 
 	((plfunctionptr_t*)commandBuf.array)[0].function = plShellTest;
 	((plfunctionptr_t*)commandBuf.array)[0].name = "parser-test";
@@ -205,5 +212,9 @@ int main(int argc, const char* argv[]){
 	((plvariable_t*)variableBuf.array)[3].name = "test_string";
 	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
 
-	plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainGC);
+	if(argc > 1){
+		plShell(argv[1], &variableBuf, &commandBuf, &mainGC);
+	}else{
+		plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainGC);
+	}
 }

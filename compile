@@ -12,8 +12,25 @@ if [ "$AR" = "" ]; then
 fi
 
 if [ "$CFLAGS" = "" ]; then
-	CFLAGS="-s -O2"
+	CFLAGS="-s -O2 -w"
 fi
+
+_compile_obj(){
+	local extra_flag=""
+	printf "Compiling $1 ($2)..."
+	basename=$(echo $1 | cut -d. -f1)
+	if [ -f obj/$basename-$2.o ]; then
+		echo "Already Built."
+		return 0
+	else
+		if [ "$2" = "shared" ]; then
+			extra_flag="-fPIC"
+		fi
+
+		$CC -c $extra_flag -Iinclude src/$1 -o obj/$basename-$2.o $CFLAGS
+		echo "Done."
+	fi
+}
 
 _runtime_calc(){
 	set +e
@@ -52,21 +69,18 @@ _runtime_calc(){
 }
 
 compile_lib(){
-	for i in $(ls src); do
-		printf "Compiling $i (static)..."
-		$CC -c -Iinclude src/$i $CFLAGS -w
-		echo "Done."
+	mkdir obj -p
+	for i in $(ls src | grep '.c'); do
+		_compile_obj $i "static"
 	done
 	printf "Creating static library $1..."
-	$AR rc $1.a *.o 2>&1 >/dev/null
+	$AR rc $1.a $(find obj | grep static) 2>&1 >/dev/null
 	echo "Done."
-	for i in $(ls src); do
-		printf "Compiling $i (shared)..."
-		$CC -c -fPIC -Iinclude src/$i $CFLAGS -w
-		echo "Done"
+	for i in $(ls src | grep '.c'); do
+		_compile_obj $i "shared"
 	done
 	printf "Creating shared library $1..."
-	$CC -shared *.o -o $1.so -w
+	$CC -shared $(find obj | grep shared) -o $1.so $CFLAGS
 	echo "Done."
 	rm *.o -f
 }
@@ -84,10 +98,10 @@ install_lib(){
 	echo "Done."
 }
 
-printf "PocketLinux32's Generic C Library Build System v0.02\n\n"
+printf "PocketLinux32's Generic C Library Build System v0.03\n\n"
 case $1 in
 	--clean)
-		rm *.o *.out *.a *.so core* -f
+		rm obj *.out *.a *.so core* -rf
 		echo "Project directory has been cleaned"
 		exit 0
 		;;

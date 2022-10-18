@@ -28,6 +28,11 @@ plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 			returnStruct->fileptr = fopen(filename, mode);
 			returnStruct->bufsize = 0;
 			returnStruct->strbuf = NULL;
+
+			if(!returnStruct->fileptr){
+				plGCFree(gc, returnStruct);
+				return NULL;
+			}
 		}
 
 		returnStruct->gcptr = gc;
@@ -117,7 +122,7 @@ int plFPutC(char ch, plfile_t* stream){
 
 		return ch;
 	}else{
-		fputc(ch, stream->fileptr);
+		return fputc(ch, stream->fileptr);
 	}
 }
 

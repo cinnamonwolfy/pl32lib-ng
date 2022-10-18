@@ -78,6 +78,8 @@ plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc){
 		((char*)returnString->array)[returnString->size] = readChar;
 		returnString->size++;
 	}
+
+	return returnString;
 }
 
 // Get one byte from the terminal session

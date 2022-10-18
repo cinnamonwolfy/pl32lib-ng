@@ -124,6 +124,25 @@ void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
 	plGCFree(gc, array);
 }
 
+// Internal function to find a variable with a pointer or a name
+long plShellSearchVarBuf(int opt, char* stringOrPtr, plarray_t* variableBuf){
+	long retVar = 0;
+	plvariable_t* workVarBuf = variableBuf->array;
+
+	if(opt == 0){
+		while(retVar < variableBuf->size && strcmp(workVarBuf[retVar].name, stringOrPtr) != 0)
+			retVar++;
+	}else{
+		while(retVar < variableBuf->size && workVarBuf[retVar].varptr != stringOrPtr)
+			retVar++;
+	}
+
+	if(retVar == variableBuf->size)
+		return -1;
+
+	return retVar;
+}
+
 // Variable Manager
 uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
 	if(!gc || !cmdline || !cmdlineIsNotCommand || !variableBuf)
@@ -144,29 +163,26 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 	}
 
 
-	int i = 0, j = -1;
-	while(i < cmdline->size && strchr(array[i], '$') == NULL)
-		i++;
+	int cmdPos = 0, varPos = -1;
+	while(cmdPos < cmdline->size && strchr(array[cmdPos], '$') == NULL)
+		cmdPos++;
 
-        if(i < cmdline->size && (strchr(array[i], '$') == array[i] || strchr(array[i], '$') == array[i] + 1)){
-		char* workVar = strchr(array[i], '$') + 1;
-		j = 0;
+        if(cmdPos < cmdline->size && (strchr(array[cmdPos], '$') == array[cmdPos] || strchr(array[cmdPos], '$') == array[cmdPos] + 1)){
+		char* workVar = strchr(array[cmdPos], '$') + 1;
+		varPos = plShellSearchVarBuf(0, workVar, variableBuf);
 
-		while(strcmp(workVar, workVarBuf[j].name) != 0 && j < variableBuf->size)
-			j++;
-
-		if(j == variableBuf->size){
-			printf("%s: Non-existent variable ", workVar);
+		if(varPos == -1){
+			printf("%s: Non-existent variable\n", workVar);
 			return 255;
 		}
 	}
 
-	if(!*cmdlineIsNotCommand && j > -1){
-		void* valToExpand = workVarBuf[j].varptr;
+	if(!*cmdlineIsNotCommand && varPos > -1){
+		void* valToExpand = workVarBuf[varPos].varptr;
 		char holderString[1024] = "";
 		char* outputString = NULL;
 
-		switch(workVarBuf[j].type){
+		switch(workVarBuf[varPos].type){
 			case PLSHVAR_INT: ;
 				snprintf(holderString, 1023, "%d", *((int*)valToExpand));
 				break;
@@ -177,9 +193,9 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 				bool tempBool = *((bool*)valToExpand);
 
 				if(tempBool)
-					strcmp(holderString, "true");
+					strcpy(holderString, "true");
 				else
-					strcmp(holderString, "false");
+					strcpy(holderString, "false");
 				break;
 			case PLSHVAR_FLOAT: ;
 				snprintf(holderString, 1023, "%f", *((float*)valToExpand));
@@ -190,15 +206,17 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			outputString = holderString;
 
 		size_t sizeOfOut = strlen(outputString);
-		plGCFree(gc, array[i]);
-		array[i] = plGCAlloc(gc, sizeOfOut);
-		memcpy(array[i], outputString, sizeOfOut);
-		array[i][sizeOfOut] = 0;
+		plGCFree(gc, array[cmdPos]);
+		array[cmdPos] = plGCAlloc(gc, sizeOfOut);
+		memcpy(array[cmdPos], outputString, sizeOfOut);
+		array[cmdPos][sizeOfOut] = 0;
 	}else if(assignVal > -1){
 		char* varToAssign = NULL;
 		char* valToAssign = NULL;
 		char* workVar = strchr(array[0], '=');
-		int type = PLSHVAR_NULL;
+		int valType = PLSHVAR_NULL;
+		int assignVarPos = 0;
+		bool isMemAlloc = true;
 
 		if(assignVal < 2 && workVar){
 			size_t sizeToCopy = workVar - array[0];
@@ -209,7 +227,30 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			varToAssign = array[0];
 		}
 
-		if(j == -1){
+		while(assignVarPos < variableBuf->size && strcmp(workVarBuf[assignVarPos].name, varToAssign))
+			assignVarPos++;
+
+		if(assignVarPos == variableBuf->size){
+			int nullPos = plShellSearchVarBuf(1, NULL, variableBuf);
+
+			if(nullPos == variableBuf->size && !variableBuf->isMemAlloc){
+				printf("plShellVarMgmt: Variable buffer is full\n");
+				return ENOMEM;
+			}else if(nullPos == variableBuf->size){
+				void* tempPtr = plGCRealloc(gc, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
+				if(!tempPtr)
+					return ENOMEM;
+
+				variableBuf->array = tempPtr;
+				workVarBuf = variableBuf->array;
+				workVarBuf[nullPos].varptr = NULL;
+				workVarBuf[nullPos].name = NULL;
+			}
+
+			assignVarPos = nullPos;
+		}
+
+		if(varPos == -1){
 			switch(assignVal){
 				case 0: ;
 					size_t sizeToCopy = (array[0] + strlen(array[0])) - workVar;
@@ -228,92 +269,84 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 					}
 					break;
 				case 2: ;
-					varToAssign = array[2];
+					valToAssign = array[2];
 					break;
 			}
 		}else{
-			valToAssign = workVarBuf[j].varptr;
+			valToAssign = workVarBuf[varPos].varptr;
 		}
 
-		i = 0;
-		while(workVarBuf[i].varptr == NULL && i < variableBuf->size)
-			i++;
+		if(varPos == -1){
+			char* leftoverStr = NULL;
+			int number;
+			bool boolean;
+			float decimal;
+			void* pointer;
 
-		if(i == variableBuf->size && !variableBuf->isMemAlloc){
-			printf("Error: Variable buffer is full\n");
-			return ENOMEM;
-		}else{
-			if(i == variableBuf->size){
-				void* tempPtr = plGCRealloc(gc, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
-				if(!tempPtr)
-					return ENOMEM;
-
-				variableBuf->array = tempPtr;
-				workVarBuf = variableBuf->array;
-			}
-
-			if(j == -1){
-				char* leftoverStr = NULL;
-				int number;
-				bool boolean;
-				float decimal;
-				void* pointer;
-
-				number = strtol(valToAssign, &leftoverStr, 10);
+			number = strtol(valToAssign, &leftoverStr, 10);
+			if(leftoverStr != NULL && *leftoverStr != '\0'){
+				decimal = strtof(valToAssign, &leftoverStr);
 				if(leftoverStr != NULL && *leftoverStr != '\0'){
-					decimal = strtof(valToAssign, &leftoverStr);
-					if(leftoverStr != NULL && *leftoverStr != '\0'){
-						if(strcmp("true", valToAssign) == 0){
-							boolean = true;
-							if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
-								printf("Error: Out of memory\n");
-								return ENOMEM;
-							}
-
-							*((bool*)pointer) = boolean;
-							type = PLSHVAR_BOOL;
-						}else if(strcmp("false", valToAssign) == 0){
-							boolean = false;
-							if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
-								printf("Error: Out of memory\n");
-								return ENOMEM;
-							}
-
-
-							*((bool*)pointer) = boolean;
-							type = PLSHVAR_BOOL;
-						}else{
-							if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char)))){
-								printf("Error: Out of memory\n");
-								return ENOMEM;
-							}
-
-							strcpy(pointer, valToAssign);
-							type = PLSHVAR_STRING;
-						}
-					}else{
-						if(!(pointer = plGCAlloc(gc, sizeof(float)))){
-							printf("Error: Out of memory\n");
+					if(strcmp("true", valToAssign) == 0){
+						boolean = true;
+						if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+							printf("plShellVarMgmt: Out of memory\n");
 							return ENOMEM;
 						}
 
-						*((float*)pointer) = decimal;
-						type = PLSHVAR_FLOAT;
+						*((bool*)pointer) = boolean;
+						valType = PLSHVAR_BOOL;
+					}else if(strcmp("false", valToAssign) == 0){
+						boolean = false;
+						if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+							printf("plShellVarMgmt: Out of memory\n");
+							return ENOMEM;
+						}
+
+						*((bool*)pointer) = boolean;
+						valType = PLSHVAR_BOOL;
+					}else{
+						if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char)))){
+							printf("plShellVarMgmt: Out of memory\n");
+							return ENOMEM;
+						}
+
+						strcpy(pointer, valToAssign);
+						valType = PLSHVAR_STRING;
 					}
 				}else{
-					if(!(pointer = plGCAlloc(gc, sizeof(int)))){
-						printf("Error: Out of memory\n");
+					if(!(pointer = plGCAlloc(gc, sizeof(float)))){
+						printf("plShellVarMgmt: Out of memory\n");
 						return ENOMEM;
 					}
 
-					*((int*)pointer) = number;
-					type = PLSHVAR_INT;
+					*((float*)pointer) = decimal;
+					valType = PLSHVAR_FLOAT;
 				}
 			}else{
-				workVarBuf[i].varptr = valToAssign;
+				if(!(pointer = plGCAlloc(gc, sizeof(int)))){
+					printf("plShellVarMgmt: Out of memory\n");
+					return ENOMEM;
+				}
+
+				*((int*)pointer) = number;
+				valType = PLSHVAR_INT;
 			}
+			valToAssign = pointer;
+		}else{
+			valType = workVarBuf[varPos].type;
 		}
+
+		if(workVarBuf[assignVarPos].varptr != NULL && workVarBuf[assignVarPos].isMemAlloc){
+			plGCFree(gc, workVarBuf[assignVarPos].varptr);
+		}
+
+		workVarBuf[assignVarPos].varptr = valToAssign;
+		workVarBuf[assignVarPos].type = valType;
+		workVarBuf[assignVarPos].isMemAlloc = true;
 	}
+
+	return 0;
 }
 
 // Command Interpreter
@@ -375,8 +408,12 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 	if(!parsedCmdLine)
 		return 1;
 
-	if(strchr(cmdline, '$') || strchr(cmdline, '='))
-		plShellVarMgmt(parsedCmdLine, &cmdlineIsNotCommand, variableBuf, *gc);
+	if(strchr(cmdline, '$') || strchr(cmdline, '=')){
+		if(plShellVarMgmt(parsedCmdLine, &cmdlineIsNotCommand, variableBuf, *gc)){
+			plShellFreeArray(parsedCmdLine, true, *gc);
+			return 1;
+		}
+	}
 
 	char** array = parsedCmdLine->array;
 	int retVar = 0;
@@ -387,7 +424,7 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 			if(strlen(srcUrlString) > 0)
 				printf("src at %s\n", srcUrlString);
 
-			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1\n", PL32LIB_VERSION);
+			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1 or later\n", PL32LIB_VERSION);
 			printf("src at https://github.com/pocketlinux32/pl32lib\n");
 			if(strcmp(array[0], "help") == 0){
 				printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
@@ -432,14 +469,15 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 
 	if(showHelpAtStart){
 		plShell("help", variableBuf, commandBuf, &shellGC);
-		plShell("show-memusg", variableBuf, commandBuf, &shellGC);
 	}
 
+	plgc_t* curShellGC = shellGC;
+	plShell("show-memusg", variableBuf, commandBuf, &shellGC);
 	while(loop){
 		char cmdline[4096] = "";
 		int retVal = 0;
 		printf("%s", prompt);
-		scanf("%4096[^\n]", cmdline);
+		scanf("%4095[^\n]", cmdline);
 		getchar();
 
 		if(strcmp(cmdline, "exit-shell") == 0 || feof(stdin)){
@@ -456,6 +494,11 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 
 		if(showRetVal)
 			printf("\nretVal = %d\n", retVal);
+
+		if(shellGC != curShellGC){
+			variableBuf = NULL;
+			commandBuf = NULL;
+		}
 	}
 
 	if(feof(stdin))
