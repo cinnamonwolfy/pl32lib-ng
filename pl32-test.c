@@ -201,7 +201,7 @@ int main(int argc, const char* argv[]){
 	((plvariable_t*)variableBuf.array)[2].name = "birthyear";
 	((plvariable_t*)variableBuf.array)[2].isMemAlloc = false;
 	((plvariable_t*)variableBuf.array)[3].varptr = string;
-	((plvariable_t*)variableBuf.array)[3].type = PLSHVAR_INT;
+	((plvariable_t*)variableBuf.array)[3].type = PLSHVAR_STRING;
 	((plvariable_t*)variableBuf.array)[3].name = "test_string";
 	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
 

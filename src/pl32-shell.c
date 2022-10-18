@@ -135,7 +135,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 	if(strchr(array[0], '=') != NULL || strchr(array[1], '=') == array[1]){
 		*cmdlineIsNotCommand = true;
-		if(strchr(array[0], '=') != array[0] + strlen(array[0]))
+		if(strchr(array[0], '=') != NULL)
 			assignVal = 0;
 		else if(strchr(array[1], '=') == array[1])
 			assignVal = 2;
@@ -145,7 +145,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 
 	int i = 0, j = -1;
-	while(strchr(array[i], '$') == NULL && i < cmdline->size)
+	while(i < cmdline->size && strchr(array[i], '$') == NULL)
 		i++;
 
         if(i < cmdline->size && (strchr(array[i], '$') == array[i] || strchr(array[i], '$') == array[i] + 1)){
@@ -156,7 +156,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			j++;
 
 		if(j == variableBuf->size){
-			printf("%s: Non-existent variable", workVar);
+			printf("%s: Non-existent variable ", workVar);
 			return 255;
 		}
 	}
