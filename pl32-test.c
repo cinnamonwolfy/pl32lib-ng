@@ -184,7 +184,7 @@ int main(int argc, const char* argv[]){
 	commandBuf.isMemAlloc = true;
 	variableBuf.array = plGCAlloc(mainGC, sizeof(plvariable_t) * 4);
 	variableBuf.size = 4;
-	variableBuf.isMemAlloc = false;
+	variableBuf.isMemAlloc = true;
 
 	((plfunctionptr_t*)commandBuf.array)[0].function = plShellTest;
 	((plfunctionptr_t*)commandBuf.array)[0].name = "parser-test";

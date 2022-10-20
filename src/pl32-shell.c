@@ -152,7 +152,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 	int assignVal = -1;
 	plvariable_t* workVarBuf = variableBuf->array;
 
-	if(strchr(array[0], '=') != NULL || strchr(array[1], '=') == array[1]){
+	if(strchr(array[0], '=') != NULL || (cmdline->size > 1 && strchr(array[1], '=') == array[1])){
 		*cmdlineIsNotCommand = true;
 		if(strchr(array[0], '=') != NULL)
 			assignVal = 0;
@@ -164,8 +164,10 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 
 	int cmdPos = 0, varPos = -1;
-	while(cmdPos < cmdline->size && strchr(array[cmdPos], '$') == NULL)
-		cmdPos++;
+//	if(strchr(array[0], '$') == NULL && cmdline->size > 1){
+		while(cmdPos < cmdline->size && strchr(array[cmdPos], '$') == NULL)
+			cmdPos++;
+//	}
 
         if(cmdPos < cmdline->size && (strchr(array[cmdPos], '$') == array[cmdPos] || strchr(array[cmdPos], '$') == array[cmdPos] + 1)){
 		char* workVar = strchr(array[cmdPos], '$') + 1;
@@ -227,21 +229,22 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			varToAssign = array[0];
 		}
 
-		while(assignVarPos < variableBuf->size && strcmp(workVarBuf[assignVarPos].name, varToAssign))
-			assignVarPos++;
+		assignVarPos = plShellSearchVarBuf(0, varToAssign, variableBuf);
 
-		if(assignVarPos == variableBuf->size){
+		if(assignVarPos == -1){
 			int nullPos = plShellSearchVarBuf(1, NULL, variableBuf);
 
-			if(nullPos == variableBuf->size && !variableBuf->isMemAlloc){
+			if(nullPos == -1 && !variableBuf->isMemAlloc){
 				printf("plShellVarMgmt: Variable buffer is full\n");
 				return ENOMEM;
-			}else if(nullPos == variableBuf->size){
+			}else if(nullPos == -1){
 				void* tempPtr = plGCRealloc(gc, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
 				if(!tempPtr)
 					return ENOMEM;
 
+				nullPos = variableBuf->size;
 				variableBuf->array = tempPtr;
+				variableBuf->size++;
 				workVarBuf = variableBuf->array;
 				workVarBuf[nullPos].varptr = NULL;
 				workVarBuf[nullPos].name = NULL;
@@ -339,6 +342,15 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 		if(workVarBuf[assignVarPos].varptr != NULL && workVarBuf[assignVarPos].isMemAlloc){
 			plGCFree(gc, workVarBuf[assignVarPos].varptr);
+		}else{
+			char* name = plGCAlloc(gc, strlen(varToAssign));
+			if(!name){
+				printf("plShellVarMgmt: Out of memory\n");
+				return ENOMEM;
+			}
+
+			workVarBuf[assignVarPos].name = name;
+			strcpy(workVarBuf[assignVarPos].name, varToAssign);
 		}
 
 		workVarBuf[assignVarPos].varptr = valToAssign;
@@ -427,7 +439,7 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 			printf("\npl32lib v%s, (c)2022 pocketlinux32, Under LGPLv2.1 or later\n", PL32LIB_VERSION);
 			printf("src at https://github.com/pocketlinux32/pl32lib\n");
 			if(strcmp(array[0], "help") == 0){
-				printf("Built-in commands: print, clear, exit, show-memusg, reset-mem, version, help\n");
+				printf("Built-in commands: print, clear, exit, show-memusg, version, help\n");
 				if(!commandBuf || commandBuf->size == 0){
 					printf("No user-defined commands loaded\n");
 				}else{
@@ -441,12 +453,6 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 			}
 		}else if(strcmp(array[0], "show-memusg") == 0){
 			printf("%ld bytes free\n", plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(*gc, PLGC_GET_USEDMEM, 0));
-		}else if(strcmp(array[0], "reset-mem") == 0){
-			size_t size = plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0);
-			plGCStop(*gc);
-			*gc = plGCInit(size);
-			printf("Memory has been reset\n");
-			return retVar;
 		}else{
 			retVar = plShellComInt(parsedCmdLine, commandBuf, *gc);
 		}
@@ -471,7 +477,6 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 		plShell("help", variableBuf, commandBuf, &shellGC);
 	}
 
-	plgc_t* curShellGC = shellGC;
 	plShell("show-memusg", variableBuf, commandBuf, &shellGC);
 	while(loop){
 		char cmdline[4096] = "";
@@ -488,6 +493,13 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 			}else{
 				showRetVal = true;
 			}
+		}else if(strcmp(cmdline, "reset-mem") == 0){
+			size_t size = plGCMemAmnt(shellGC, PLGC_GET_MAXMEM, 0);
+			plGCStop(shellGC);
+			shellGC = plGCInit(size);
+			variableBuf = NULL;
+			commandBuf = NULL;
+			printf("Memory has been reset\n");
 		}else if(strlen(cmdline) > 0){
 			retVal = plShell(cmdline, variableBuf, commandBuf, &shellGC);
 		}
@@ -495,10 +507,6 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 		if(showRetVal)
 			printf("\nretVal = %d\n", retVal);
 
-		if(shellGC != curShellGC){
-			variableBuf = NULL;
-			commandBuf = NULL;
-		}
 	}
 
 	if(feof(stdin))
