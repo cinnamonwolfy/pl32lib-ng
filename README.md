@@ -8,8 +8,11 @@ compile on everything).
 
 # Build instructions
 
-Just run `./compile build` in from the project directory and it will compile
-everything, including the test programs. This might change in a later release.
+The library can be built with the command `./compile --build lib`. You can
+specify whether to build just the shared lib or just the static lib by appending
+`no-shared` or `no-static` to the build command.
+
+To build the test program, you would run `./compile --build test`.
 
 # Bug Reporting
 
