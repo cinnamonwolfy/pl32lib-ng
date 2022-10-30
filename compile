@@ -2,6 +2,8 @@
 set -e
 start_time=""
 end_time=""
+static=1
+shared=1
 
 if [ "$CC" = "" ]; then
 	CC="cc"
@@ -11,12 +13,8 @@ if [ "$AR" = "" ]; then
 	AR="ar"
 fi
 
-if [ "$CFLAGS" = "" ]; then
-	CFLAGS="-s -O2 -w"
-fi
-
 _compile_obj(){
-	local extra_flag=""
+	extra_flag=""
 	printf "Compiling $1 ($2)..."
 	basename=$(echo $1 | cut -d. -f1)
 	if [ -f obj/$basename-$2.o ]; then
@@ -41,9 +39,9 @@ _runtime_calc(){
 			;;
 		stop)
 			end_time="$(date +%s)"
-			local runtime="$(expr $end_time - $start_time)"
-			local hours="$(expr $runtime / 3600)"
-			local minutes=0
+			runtime="$(expr $end_time - $start_time)"
+			hours="$(expr $runtime / 3600)"
+			minutes=0
 			printf "Operation took "
 
 			if [ $hours -ne 0 ]; then
@@ -70,19 +68,31 @@ _runtime_calc(){
 
 compile_lib(){
 	mkdir obj -p
-	for i in $(ls src | grep '.c'); do
-		_compile_obj $i "static"
-	done
-	printf "Creating static library $1..."
-	$AR rc $1.a $(find obj | grep static) 2>&1 >/dev/null
-	echo "Done."
-	for i in $(ls src | grep '.c'); do
-		_compile_obj $i "shared"
-	done
-	printf "Creating shared library $1..."
-	$CC -shared $(find obj | grep shared) -o $1.so $CFLAGS
-	echo "Done."
-	rm *.o -f
+	src_list=$(ls src | grep '.c')
+	if [ -f custom_checks ]; then
+		printf "Running custom checks..."
+		. ./custom_checks
+		echo "Done."
+	fi
+
+	if [ $static -ne 0 ]; then
+		for i in $src_list; do
+			_compile_obj $i "static"
+		done
+		printf "Creating static library $1..."
+		$AR rc $1.a $(find obj | grep static) 2>&1 >/dev/null
+		echo "Done."
+	fi
+
+	if [ $shared -ne 0 ]; then
+		for i in $(ls src | grep '.c'); do
+			_compile_obj $i "shared"
+		done
+		printf "Creating shared library $1..."
+		$CC -shared $(find obj | grep shared) -o $1.so $CFLAGS
+		echo "Done."
+		rm *.o -f
+	fi
 }
 
 compile_test(){
@@ -125,6 +135,11 @@ esac
 
 if [ "$action" = "lib" ]; then
 	opts="libpl32"
+	if [ "$3" = "no-static" ]; then
+		static=0
+	elif [ "$3" = "no-shared" ]; then
+		shared=0
+	fi
 elif [ "$action" = "test" ]; then
 	opts="pl32-test -lpl32"
 fi
@@ -132,3 +147,4 @@ fi
 _runtime_calc start
 compile_$action $opts
 _runtime_calc stop
+
