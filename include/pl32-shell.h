@@ -1,8 +1,8 @@
-/*********************************************\
-* pl32lib, v4.00                              *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* String manipulation/Shell/Parser module     *
-\*********************************************/
+/*****************************************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1
+ pl32-shell.h: String manipulation, shell and parser module header
+\*****************************************************************/
 #pragma once
 #include <pl32-memory.h>
 

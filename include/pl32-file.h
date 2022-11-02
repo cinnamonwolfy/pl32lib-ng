@@ -1,8 +1,8 @@
-/*********************************************\
-* pl32lib, v4.00                              *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* File Management Module                      *
-\*********************************************/
+/********************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1
+ pl32-file.h: File management module header
+\********************************************/
 #pragma once
 #include <pl32-memory.h>
 

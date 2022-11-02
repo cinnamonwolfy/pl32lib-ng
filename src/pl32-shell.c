@@ -1,8 +1,8 @@
-/******************************************************\
-* pl32lib, v4.00                                       *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
-* String manipulation/Shell/Parser module              *
-\******************************************************/
+/**********************************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1 or later
+ pl32-shell.c: String manipulation, shell and parser module
+\**********************************************************/
 #include <pl32-shell.h>
 
 char productString[4096] = "PocketLinux Shell, (c)2022 pocketlinux32";

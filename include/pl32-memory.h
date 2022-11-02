@@ -1,8 +1,8 @@
-/*************************************************\
-* pl32lib, v4.00                                  *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1     *
-* Memory Management/Semi-Garbage Collector module *
-\*************************************************/
+/****************************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1
+ pl32-memory.h: Safe memory management module headers
+\****************************************************/
 #pragma once
 #ifdef __cplusplus
 #include <cstdio>

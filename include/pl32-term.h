@@ -1,14 +1,11 @@
-/*********************************************\
-* pl32lib, v4.00                              *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 *
-* Serial Communication module                 *
-\*********************************************/
+/******************************************************************\
+ pl32lib, v4.00
+ (c)2022 pocketlinux32, Under Lesser GPLv2.1
+ pl32-term.h: Serial communication module header (platform-specific)
+\*******************************************************************/
 #pragma once
 #include <pl32-memory.h>
 #include <pl32-shell.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
 
 typedef struct plterminal {
 	int fDesc;

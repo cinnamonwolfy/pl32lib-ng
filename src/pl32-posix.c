@@ -1,9 +1,12 @@
-/******************************************************\
-* pl32lib, v4.00                                       *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
-* POSIX-Only routuines                                 *
-\******************************************************/
+/*****************************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1 or later
+ pl32-posix.c: POSIX-Only routuines
+\*****************************************************/
 #include <pl32-term.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <termios.h>
 
 // Opens a terminal session
 plterminal_t* plOpenTerminal(char* path, plgc_t* gc){

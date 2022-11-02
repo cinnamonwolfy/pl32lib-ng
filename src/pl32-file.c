@@ -1,8 +1,8 @@
-/******************************************************\
-* pl32lib, v4.00                                       *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
-* File Management Module                               *
-\******************************************************/
+/****************************************************\
+ pl32lib, v4.00
+ (c) 2022 pocketlinux32, Under Lesser GPLv2.1 or later
+ pl32-file.c: File management module
+\****************************************************/
 #include <pl32-file.h>
 
 struct plfile {
