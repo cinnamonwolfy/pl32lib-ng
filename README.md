@@ -1,5 +1,8 @@
 # pl32lib
 
+**NOTICE: This is the old pl32lib codebase. It is unsupported and it's only here as 
+a historical archive**
+
 pl32lib is a library containing boilerplate routines that I use for every
 project I make. Most of it is strictly C99-compliant and thus fully portable.
 The `pl32-term` module is the only component that isn't fully portable. (it 
