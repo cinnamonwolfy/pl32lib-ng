@@ -1,4 +1,4 @@
-/****************************************************\
+ /****************************************************\
  pl32lib, v4.00
  (c) 2022 pocketlinux32, Under Lesser GPLv2.1 or later
  pl32-file.c: File management module
@@ -6,23 +6,25 @@
 #include <pl32-file.h>
 
 struct plfile {
-	FILE* fileptr; // File pointer for actual files
-	char* strbuf; // String pointer for stringstream
-	char* mode; // File open mode
-	size_t seekbyte; // Byte offset from the beginning of buffer
-	size_t bufsize; // Buffer size
-	plgc_t* gcptr; // pointer to GC (see pl32-memory.h)
+	FILE* fileptr; /* File pointer for actual files */
+	char* strbuf; /* String pointer for stringstream */
+	char* mode; /* File open mode */
+	size_t seekbyte; /* Byte offset from the beginning of buffer */
+	size_t bufsize; /* Buffer size */
+	plmt_t* mtptr; /* pointer to MT (see pl32-memory.h) */
 };
 
-// Opens a file stream. If filename is NULL, a file-in-memory is returned
-plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
+/* Opens a file stream. If filename is NULL, a file-in-memory is returned */
+plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
 	plfile_t* returnStruct = NULL;
 
 	if(mode){
-		returnStruct = plGCAlloc(gc, sizeof(plfile_t));
+		returnStruct = plMTAlloc(mt, sizeof(plfile_t));
+
+		/* If no filename is given, set up a file in memory */
 		if(!filename){
 			returnStruct->fileptr = NULL;
-			returnStruct->strbuf = plGCAlloc(gc, 4098);
+			returnStruct->strbuf = plMTAlloc(mt, 4098);
 			returnStruct->bufsize = 4098;
 		}else{
 			returnStruct->fileptr = fopen(filename, mode);
@@ -30,40 +32,40 @@ plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc){
 			returnStruct->strbuf = NULL;
 
 			if(!returnStruct->fileptr){
-				plGCFree(gc, returnStruct);
+				plMTFree(mt, returnStruct);
 				return NULL;
 			}
 		}
 
-		returnStruct->gcptr = gc;
+		returnStruct->mtptr = mt;
 		returnStruct->seekbyte = 0;
-		returnStruct->mode = plGCAlloc(gc, (strlen(mode)+1) * sizeof(char));
+		returnStruct->mode = plMTAlloc(mt, (strlen(mode)+1) * sizeof(char));
 		strcpy(returnStruct->mode, mode);
 	}
 
 	return returnStruct;
 }
 
-// Converts a FILE pointer into a plfile_t pointer
-plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc){
-	plfile_t* returnPointer = plFOpen(NULL, mode, gc);
+/* Converts a FILE pointer into a plfile_t pointer */
+plfile_t* plFToP(FILE* pointer, char* mode, plmt_t* mt){
+	plfile_t* returnPointer = plFOpen(NULL, mode, mt);
 	returnPointer->fileptr = pointer;
 	returnPointer->bufsize = 0;
-	plGCFree(gc, returnPointer->strbuf);
+	plMTFree(mt, returnPointer->strbuf);
 	return returnPointer;
 }
 
 // Closes a file stream
 int plFClose(plfile_t* ptr){
 	if(!ptr->fileptr){
-		plGCFree(ptr->gcptr, ptr->strbuf);
+		plMTFree(ptr->mtptr, ptr->strbuf);
 	}else{
 		if(fclose(ptr->fileptr))
 			return 1;
 	}
 
-	plGCFree(ptr->gcptr, ptr->mode);
-	plGCFree(ptr->gcptr, ptr);
+	plMTFree(ptr->mtptr, ptr->mode);
+	plMTFree(ptr->mtptr, ptr);
 	return 0;
 }
 
@@ -92,7 +94,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(!stream->fileptr){
 		if(size * nmemb > stream->bufsize - stream->seekbyte){
-			void* tempPtr = plGCRealloc(stream->gcptr, stream->strbuf, stream->bufsize + size * nmemb);
+			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + size * nmemb);
 			if(!tempPtr){
 				return 0;
 			}
@@ -112,7 +114,7 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 int plFPutC(char ch, plfile_t* stream){
 	if(!stream->fileptr){
 		if(stream->bufsize - stream->seekbyte < 1){
-			void* tempPtr = plGCRealloc(stream->gcptr, stream->strbuf, stream->bufsize + 1);
+			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + 1);
 
 			if(!tempPtr)
 				return '\0';

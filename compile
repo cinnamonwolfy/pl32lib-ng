@@ -2,16 +2,6 @@
 set -e
 start_time=""
 end_time=""
-static=1
-shared=1
-
-if [ "$CC" = "" ]; then
-	CC="cc"
-fi
-
-if [ "$AR" = "" ]; then
-	AR="ar"
-fi
 
 _compile_obj(){
 	extra_flag=""
@@ -68,83 +58,73 @@ _runtime_calc(){
 
 compile_lib(){
 	mkdir obj -p
-	src_list=$(ls src | grep '.c')
-	if [ -f custom_checks ]; then
-		printf "Running custom checks..."
-		. ./custom_checks
-		echo "Done."
-	fi
 
-	if [ $static -ne 0 ]; then
-		for i in $src_list; do
+	if [ "$STATIC" != "" ]; then
+		for i in $SRC; do
 			_compile_obj $i "static"
 		done
 		printf "Creating static library $1..."
-		$AR rc $1.a $(find obj | grep static) 2>&1 >/dev/null
+		$AR rc $LIBNAME.a $(find obj | grep static) 2>&1 >/dev/null
 		echo "Done."
 	fi
 
-	if [ $shared -ne 0 ]; then
+	if [ "$SHARED" != "" ]; then
 		for i in $(ls src | grep '.c'); do
 			_compile_obj $i "shared"
 		done
 		printf "Creating shared library $1..."
-		$CC -shared $(find obj | grep shared) -o $1.so $CFLAGS
+		$CC -shared $(find obj | grep shared) -o $LIBNAME.so $CFLAGS
 		echo "Done."
 		rm *.o -f
 	fi
 }
 
 compile_test(){
-	printf "Compiling test program $1..."
-	$CC --static -Iinclude -L. $LDFLAGS  $1.c -o $1.out $2 $CFLAGS -w
+	printf "Compiling test program $LIBTEST..."
+	$CC --static -Iinclude -L. -l$LIB $CFLAGS  $LIBTEST.c -o $LIBTEST.out
 	echo "Done."
 }
 
 install_lib(){
-	printf "Installing library $1..."
-	cp include/* "$2/include"
-	mv $1.* "$2/lib"
+	printf "Installing library $LIBNAME..."
+	cp include/* "$prefix/include"
+	mv * "$prefix/lib"
 	echo "Done."
 }
 
-printf "PocketLinux32's Generic C Library Build System v0.03\n\n"
+printf "PocketLinux32's Generic C Library Build System v0.04\n\n"
+
 case $1 in
 	--clean)
-		rm obj *.out *.a *.so core* -rf
+		rm obj *.out *.a *.so core* .config -rf
 		echo "Project directory has been cleaned"
 		exit 0
 		;;
-
 	--build)
-		action=$2
+		action="compile_$2"
 		;;
 	--install)
-		_runtime_calc start
-		install_lib libpl32 $(realpath "$2")
-		_runtime_calc stop
-		exit 0
+		action="install_lib"
 		;;
 	--help)
 		echo "--clean			Removes any files generated during compilation"
 		echo "--build [action]	Compiles the library or the library testcase"
-		echo "--install [dest]	Installs the compiled library to dest"
+		echo "--install		Installs the compiled library to dest"
 		exit 0
 		;;
 esac
 
-if [ "$action" = "lib" ]; then
-	opts="libpl32"
-	if [ "$3" = "no-static" ]; then
-		static=0
-	elif [ "$3" = "no-shared" ]; then
-		shared=0
-	fi
-elif [ "$action" = "test" ]; then
-	opts="pl32-test -lpl32"
+if [ ! -f ".config" ]; then
+	echo "Error: You haven't configured the system yet! Please run ./configure --help and try again"
+	exit 1
 fi
+. ./.config
+
+echo "Compiler: $CC"
+echo "Compiler Flags: $CFLAGS"
+echo "Build Type: $BUILD"
 
 _runtime_calc start
-compile_$action $opts
+$action
 _runtime_calc stop
 

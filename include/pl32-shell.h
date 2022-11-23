@@ -16,12 +16,6 @@ extern "C" {
 #define PLSHVAR_BOOL 3
 #define PLSHVAR_FLOAT 4
 
-typedef struct plarray {
-	void* array;
-	size_t size;
-	bool isMemAlloc;
-} plarray_t;
-
 typedef struct plvariable {
 	void* varptr;
 	int type;
@@ -38,8 +32,7 @@ void setProductStrings(char* productStr, char* srcUrl);
 
 char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
 plarray_t* plParser(char* input, plgc_t* gc);
-void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc);
-void plShellFreeVarBuf(plarray_t* array, plgc_t* gc);
+void plShellFreeVarBuf(plarray_t* variableBuf);
 
 uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc);
 uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);

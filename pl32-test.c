@@ -3,7 +3,7 @@
 * (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
 \******************************************************/
 #include <pl32-file.h>
-#include <pl32-term.h>
+/*#include <pl32-term.h>*/
 
 void printArray(int* array, size_t size){
 	printf("Printing out array:\n");
@@ -12,37 +12,37 @@ void printArray(int* array, size_t size){
 	}
 }
 
-void printCurrentMemUsg(plgc_t* gc){
+void printCurrentMemUsg(plmt_t* mt){
 	char gchVar;
 
-	printf("Current RAM usage: %ld bytes\n", plGCMemAmnt(gc, PLGC_GET_USEDMEM, 0));
+	printf("Current RAM usage: %ld bytes\n", plMTMemAmnt(mt, PLMT_GET_USEDMEM, 0));
 	printf("Press Enter to continue test...");
 	gchVar = getchar();
 }
 
-int testLoop(char* strToTokenize, plgc_t* gc){
+int testLoop(char* strToTokenize, plmt_t* mt){
 	char* holder;
-	char* result = plTokenize(strToTokenize, &holder, gc);
+	char* result = plTokenize(strToTokenize, &holder, mt);
 	int i = 2;
 
 	if(!result)
 		return 1;
 
 	printf("Token 1: %s\n", result);
-	plGCFree(gc, result);
-	while((result = plTokenize(holder, &holder, gc)) != NULL){
+	plMTFree(mt, result);
+	while((result = plTokenize(holder, &holder, mt)) != NULL){
 		printf("Token %d: %s\n", i, result);
-		plGCFree(gc, result);
+		plMTFree(mt, result);
 		i++;
 	}
 }
 
-int plMemoryTest(plarray_t* args, plgc_t* gc){
-	printCurrentMemUsg(gc);
+int plMemoryTest(plarray_t* args, plmt_t* mt){
+	printCurrentMemUsg(mt);
 
 	printf("Allocating and initializing int array (4 ints)...");
 
-	int* nano = plGCAlloc(gc, sizeof(int) * 4);
+	int* nano = plMTAlloc(mt, sizeof(int) * 4);
 	for(int i = 0; i < 4; i++){
 		nano[i] = i + 1;
 	}
@@ -50,60 +50,60 @@ int plMemoryTest(plarray_t* args, plgc_t* gc){
 	printf("Done.\n");
 
 	printArray(nano, 4);
-	printCurrentMemUsg(gc);
+	printCurrentMemUsg(mt);
 
 	printf("Reallocating int array...");
 
-	void* tempPtr = plGCRealloc(gc, nano, sizeof(int) * 8);
+	void* tempPtr = plMTRealloc(mt, nano, sizeof(int) * 8);
 	if(!tempPtr){
-		printf("Error!\n Error: plGCRealloc() returned NULL\n");
+		printf("Error!\n Error: plMTRealloc() returned NULL\n");
 	}else{
 		nano = tempPtr;
 		printf("Done\n");
-		printCurrentMemUsg(gc);
+		printCurrentMemUsg(mt);
 
 		printf("Deallocating int array...");
-		plGCFree(gc, nano);
+		plMTFree(mt, nano);
 		printf("Done\n");
-		printCurrentMemUsg(gc);
+		printCurrentMemUsg(mt);
 
 		printf("Testing double free protection...");
-		plGCFree(gc, nano);
+		plMTFree(mt, nano);
 		printf("Done\n");
 
 		printf("Allocating multiple arrays of multiple sizes...");
 
-		char* nano2 = plGCAlloc(gc, sizeof(char) * 16);
-		char** nano3 = plGCAlloc(gc, sizeof(char*) * 4);
-		int* nano4 = plGCAlloc(gc, sizeof(int) * 10);
-		int* nano5 = plGCAlloc(gc, sizeof(int) * 20);
+		char* nano2 = plMTAlloc(mt, sizeof(char) * 16);
+		char** nano3 = plMTAlloc(mt, sizeof(char*) * 4);
+		int* nano4 = plMTAlloc(mt, sizeof(int) * 10);
+		int* nano5 = plMTAlloc(mt, sizeof(int) * 20);
 
 		printf("Done\n");
-		printCurrentMemUsg(gc);
+		printCurrentMemUsg(mt);
 
 		printf("Deallocating arrays...");
 
-		plGCFree(gc, nano2);
-		plGCFree(gc, nano3);
-		plGCFree(gc, nano4);
-		plGCFree(gc, nano5);
+		plMTFree(mt, nano2);
+		plMTFree(mt, nano3);
+		plMTFree(mt, nano4);
+		plMTFree(mt, nano5);
 
 		printf("Done\n");
-		printCurrentMemUsg(gc);
+		printCurrentMemUsg(mt);
 	}
 
 	return 0;
 }
 
-int plFileTest(plarray_t* args, plgc_t* gc){
+int plFileTest(plarray_t* args, plmt_t* mt){
 	char stringBuffer[4096] = "";
 	char filepath[256] = "src/pl32-file.c";
 	if(args->size > 1)
 		strcpy(filepath, ((char**)args->array)[1]);
 
 	printf("Opening an existing file...");
-	plfile_t* realFile = plFOpen(filepath, "r", gc);
-	plfile_t* memFile = plFOpen(NULL, "w+", gc);
+	plfile_t* realFile = plFOpen(filepath, "r", mt);
+	plfile_t* memFile = plFOpen(NULL, "w+", mt);
 
 	if(!realFile){
 		printf("Error!\nError opening file. Exiting...\n");
@@ -136,14 +136,14 @@ int plFileTest(plarray_t* args, plgc_t* gc){
 	return 0;
 }
 
-int plShellTest(plarray_t* args, plgc_t* gc){
+int plShellTest(plarray_t* args, plmt_t* mt){
 	char* tknTestStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
 
 	printf("This is a test of the pl32-shell tokenizer\n\n");
 
 	for(int i = 0; i < 5; i++){
 		printf("Test %d:\n", i);
-		if(testLoop(tknTestStrings[i], gc)){
+		if(testLoop(tknTestStrings[i], mt)){
 			printf("An error occurred. Exiting...\n");
 			return 1;
 		}
@@ -152,26 +152,26 @@ int plShellTest(plarray_t* args, plgc_t* gc){
 	return 0;
 }
 
-int plTermTest(plarray_t* args, plgc_t* gc){
+/*int plTermTest(plarray_t* args, plmt_t* mt){
 	if(args->size < 2){
 		printf("Error: Not enough args\n");
 		printf("Usage: %s [serial-port]\n", ((char**)args->array)[0]);
 		return 1;
 	}
 
-	plterminal_t* terminal = plOpenTerminal(((char**)args->array)[1], gc);
+	plterminal_t* terminal = plOpenTerminal(((char**)args->array)[1], mt);
 	if(!terminal)
 		return 2;
 
 	plTermRawInit(terminal);
 	plTermInteractive(terminal);
-	plCloseTerminal(terminal, gc);
+	plCloseTerminal(terminal, mt);
 
 	return 0;
-}
+}*/
 
 int main(int argc, const char* argv[]){
-	plgc_t* mainGC = plGCInit(8 * 1024 * 1024);
+	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
 	plarray_t commandBuf, variableBuf;
 
 	int plmajorver = 4;
@@ -179,10 +179,10 @@ int main(int argc, const char* argv[]){
 	int birthyear = 2020;
 	char string[16] = "Hello, World!";
 
-	commandBuf.array = plGCAlloc(mainGC, sizeof(plfunctionptr_t) * 4);
+	commandBuf.array = plMTAlloc(mainMT, sizeof(plfunctionptr_t) * 4);
 	commandBuf.size = 4;
 	commandBuf.isMemAlloc = true;
-	variableBuf.array = plGCAlloc(mainGC, sizeof(plvariable_t) * 4);
+	variableBuf.array = plMTAlloc(mainMT, sizeof(plvariable_t) * 4);
 	variableBuf.size = 4;
 	variableBuf.isMemAlloc = true;
 
@@ -213,8 +213,8 @@ int main(int argc, const char* argv[]){
 	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
 
 	if(argc > 1){
-		plShell(argv[1], &variableBuf, &commandBuf, &mainGC);
+		plShell(argv[1], &variableBuf, &commandBuf, &mainMT);
 	}else{
-		plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainGC);
+		plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainMT);
 	}
 }

@@ -15,8 +15,8 @@ extern "C" {
 
 typedef struct plfile plfile_t;
 
-plfile_t* plFOpen(char* filename, char* mode, plgc_t* gc);
-plfile_t* plFToP(FILE* pointer, char* mode, plgc_t* gc);
+plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt);
+plfile_t* plFToP(FILE* pointer, char* mode, plmt_t* mt);
 int plFClose(plfile_t* ptr);
 
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream);

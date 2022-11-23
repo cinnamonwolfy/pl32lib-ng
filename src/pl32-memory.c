@@ -5,14 +5,14 @@
 \*****************************************************/
 #include <pl32-memory.h>
 
-// Internal type for representing internal pointer references
+/* Internal type for representing internal pointer references */
 typedef struct plpointer {
 	void* pointer;
 	size_t size;
 } plptr_t;
 
-// Structure of the semi-garbage collector. This semi-garbage collector is thread-specific
-struct plgc {
+/* Structure of the memory allocation tracker . This memory allocation tracker is thread-specific */
+struct plmt {
 	plptr_t* ptrList;
 	size_t listAmnt;
 	size_t allocListAmnt;
@@ -20,91 +20,91 @@ struct plgc {
 	size_t maxMemory;
 };
 
-// Creates and initializes a semi-garbage collector
-plgc_t* plGCInit(size_t maxMemoryInit){
-	plgc_t* returnGC = malloc(sizeof(plgc_t));
-	returnGC->ptrList = malloc(2 * sizeof(plptr_t));
-	returnGC->listAmnt = 0;
-	returnGC->allocListAmnt = 2;
-	returnGC->usedMemory = 0;
+/* Creates and initializes a memory allocation tracker */
+plmt_t* plMTInit(size_t maxMemoryInit){
+	plmt_t* returnMT = malloc(sizeof(plmt_t));
+	returnMT->ptrList = malloc(2 * sizeof(plptr_t));
+	returnMT->listAmnt = 0;
+	returnMT->allocListAmnt = 2;
+	returnMT->usedMemory = 0;
 
 	if(!maxMemoryInit){
-		returnGC->maxMemory = 128 * 1024 * 1024;
+		returnMT->maxMemory = 128 * 1024 * 1024;
 	}else{
-		returnGC->maxMemory = maxMemoryInit;
+		returnMT->maxMemory = maxMemoryInit;
 	}
 
-	return returnGC;
+	return returnMT;
 }
 
-// Frees all pointers currently in
-void plGCStop(plgc_t* gc){
-	for(int i = 0; i < gc->listAmnt; i++){
-		free(gc->ptrList[i].pointer);
+/* Frees all pointers currently in the memory allocation tracker */
+void plMTStop(plmt_t* mt){
+	for(int i = 0; i < mt->listAmnt; i++){
+		free(mt->ptrList[i].pointer);
 	}
-	free(gc->ptrList);
-	free(gc);
+	free(mt->ptrList);
+	free(mt);
 }
 
-// Controller for semi-garbage collector
-int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
-	if(gc == NULL){
+/* An internal control function for the memory allocation tracker */
+int plMTManage(plmt_t* mt, int mode, void* ptr, size_t size, void* ptr2){
+	if(mt == NULL){
 		return 1;
 	}
 
 	switch(mode){
-		//Searches pointer address within the tracking array
-		case PLGC_SEARCHPTR: ;
+		/* Searches pointer address within the tracking array */
+		case PLMT_SEARCHPTR: ;
 			int i = 0;
-			while(gc->ptrList[i].pointer != ptr && i < gc->listAmnt)
+			while(mt->ptrList[i].pointer != ptr && i < mt->listAmnt)
 				i++;
 
-			if(gc->ptrList[i].pointer == ptr)
+			if(mt->ptrList[i].pointer == ptr)
 				return i;
 
 			return -1;
-		// Adds pointer reference to the tracking array
-		case PLGC_ADDPTR: ;
-			if(gc->listAmnt >= gc->allocListAmnt){
-				void* tempPtr = realloc(gc->ptrList, (gc->listAmnt + 1) * sizeof(plptr_t));
+		/* Adds pointer reference to the tracking array */
+		case PLMT_ADDPTR: ;
+			if(mt->listAmnt >= mt->allocListAmnt){
+				void* tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
 				if(!tempPtr)
 					return 1;
 
-				gc->ptrList = tempPtr;
-				gc->allocListAmnt++;
+				mt->ptrList = tempPtr;
+				mt->allocListAmnt++;
 			}
 
-			gc->ptrList[gc->listAmnt].pointer = ptr;
-			gc->ptrList[gc->listAmnt].size = size;
-			gc->listAmnt++;
-			gc->usedMemory += size;
+			mt->ptrList[mt->listAmnt].pointer = ptr;
+			mt->ptrList[mt->listAmnt].size = size;
+			mt->listAmnt++;
+			mt->usedMemory += size;
 			break;
-		// Removes pointer reference from the tracking array
-		case PLGC_RMPTR: ;
-			int rmPtrResult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
+		/* Removes pointer reference from the tracking array */
+		case PLMT_RMPTR: ;
+			int rmPtrResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0, NULL);
 			if(rmPtrResult == -1)
 				return 1;
 
-			gc->usedMemory -= gc->ptrList[rmPtrResult].size;
-			gc->ptrList[rmPtrResult].pointer = gc->ptrList[gc->listAmnt - 1].pointer;
-			gc->ptrList[rmPtrResult].size = gc->ptrList[gc->listAmnt - 1].size;
-			gc->ptrList[gc->listAmnt - 1].pointer = NULL;
-			gc->ptrList[gc->listAmnt - 1].size = 0;
-			gc->listAmnt--;
+			mt->usedMemory -= mt->ptrList[rmPtrResult].size;
+			mt->ptrList[rmPtrResult].pointer = mt->ptrList[mt->listAmnt - 1].pointer;
+			mt->ptrList[rmPtrResult].size = mt->ptrList[mt->listAmnt - 1].size;
+			mt->ptrList[mt->listAmnt - 1].pointer = NULL;
+			mt->ptrList[mt->listAmnt - 1].size = 0;
+			mt->listAmnt--;
 
 			free(ptr);
 
 			break;
-		// Special mode for just realloc()
-		case PLGC_REALLOC: ;
-			int reallocResult = plGCManage(gc, PLGC_SEARCHPTR, ptr, 0, NULL);
+		/* Special mode for just realloc() */
+		case PLMT_REALLOC: ;
+			int reallocResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0, NULL);
 			if(reallocResult == -1)
 				return 1;
 
-			gc->ptrList[reallocResult].pointer = ptr2;
-			gc->usedMemory += (size - gc->ptrList[reallocResult].size);
-			gc->ptrList[reallocResult].size = size;
+			mt->ptrList[reallocResult].pointer = ptr2;
+			mt->usedMemory += (size - mt->ptrList[reallocResult].size);
+			mt->ptrList[reallocResult].size = size;
 			break;
 		default:
 			return 1;
@@ -112,27 +112,29 @@ int plGCManage(plgc_t* gc, int mode, void* ptr, size_t size, void* ptr2){
 	return 0;
 }
 
-size_t plGCMemAmnt(plgc_t* gc, int action, size_t size){
+/* Get the current memory usage or the maximum memory usage limit, or set a new *\
+\* maximum memory usage limit                                                   */
+size_t plMTMemAmnt(plmt_t* mt, int action, size_t size){
 	switch(action){
-		case PLGC_GET_USEDMEM: ;
-			return gc->usedMemory;
-		case PLGC_GET_MAXMEM: ;
-			return gc->maxMemory;
-		case PLGC_SET_MAXMEM: ;
-			gc->maxMemory = size;
+		case PLMT_GET_USEDMEM: ;
+			return mt->usedMemory;
+		case PLMT_GET_MAXMEM: ;
+			return mt->maxMemory;
+		case PLMT_SET_MAXMEM: ;
+			mt->maxMemory = size;
 			break;
 	}
 	return 0;
 }
 
-// malloc() wrapper that interfaces with the semi-garbage collector
-void* plGCAlloc(plgc_t* gc, size_t size){
+/* malloc() wrapper that interfaces with the memory allocation tracker */
+void* plMTAlloc(plmt_t* mt, size_t size){
 	void* tempPtr;
 
-	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = malloc(size)) == NULL)
+	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
-	if(plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL)){
+	if(plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL)){
 		free(tempPtr);
 		return NULL;
 	}
@@ -140,14 +142,14 @@ void* plGCAlloc(plgc_t* gc, size_t size){
 	return tempPtr;
 }
 
-// calloc() wrapper that interfaces with the semi-garbage collector
-void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
+/* calloc() wrapper that interfaces with the memory allocation tracker */
+void* plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 	void* tempPtr;
 
-	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
+	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
-	if(plGCManage(gc, PLGC_ADDPTR, tempPtr, size, NULL)){
+	if(plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL)){
 		free(tempPtr);
 		return NULL;
 	}
@@ -155,14 +157,14 @@ void* plGCCalloc(plgc_t* gc, size_t amount, size_t size){
 	return tempPtr;
 }
 
-// realloc() wrapper that interfaces with the semi-garbage collector
-void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
+/* realloc() wrapper that interfaces with the memory allocation tracker */
+void* plMTRealloc(plmt_t* mt, void* pointer, size_t size){
 	void* tempPtr;
 
-	if(gc->usedMemory + size > gc->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
+	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
 
-	if(plGCManage(gc, PLGC_REALLOC, pointer, size, tempPtr)){
+	if(plMTManage(mt, PLMT_REALLOC, pointer, size, tempPtr)){
 		free(tempPtr);
 		return NULL;
 	}
@@ -170,7 +172,17 @@ void* plGCRealloc(plgc_t* gc, void* pointer, size_t size){
 	return tempPtr;
 }
 
-// free() wrapper that interfaces with the semi-garbage collector
-void plGCFree(plgc_t* gc, void* pointer){
-	plGCManage(gc, PLGC_RMPTR, pointer, 0, NULL);
+/* free() wrapper that interfaces with the memory allocation tracker */
+void plMTFree(plmt_t* mt, void* pointer){
+	plMTManage(mt, PLMT_RMPTR, pointer, 0, NULL);
+}
+
+/* Frees a plarray_t */
+void plMTFreeArray(plarray_t* array, bool is2DArray){
+	if(is2DArray){
+		for(int i = 0; i < array->size; i++)
+			plMTFree(array->mt, ((void**)array->array)[i]);
+	}
+	plMTFree(array->mt, array->array);
+	plMTFree(array->mt, array);
 }

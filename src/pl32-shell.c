@@ -14,9 +14,9 @@ void setProductStrings(char* productStr, char* srcUrl){
 		strcpy(srcUrlString, srcUrl);
 }
 
-// Tokenizes string in a similar way an interactive command line would
-char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
-	if(!string || !gc)
+/* Tokenizes string in a similar way an interactive command line would */
+char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
+	if(!string || !mt)
 		return NULL;
 
 	char* tempPtr[2] = { strchr(string, '"'), strchr(string, ' ') };
@@ -29,8 +29,8 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 		return NULL;
 	}
 
-	// If string starts with a space and string pointer is lower than the search limit,
-	// keep increasing string pointer until it equals tempPtr[1]
+	/* If string starts with a space and string pointer is lower than the search limit, *\
+	\* keep increasing string pointer until it equals tempPtr[1]                        */
 	if(*string == ' '){
 		while(*string == ' ' && string < searchLimit)
 			string++;
@@ -39,15 +39,15 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 			tempPtr[1] = strchr(string, ' ');
 	}
 
-	// If there are no string in quotes, or if the quotes come after a whitespace,
-	// assign the beginning of the string to be returned as the pointer of the given
-	// string and the end of the string as the next whitespase
+	/* If there are no string in quotes, or if the quotes come after a whitespace, assign the   *\
+	   beginning of the string to be returned as the pointer of the given string and the end of
+	\* the string as the next whitespace                                                        */
 	if((!tempPtr[0] && tempPtr[1]) || (tempPtr[1] && tempPtr[1] < tempPtr[0])){
 		startPtr = string;
 		endPtr = tempPtr[1];
-	// Else, if the beginning of the given string begins with a quote, assign the beginning
-	// of the string to be returned as the opening quote + 1 and the end of the string as the
-	// closing quote
+	/* Else, if the beginning of the given string begins with a quote, assign the beginning   *\
+	   of the string to be returned as the opening quote + 1 and the end of the string as the
+	\* closing quote                                                                          */
 	}else if(tempPtr[0] && tempPtr[0] == string){
 		startPtr = tempPtr[0] + 1;
 		endPtr = strchr(tempPtr[0] + 1, '"');
@@ -55,7 +55,7 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 
 	size_t strSize = (endPtr - startPtr);
 
-	// If there's no whitespace or quotes in the given string, return the given string.
+	/* If there's no whitespace or quotes in the given string, return the given string. */
 	if(!startPtr || !endPtr || !strSize){
 		if(strlen(string) != 0){
 			strSize = strlen(string);
@@ -65,44 +65,44 @@ char* plTokenize(char* string, char** leftoverStr, plgc_t* gc){
 			return NULL;
 		}
 	}else{
-	// Else what remains of the given string into the leftover variable
+	/* Else what remains of the given string into the leftover variable */
 		*leftoverStr = endPtr+1;
 	}
 
-	// Allocate memory for return string, copy the selected part of the string,
-	// and null-terminate the return string
-	retPtr = plGCAlloc(gc, (strSize + 1) * sizeof(char));
+	/* Allocate memory for return string, copy the selected part of the string, *\
+	\* and null-terminate the return string                                     */
+	retPtr = plMTAlloc(mt, (strSize + 1) * sizeof(char));
 	memcpy(retPtr, startPtr, strSize);
 
 	retPtr[strSize] = '\0';
 	return retPtr;
 }
 
-// Parses a string into an array
-plarray_t* plParser(char* input, plgc_t* gc){
-	if(!input || !gc)
+/* Parses a string into an array */
+plarray_t* plParser(char* input, plmt_t* mt){
+	if(!input || !mt)
 		return NULL;
 
 	char* leftoverStr;
-	plarray_t* returnStruct = plGCAlloc(gc, sizeof(plarray_t));
+	plarray_t* returnStruct = plMTAlloc(mt, sizeof(plarray_t));
 	returnStruct->size = 1;
-	returnStruct->array = plGCAlloc(gc, 2 * sizeof(char*));
+	returnStruct->array = plMTAlloc(mt, 2 * sizeof(char*));
 
-	// First token
-	char* tempPtr = plTokenize(input, &leftoverStr, gc);
+	/* First token */
+	char* tempPtr = plTokenize(input, &leftoverStr, mt);
 	((char**)returnStruct->array)[0] = tempPtr;
 
-	// Keep tokenizing until there is no more string left to tokenize
-	while((tempPtr = plTokenize(leftoverStr, &leftoverStr, gc)) != NULL){
+	/* Keep tokenizing until there is no more string left to tokenize */
+	while((tempPtr = plTokenize(leftoverStr, &leftoverStr, mt)) != NULL){
 		returnStruct->size++;
-		char** tempArrPtr = plGCRealloc(gc, returnStruct->array, returnStruct->size * sizeof(char*));
+		char** tempArrPtr = plMTRealloc(mt, returnStruct->array, returnStruct->size * sizeof(char*));
 
 		if(!tempArrPtr){
 			for(int i = 0; i < returnStruct->size; i++)
-				plGCFree(gc, ((char**)returnStruct->array)[i]);
+				plMTFree(mt, ((char**)returnStruct->array)[i]);
 
-			plGCFree(gc, returnStruct->array);
-			plGCFree(gc, returnStruct);
+			plMTFree(mt, returnStruct->array);
+			plMTFree(mt, returnStruct);
 
 			return NULL;
 		}
@@ -111,17 +111,10 @@ plarray_t* plParser(char* input, plgc_t* gc){
 		((char**)returnStruct->array)[returnStruct->size - 1] = tempPtr;
 	}
 
-	return returnStruct;
-}
+	returnStruct->isMemAlloc = true;
+	returnStruct->mt = mt;
 
-// Frees a plarray_t
-void plShellFreeArray(plarray_t* array, bool is2DArray, plgc_t* gc){
-	if(is2DArray){
-		for(int i = 0; i < array->size; i++)
-			plGCFree(gc, ((void**)array->array)[i]);
-	}
-	plGCFree(gc, array->array);
-	plGCFree(gc, array);
+	return returnStruct;
 }
 
 // Internal function to find a variable with a pointer or a name
@@ -144,8 +137,8 @@ long plShellSearchVarBuf(int opt, char* stringOrPtr, plarray_t* variableBuf){
 }
 
 // Variable Manager
-uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc){
-	if(!gc || !cmdline || !cmdlineIsNotCommand || !variableBuf)
+uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plmt_t* mt){
+	if(!mt || !cmdline || !cmdlineIsNotCommand || !variableBuf)
 		return 255;
 
 	char** array = cmdline->array;
@@ -164,10 +157,8 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 
 	int cmdPos = 0, varPos = -1;
-//	if(strchr(array[0], '$') == NULL && cmdline->size > 1){
-		while(cmdPos < cmdline->size && strchr(array[cmdPos], '$') == NULL)
-			cmdPos++;
-//	}
+	while(cmdPos < cmdline->size && strchr(array[cmdPos], '$') == NULL)
+		cmdPos++;
 
         if(cmdPos < cmdline->size && (strchr(array[cmdPos], '$') == array[cmdPos] || strchr(array[cmdPos], '$') == array[cmdPos] + 1)){
 		char* workVar = strchr(array[cmdPos], '$') + 1;
@@ -208,8 +199,8 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			outputString = holderString;
 
 		size_t sizeOfOut = strlen(outputString);
-		plGCFree(gc, array[cmdPos]);
-		array[cmdPos] = plGCAlloc(gc, sizeOfOut);
+		plMTFree(mt, array[cmdPos]);
+		array[cmdPos] = plMTAlloc(mt, sizeOfOut);
 		memcpy(array[cmdPos], outputString, sizeOfOut);
 		array[cmdPos][sizeOfOut] = 0;
 	}else if(assignVal > -1){
@@ -222,7 +213,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 
 		if(assignVal < 2 && workVar){
 			size_t sizeToCopy = workVar - array[0];
-			varToAssign = plGCAlloc(gc, sizeToCopy + 1);
+			varToAssign = plMTAlloc(mt, sizeToCopy + 1);
 			memcpy(varToAssign, array[0], sizeToCopy);
 			varToAssign[sizeToCopy] = 0;
 		}else{
@@ -238,7 +229,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 				printf("plShellVarMgmt: Variable buffer is full\n");
 				return ENOMEM;
 			}else if(nullPos == -1){
-				void* tempPtr = plGCRealloc(gc, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
+				void* tempPtr = plMTRealloc(mt, variableBuf->array, (variableBuf->size + 1) * sizeof(plvariable_t));
 				if(!tempPtr)
 					return ENOMEM;
 
@@ -257,7 +248,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 			switch(assignVal){
 				case 0: ;
 					size_t sizeToCopy = (array[0] + strlen(array[0])) - workVar;
-					valToAssign = plGCAlloc(gc, sizeToCopy + 1);
+					valToAssign = plMTAlloc(mt, sizeToCopy + 1);
 					memcpy(valToAssign, workVar + 1, sizeToCopy);
 					valToAssign[sizeToCopy] = 0;
 					break;
@@ -266,7 +257,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 						valToAssign = array[1];
 					}else{
 						size_t sizeToCopy = strlen(array[1]) - 1;
-						valToAssign = plGCAlloc(gc, sizeToCopy + 1);
+						valToAssign = plMTAlloc(mt, sizeToCopy + 1);
 						memcpy(valToAssign, workVar + 1, sizeToCopy);
 						valToAssign[sizeToCopy] = 0;
 					}
@@ -292,7 +283,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 				if(leftoverStr != NULL && *leftoverStr != '\0'){
 					if(strcmp("true", valToAssign) == 0){
 						boolean = true;
-						if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+						if(!(pointer = plMTAlloc(mt, sizeof(bool)))){
 							printf("plShellVarMgmt: Out of memory\n");
 							return ENOMEM;
 						}
@@ -301,7 +292,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 						valType = PLSHVAR_BOOL;
 					}else if(strcmp("false", valToAssign) == 0){
 						boolean = false;
-						if(!(pointer = plGCAlloc(gc, sizeof(bool)))){
+						if(!(pointer = plMTAlloc(mt, sizeof(bool)))){
 							printf("plShellVarMgmt: Out of memory\n");
 							return ENOMEM;
 						}
@@ -309,7 +300,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 						*((bool*)pointer) = boolean;
 						valType = PLSHVAR_BOOL;
 					}else{
-						if(!(pointer = plGCAlloc(gc, (strlen(valToAssign) + 1) * sizeof(char)))){
+						if(!(pointer = plMTAlloc(mt, (strlen(valToAssign) + 1) * sizeof(char)))){
 							printf("plShellVarMgmt: Out of memory\n");
 							return ENOMEM;
 						}
@@ -318,7 +309,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 						valType = PLSHVAR_STRING;
 					}
 				}else{
-					if(!(pointer = plGCAlloc(gc, sizeof(float)))){
+					if(!(pointer = plMTAlloc(mt, sizeof(float)))){
 						printf("plShellVarMgmt: Out of memory\n");
 						return ENOMEM;
 					}
@@ -327,7 +318,7 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 					valType = PLSHVAR_FLOAT;
 				}
 			}else{
-				if(!(pointer = plGCAlloc(gc, sizeof(int)))){
+				if(!(pointer = plMTAlloc(mt, sizeof(int)))){
 					printf("plShellVarMgmt: Out of memory\n");
 					return ENOMEM;
 				}
@@ -341,9 +332,9 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 		}
 
 		if(workVarBuf[assignVarPos].varptr != NULL && workVarBuf[assignVarPos].isMemAlloc){
-			plGCFree(gc, workVarBuf[assignVarPos].varptr);
+			plMTFree(mt, workVarBuf[assignVarPos].varptr);
 		}else{
-			char* name = plGCAlloc(gc, strlen(varToAssign));
+			char* name = plMTAlloc(mt, strlen(varToAssign));
 			if(!name){
 				printf("plShellVarMgmt: Out of memory\n");
 				return ENOMEM;
@@ -362,8 +353,8 @@ uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t*
 }
 
 // Command Interpreter
-uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
-	if(!gc || !command)
+uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plmt_t* mt){
+	if(!mt || !command)
 		return 1;
 
 	char** array = command->array;
@@ -402,7 +393,7 @@ uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
 			printf("%s: command not found\n", array[0]);
 			return 255;
 		}else{
-			retVar = ((plfunctionptr_t*)commandBuf->array)[i].function(command, gc);
+			retVar = ((plfunctionptr_t*)commandBuf->array)[i].function(command, mt);
 		}
 	}
 
@@ -410,19 +401,19 @@ uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc){
 }
 
 // Complete Shell Interpreter
-uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc){
-	if(!gc || !*gc)
+uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plmt_t** mt){
+	if(!mt || !*mt)
 		return 1;
 
 	bool cmdlineIsNotCommand = false;
-	plarray_t* parsedCmdLine = plParser(cmdline, *gc);
+	plarray_t* parsedCmdLine = plParser(cmdline, *mt);
 
 	if(!parsedCmdLine)
 		return 1;
 
 	if(strchr(cmdline, '$') || strchr(cmdline, '=')){
-		if(plShellVarMgmt(parsedCmdLine, &cmdlineIsNotCommand, variableBuf, *gc)){
-			plShellFreeArray(parsedCmdLine, true, *gc);
+		if(plShellVarMgmt(parsedCmdLine, &cmdlineIsNotCommand, variableBuf, *mt)){
+			plShellFreeArray(parsedCmdLine, true, *mt);
 			return 1;
 		}
 	}
@@ -452,32 +443,32 @@ uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, pl
 				}
 			}
 		}else if(strcmp(array[0], "show-memusg") == 0){
-			printf("%ld bytes free\n", plGCMemAmnt(*gc, PLGC_GET_MAXMEM, 0) -  plGCMemAmnt(*gc, PLGC_GET_USEDMEM, 0));
+			printf("%ld bytes free\n", plMTMemAmnt(*mt, PLMT_GET_MAXMEM, 0) -  plMTMemAmnt(*mt, PLMT_GET_USEDMEM, 0));
 		}else{
-			retVar = plShellComInt(parsedCmdLine, commandBuf, *gc);
+			retVar = plShellComInt(parsedCmdLine, commandBuf, *mt);
 		}
 	}
 
-	plShellFreeArray(parsedCmdLine, true, *gc);
+	plShellFreeArray(parsedCmdLine, true, *mt);
 	return retVar;
 }
 
 // Interactive frontend to plShellFrontEnd()
-void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t* shellGC){
+void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* commandBuf, plmt_t* shellMT){
 	bool loop = true;
 	bool showRetVal = false;
 
-	if(!shellGC)
-		shellGC = plGCInit(8 * 1024 * 1024);
+	if(!shellMT)
+		shellMT = plMTInit(8 * 1024 * 1024);
 
 	if(!prompt)
 		prompt = "(cmd) # ";
 
 	if(showHelpAtStart){
-		plShell("help", variableBuf, commandBuf, &shellGC);
+		plShell("help", variableBuf, commandBuf, &shellMT);
 	}
 
-	plShell("show-memusg", variableBuf, commandBuf, &shellGC);
+	plShell("show-memusg", variableBuf, commandBuf, &shellMT);
 	while(loop){
 		char cmdline[4096] = "";
 		int retVal = 0;
@@ -494,14 +485,14 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 				showRetVal = true;
 			}
 		}else if(strcmp(cmdline, "reset-mem") == 0){
-			size_t size = plGCMemAmnt(shellGC, PLGC_GET_MAXMEM, 0);
-			plGCStop(shellGC);
-			shellGC = plGCInit(size);
+			size_t size = plMTMemAmnt(shellMT, PLMT_GET_MAXMEM, 0);
+			plMTStop(shellMT);
+			shellMT = plMTInit(size);
 			variableBuf = NULL;
 			commandBuf = NULL;
 			printf("Memory has been reset\n");
 		}else if(strlen(cmdline) > 0){
-			retVal = plShell(cmdline, variableBuf, commandBuf, &shellGC);
+			retVal = plShell(cmdline, variableBuf, commandBuf, &shellMT);
 		}
 
 		if(showRetVal)
@@ -512,5 +503,5 @@ void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableB
 	if(feof(stdin))
 		printf("\n");
 
-	plGCStop(shellGC);
+	plMTStop(shellMT);
 }
