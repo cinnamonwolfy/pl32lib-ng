@@ -1,0 +1,169 @@
+#!/bin/sh
+set -e
+
+CC="cc"
+CFLAGS="-std=c99"
+AR="ar"
+RANLIB="ranlib"
+prefix="/usr/local"
+exec_prefix="$prefix"
+bindir="$exec_prefix/bin"
+libdir="$prefix/lib"
+includedir="$prefix/include"
+
+update_prefixes(){
+	if [ "$1" = "" ]; then
+		exec_prefix="$prefix"
+	fi
+	bindir="$exec_prefix/bin"
+	libdir="$prefix/lib"
+	includedir="$prefix/include"
+}
+
+toolchain_test(){
+	# TODO: Add compiler/toolchain test
+	return 0
+}
+
+generate_config(){
+	echo "Detecting install prefix...$prefix"
+	echo "Detecting executable install prefix...$exec_prefix"
+	echo "Detecting binary install prefix...$bindir"
+	echo "Detecting library install prefix...$libdir"
+	echo "Detecting headers install prefix...$includedir"
+	printf "Detecting target system..."
+	if [ "$target" = "" ]; then
+		echo "native."
+	else
+		echo "$target."
+	fi
+	printf "Detecting C compiler..."
+	compiler_check="$(realpath $(command -v $CC))"
+	if [ $(echo "$compiler_check" | grep clang -c) -ne 0 ]; then
+		echo "clang"
+		if [ "$target" != "" ]; then
+			CFLAGS="--target=$target $CFLAGS"
+		fi
+	elif [ $(echo "$compiler_check" | grep gcc -c) -ne 0 ]; then
+		echo "gcc"
+		if [ $(echo $(basename $CC) | grep "$target" -c) -eq 0 ]; then
+			compile_dir="$(dirname $CC)"
+			compile_name="$(basename $CC)"
+
+			if [ "$compile_dir" != "." ]; then
+				CC="$compile_dir/"
+			else
+				CC=""
+			fi
+
+			CC="$CC$target-$compile_name"
+		fi
+	else
+		echo "$CC"
+	fi
+
+	toolchain_test
+
+	printf "CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\nprefix=\"$prefix\"\nexec_prefix=\"$exec_prefix\"\n" > ./.config
+	printf "bindir=\"$bindir\"\nlibdir=\"$libdir\"\nincludedir=\"$includedir\"\n" >> ./.config
+
+	if [ -f ./config-template.conf ]; then
+		cat config-template.conf >> ./.config
+	fi
+}
+
+update_prefixes
+
+while [ $# -ne 0 ]; do
+	case $1 in
+		--prefix | --prefix=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				prefix="$(echo $1 | cut -d= -f2)"
+			else
+				prefix="$2"
+				shift
+			fi
+			update_prefixes
+			;;
+		--exec-prefix | --exec-prefix=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				exec_prefix="$(echo $1 | cut -d= -f2)"
+			else
+				exec_prefix="$2"
+				shift
+			fi
+			update_prefixes exec
+			;;
+		--bindir | --bindir=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				bindir="$(echo $1 | cut -d= -f2)"
+			else
+				bindir="$2"
+				shift
+			fi
+			;;
+		--libdir | --libdir=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				libdir="$(echo $1 | cut -d= -f2)"
+			else
+				libdir="$2"
+				shift
+			fi
+			;;
+		--includedir | --includedir=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				includedir="$(echo $1 | cut -d= -f2)"
+			else
+				includedir="$2"
+				shift
+			fi
+			;;
+		--target | --target=*)
+			if [ $(echo $1 | grep "=" -c) -ne 0 ]; then
+				target="$(echo $1 | cut -d= -f2)"
+			else
+				target="$2"
+				shift
+			fi
+			;;
+		--enable-w*)
+			CFLAGS="$CFLAGS -Wall"
+
+			if [ "$1" = "--enable-wextra" ] || [ "$1" = "--enable-werror" ]; then
+				CFLAGS="$CFLAGS -Wextra"
+			fi
+
+			if [ "$1" = "--enable-werror" ]; then
+				CFLAGS="$CFLAGS -Werror"
+			fi
+			;;
+		--help | --*)
+			printf "PocketLinux32's Generic C99 Configure System v0.01\n\n"
+			printf "Usage: $0 [OPTIONS]...\n\n"
+			echo "Install Options"
+			echo "--prefix=DIR		Sets install path (default=/usr/local)"
+			echo "--exec-prefix=DIR	Sets executable install path (default=prefix)"
+			echo "--bindir=DIR		Sets binary install path (default=exec_prefix/bin)"
+			echo "--libdir=DIR		Sets library install path (default=prefix/lib)"
+			echo "--includedir=DIR	Sets include headers install path (default=prefix/include)"
+			printf "\nCompile Options\n"
+			echo "--target=TARGET		Sets the target system"
+			echo "--enable-wall		Compiles the project with -Wall"
+			echo "--enable-wextra		Compiles the project with -Wextra (enables -Wall)"
+			echo "--enable-werror		Compiles the project with -Werror (enables -Wall -Wextra)"
+			exit 0
+			;;
+		CC=*)
+			CC=$(echo $1 | cut -d= -f2)
+			;;
+		AR=*)
+			AR=$(echo $1 | cut -d= -f2)
+			;;
+		RANLIB=*)
+			RANLIB=$(echo $1 | cut -d= -f2)
+			;;
+	esac
+	shift
+done
+
+generate_config

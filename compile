@@ -56,32 +56,37 @@ _runtime_calc(){
 	set -e
 }
 
-compile_lib(){
+compile_static_lib(){
 	mkdir obj -p
 
-	if [ "$STATIC" != "" ]; then
-		for i in $SRC; do
-			_compile_obj $i "static"
-		done
-		printf "Creating static library $1..."
-		$AR rc $LIBNAME.a $(find obj | grep static) 2>&1 >/dev/null
-		echo "Done."
-	fi
+	for i in $src; do
+		_compile_obj $i "static"
+	done
+	printf "Creating static library $1..."
+	$AR rc lib$libname.a $(find obj | grep static) 2>&1 >/dev/null
+	echo "Done."
+}
 
-	if [ "$SHARED" != "" ]; then
-		for i in $(ls src | grep '.c'); do
-			_compile_obj $i "shared"
-		done
-		printf "Creating shared library $1..."
-		$CC -shared $(find obj | grep shared) -o $LIBNAME.so $CFLAGS
-		echo "Done."
-		rm *.o -f
-	fi
+compile_shared_lib(){
+	mkdir obj -p
+
+	for i in $src; do
+		_compile_obj $i "shared"
+	done
+	printf "Creating shared library $1..."
+	$CC -shared $(find obj | grep shared) -o lib$libname.so $CFLAGS
+	echo "Done."
+	rm *.o -f
+}
+
+compile_lib(){
+	compile_static_lib
+	compile_shared_lib
 }
 
 compile_test(){
-	printf "Compiling test program $LIBTEST..."
-	$CC --static -Iinclude -L. -l$LIB $CFLAGS  $LIBTEST.c -o $LIBTEST.out
+	printf "Compiling test program $libtest..."
+	$CC --static -Iinclude -L. -l$libname $CFLAGS  $libtest.c -o $libtest.out
 	echo "Done."
 }
 

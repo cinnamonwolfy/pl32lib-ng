@@ -7,10 +7,7 @@
 #include <pl32-memory.h>
 
 #ifdef __cplusplus
-#include <cstdio>
 extern "C" {
-#else
-#include <stdio.h>
 #endif
 
 typedef struct plfile plfile_t;

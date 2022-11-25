@@ -24,21 +24,25 @@ typedef struct plvariable {
 } plvariable_t;
 
 typedef struct plfunctionptr {
-	int (*function)(plarray_t*, plgc_t*);
+	int (*function)(plarray_t*, plmt_t*);
 	char* name;
 } plfunctionptr_t;
 
+typedef struct plshell {
+	plarray_t* commandBuffer;
+	plarray_t* variableBuffer;
+	plarray_t* blockBuffers;
+	bool isInBlock;
+	plmt_t* mt;
+}
+
 void setProductStrings(char* productStr, char* srcUrl);
 
-char* plTokenize(char* string, char** leftoverStr, plgc_t* gc);
-plarray_t* plParser(char* input, plgc_t* gc);
-void plShellFreeVarBuf(plarray_t* variableBuf);
+char* plTokenize(char* string, char** leftoverStr, plmt_t* mt);
+plarray_t* plParser(char* input, plmt_t* mt);
+uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plmt_t** mt);
 
-uint8_t plShellVarMgmt(plarray_t* cmdline, bool* cmdlineIsNotCommand, plarray_t* variableBuf, plgc_t* gc);
-uint8_t plShellComInt(plarray_t* command, plarray_t* commandBuf, plgc_t* gc);
-uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plgc_t** gc);
-
-void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* comamndBuf, plgc_t* shellGC);
+void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* comamndBuf, plmt_t* shellGC);
 
 #ifdef __cplusplus
 }

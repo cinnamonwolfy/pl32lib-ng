@@ -9,7 +9,7 @@
 #include <termios.h>
 
 // Opens a terminal session
-plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
+plterminal_t* plOpenTerminal(char* path, plmt_t* mt){
 	plterminal_t* returnTerminal = NULL;
 
 	int fileDesc = open(path, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -17,8 +17,8 @@ plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
 		perror("plOpenTerminal");
 
 	if(fileDesc > 0){
-		returnTerminal = plGCAlloc(gc, sizeof(plterminal_t));
-		returnTerminal->termOptions = plGCAlloc(gc, sizeof(struct termios));
+		returnTerminal = plMTAlloc(mt, sizeof(plterminal_t));
+		returnTerminal->termOptions = plMTAlloc(mt, sizeof(struct termios));
 
 		returnTerminal->fDesc = fileDesc;
 	}
@@ -27,10 +27,10 @@ plterminal_t* plOpenTerminal(char* path, plgc_t* gc){
 }
 
 // Closes a terminal session
-void plCloseTerminal(plterminal_t* terminalSession, plgc_t* gc){
+void plCloseTerminal(plterminal_t* terminalSession, plmt_t* mt){
 	close(terminalSession->fDesc);
-	plGCFree(gc, terminalSession->termOptions);
-	plGCFree(gc, terminalSession);
+	plMTFree(mt, terminalSession->termOptions);
+	plMTFree(mt, terminalSession);
 }
 
 // Initializes the terminal session with settings similar to BSD raw mode
@@ -58,20 +58,20 @@ ssize_t plTermSendC(plterminal_t* terminalSession, char c){
 }
 
 // Gets byte array from the terminal session
-plarray_t* plTermGet(plterminal_t* terminalSession, plgc_t* gc){
-	plarray_t* returnString = plGCAlloc(gc, sizeof(plarray_t));
+plarray_t* plTermGet(plterminal_t* terminalSession, plmt_t* mt){
+	plarray_t* returnString = plMTAlloc(mt, sizeof(plarray_t));
 	char readChar;
 
-	returnString->array = plGCAlloc(gc, 2 * sizeof(char));
+	returnString->array = plMTAlloc(mt, 2 * sizeof(char));
 	returnString->size = 0;
 
 	while(read(terminalSession->fDesc, &readChar, 1) > 0){
 		if(returnString->size > 1){
-			void* tempVar = plGCAlloc(gc, (returnString->size + 1) * sizeof(char));
+			void* tempVar = plMTAlloc(mt, (returnString->size + 1) * sizeof(char));
 
 			if(!tempVar){
-				plGCFree(gc, returnString->array);
-				plGCFree(gc, returnString);
+				plMTFree(mt, returnString->array);
+				plMTFree(mt, returnString);
 				return NULL;
 			}
 
