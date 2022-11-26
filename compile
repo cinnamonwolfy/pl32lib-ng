@@ -126,8 +126,7 @@ fi
 . ./.config
 
 echo "Compiler: $CC"
-echo "Compiler Flags: $CFLAGS"
-echo "Build Type: $BUILD"
+printf "Compiler Flags: $CFLAGS\n\n"
 
 _runtime_calc start
 $action

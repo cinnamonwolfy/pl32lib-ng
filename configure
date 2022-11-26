@@ -1,6 +1,4 @@
 #!/bin/sh
-set -e
-
 CC="cc"
 CFLAGS="-std=c99"
 AR="ar"
@@ -10,6 +8,8 @@ exec_prefix="$prefix"
 bindir="$exec_prefix/bin"
 libdir="$prefix/lib"
 includedir="$prefix/include"
+posix=0
+indev=0
 
 update_prefixes(){
 	if [ "$1" = "" ]; then
@@ -26,11 +26,25 @@ toolchain_test(){
 }
 
 generate_config(){
-	echo "Detecting install prefix...$prefix"
-	echo "Detecting executable install prefix...$exec_prefix"
-	echo "Detecting binary install prefix...$bindir"
-	echo "Detecting library install prefix...$libdir"
-	echo "Detecting headers install prefix...$includedir"
+	if [ ! -f ./sources.conf ]; then
+		echo "Error: Sources file is missing!"
+		echo "Notice: If you're not the project maintainer, this is a bug. Please report this to the project maintainers."
+		exit 1
+	fi
+
+	. ./sources.conf
+
+	if [ "$src" = "" ]; then
+		echo "Error: Sources field is empty!"
+		echo "Notice: If you're not the project maintainer, this is a bug. Please report this to the project maintainers."
+		exit 1
+	fi
+
+	echo "Checking install prefix...$prefix"
+	echo "Checking executable install prefix...$exec_prefix"
+	echo "Checking binary install prefix...$bindir"
+	echo "Checking library install prefix...$libdir"
+	echo "Checking headers install prefix...$includedir"
 	printf "Detecting target system..."
 	if [ "$target" = "" ]; then
 		echo "native."
@@ -64,11 +78,19 @@ generate_config(){
 
 	toolchain_test
 
-	printf "CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\nprefix=\"$prefix\"\nexec_prefix=\"$exec_prefix\"\n" > ./.config
-	printf "bindir=\"$bindir\"\nlibdir=\"$libdir\"\nincludedir=\"$includedir\"\n" >> ./.config
+	if [ $posix -eq 1 ]; then
+		src="$src $src_posix"
+	fi
 
-	if [ -f ./config-template.conf ]; then
-		cat config-template.conf >> ./.config
+	if [ $indev -eq 1 ]; then
+		src="$src $src_indev"
+	fi
+
+	printf "CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\nprefix=\"$prefix\"\nexec_prefix=\"$exec_prefix\"\n" > ./.config
+	printf "bindir=\"$bindir\"\nlibdir=\"$libdir\"\nincludedir=\"$includedir\"\nsrc=\"$src\"\n" >> ./.config
+
+	if [ -f ./custom.conf ]; then
+		cat custom.conf >> ./.config
 	fi
 }
 
@@ -126,6 +148,12 @@ while [ $# -ne 0 ]; do
 				shift
 			fi
 			;;
+		--enable-posix)
+			posix=1
+			;;
+		--enable-indev)
+			indev=1
+			;;
 		--enable-w*)
 			CFLAGS="$CFLAGS -Wall"
 
@@ -141,16 +169,18 @@ while [ $# -ne 0 ]; do
 			printf "PocketLinux32's Generic C99 Configure System v0.01\n\n"
 			printf "Usage: $0 [OPTIONS]...\n\n"
 			echo "Install Options"
-			echo "--prefix=DIR		Sets install path (default=/usr/local)"
+			echo "--prefix=DIR		Set install path (default=/usr/local)"
 			echo "--exec-prefix=DIR	Sets executable install path (default=prefix)"
-			echo "--bindir=DIR		Sets binary install path (default=exec_prefix/bin)"
-			echo "--libdir=DIR		Sets library install path (default=prefix/lib)"
-			echo "--includedir=DIR	Sets include headers install path (default=prefix/include)"
+			echo "--bindir=DIR		Set binary install path (default=exec_prefix/bin)"
+			echo "--libdir=DIR		Set library install path (default=prefix/lib)"
+			echo "--includedir=DIR	Set include headers install path (default=prefix/include)"
 			printf "\nCompile Options\n"
-			echo "--target=TARGET		Sets the target system"
-			echo "--enable-wall		Compiles the project with -Wall"
-			echo "--enable-wextra		Compiles the project with -Wextra (enables -Wall)"
-			echo "--enable-werror		Compiles the project with -Werror (enables -Wall -Wextra)"
+			echo "--target=TARGET		Set the target system"
+			echo "--enable-posix		Compile POSIX modules/source files"
+			echo "--enable-indev		Compile incomplete modules/source files"
+			echo "--enable-wall		Compile with -Wall"
+			echo "--enable-wextra		Compile with -Wextra (enables -Wall)"
+			echo "--enable-werror		Compile with -Werror (enables -Wall -Wextra)"
 			exit 0
 			;;
 		CC=*)
