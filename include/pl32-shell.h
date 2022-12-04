@@ -1,10 +1,11 @@
 /*****************************************************************\
- pl32lib, v4.00
+ pl32lib-ng, v0.95
  (c) 2022 pocketlinux32, Under Lesser GPLv2.1
- pl32-shell.h: String manipulation, shell and parser module header
+ pl32-shell.h: Interpreter module header
 \*****************************************************************/
 #pragma once
-#include <pl32-memory.h>
+#include <pl32-token.h>
+#include <pl32-file.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,16 +34,13 @@ typedef struct plshell {
 	plarray_t* variableBuffer;
 	plarray_t* blockBuffers;
 	bool isInBlock;
-	plmt_t* mt;
-}
+	plmt_t* memTrack;
+} plshell_t;
 
 void setProductStrings(char* productStr, char* srcUrl);
 
-char* plTokenize(char* string, char** leftoverStr, plmt_t* mt);
-plarray_t* plParser(char* input, plmt_t* mt);
-uint8_t plShell(char* cmdline, plarray_t* variableBuf, plarray_t* commandBuf, plmt_t** mt);
-
-void plShellInteractive(char* prompt, bool showHelpAtStart, plarray_t* variableBuf, plarray_t* comamndBuf, plmt_t* shellGC);
+uint8_t plShell(char* cmdline, plshell_t* shellStats);
+void plShellInteractive(char* prompt, bool showHelpAtStart, plshell_t shellStats);
 
 #ifdef __cplusplus
 }

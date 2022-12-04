@@ -2,6 +2,7 @@
 set -e
 start_time=""
 end_time=""
+action="compile_lib"
 
 _compile_obj(){
 	extra_flag=""

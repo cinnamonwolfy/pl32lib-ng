@@ -1,9 +1,10 @@
 /******************************************************\
 * pl32-test: pl32lib testcase                          *
-* (c)2022 pocketlinux32, Under Lesser GPLv2.1 or later *
+* (c)2022 pocketlinux32, Under Mozilla Public License  *
 \******************************************************/
+#include <pl32-memory.h>
 #include <pl32-file.h>
-/*#include <pl32-term.h>*/
+#include <pl32-token.h>
 
 void printArray(int* array, size_t size){
 	printf("Printing out array:\n");
@@ -37,7 +38,7 @@ int testLoop(char* strToTokenize, plmt_t* mt){
 	}
 }
 
-int plMemoryTest(plarray_t* args, plmt_t* mt){
+int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
 	printCurrentMemUsg(mt);
 
 	printf("Allocating and initializing int array (4 ints)...");
@@ -95,7 +96,7 @@ int plMemoryTest(plarray_t* args, plmt_t* mt){
 	return 0;
 }
 
-int plFileTest(plarray_t* args, plmt_t* mt){
+int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 	char stringBuffer[4096] = "";
 	char filepath[256] = "src/pl32-file.c";
 	if(args->size > 1)
@@ -136,7 +137,7 @@ int plFileTest(plarray_t* args, plmt_t* mt){
 	return 0;
 }
 
-int plShellTest(plarray_t* args, plmt_t* mt){
+int plShellTest(/*plarray_t* args, */plmt_t* mt){
 	char* tknTestStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
 
 	printf("This is a test of the pl32-shell tokenizer\n\n");
@@ -152,27 +153,9 @@ int plShellTest(plarray_t* args, plmt_t* mt){
 	return 0;
 }
 
-/*int plTermTest(plarray_t* args, plmt_t* mt){
-	if(args->size < 2){
-		printf("Error: Not enough args\n");
-		printf("Usage: %s [serial-port]\n", ((char**)args->array)[0]);
-		return 1;
-	}
-
-	plterminal_t* terminal = plOpenTerminal(((char**)args->array)[1], mt);
-	if(!terminal)
-		return 2;
-
-	plTermRawInit(terminal);
-	plTermInteractive(terminal);
-	plCloseTerminal(terminal, mt);
-
-	return 0;
-}*/
-
 int main(int argc, const char* argv[]){
 	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
-	plarray_t commandBuf, variableBuf;
+/*	plarray_t commandBuf, variableBuf;
 
 	int plmajorver = 4;
 	int plminorver = 0;
@@ -212,9 +195,18 @@ int main(int argc, const char* argv[]){
 	((plvariable_t*)variableBuf.array)[3].name = "test_string";
 	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
 
-	if(argc > 1){
-		plShell(argv[1], &variableBuf, &commandBuf, &mainMT);
+	plShell(argv[1], &variableBuf, &commandBuf, &mainMT);*/
+
+	if(argc < 1)
+		return 1;
+
+	if(strcmp(argv[1], "parser-test") == 0){
+		plShellTest(mainMT);
+	}else if(strcmp(argv[1], "memory-test") == 0){
+		plMemoryTest(mainMT);
+	}else if(strcmp(argv[1], "file-test") == 0){
+		plFileTest(mainMT);
 	}else{
-		plShellInteractive(NULL, true, &variableBuf, &commandBuf, mainMT);
+		return 1;
 	}
 }

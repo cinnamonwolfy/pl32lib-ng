@@ -1,5 +1,5 @@
 /******************************************************************\
- pl32lib, v4.00
+ pl32lib-ng, v0.95
  (c)2022 pocketlinux32, Under Lesser GPLv2.1
  pl32-term.h: Serial communication module header (platform-specific)
 \*******************************************************************/
