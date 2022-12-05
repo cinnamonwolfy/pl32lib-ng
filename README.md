@@ -3,7 +3,7 @@
 pl32lib was a library containing boilerplate routines that I use for every
 project I made. pl32lib-ng is both a rewrite and relicensing of both the build
 system and the library itself. It builds C99-only modules by default, but it
-can be made
+can be configured to compile platform-specific modules if it's supported
 
 # Build instructions
 
@@ -22,6 +22,8 @@ meson compile
 ```
 
 To install the library and headers, run `meson install`
+
+**This is the recommended way to build pl32lib-ng**
 
 ## `./configure` and `./compile`
 
