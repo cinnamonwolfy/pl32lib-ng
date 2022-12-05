@@ -23,7 +23,7 @@ void printCurrentMemUsg(plmt_t* mt){
 
 int testLoop(char* strToTokenize, plmt_t* mt){
 	char* holder;
-	char* result = plTokenize(strToTokenize, &holder, mt);
+	char* result = plTokenizeStrtok(strToTokenize, &holder, mt);
 	int i = 2;
 
 	if(!result)
@@ -31,11 +31,13 @@ int testLoop(char* strToTokenize, plmt_t* mt){
 
 	printf("Token 1: %s\n", result);
 	plMTFree(mt, result);
-	while((result = plTokenize(holder, &holder, mt)) != NULL){
+	while((result = plTokenizeStrtok(holder, &holder, mt)) != NULL){
 		printf("Token %d: %s\n", i, result);
 		plMTFree(mt, result);
 		i++;
 	}
+
+	return 0;
 }
 
 int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
@@ -99,8 +101,8 @@ int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
 int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 	char stringBuffer[4096] = "";
 	char filepath[256] = "src/pl32-file.c";
-	if(args->size > 1)
-		strcpy(filepath, ((char**)args->array)[1]);
+	/*if(args->size > 1)
+		strcpy(filepath, ((char**)args->array)[1]);*/
 
 	printf("Opening an existing file...");
 	plfile_t* realFile = plFOpen(filepath, "r", mt);
@@ -124,7 +126,7 @@ int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 	plFPuts("test string getting sent to the yes\nnano", memFile);
 	plFSeek(memFile, 0, SEEK_SET);
 	printf("Done\n");
-	printf("Contents of file-in-memory:\n", stringBuffer);
+	printf("Contents of file-in-memory:\n");
 	while(plFGets(stringBuffer, 4095, memFile) != NULL){
 		printf("%s", stringBuffer);
 		for(int i = 0; i < 4096; i++)
@@ -138,11 +140,11 @@ int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 }
 
 int plShellTest(/*plarray_t* args, */plmt_t* mt){
-	char* tknTestStrings[5] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore lol", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes lol\"" };
+	char* tknTestStrings[6] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3" };
 
 	printf("This is a test of the pl32-shell tokenizer\n\n");
 
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 6; i++){
 		printf("Test %d:\n", i);
 		if(testLoop(tknTestStrings[i], mt)){
 			printf("An error occurred. Exiting...\n");
@@ -197,7 +199,7 @@ int main(int argc, const char* argv[]){
 
 	plShell(argv[1], &variableBuf, &commandBuf, &mainMT);*/
 
-	if(argc < 1)
+	if(argc < 2)
 		return 1;
 
 	if(strcmp(argv[1], "parser-test") == 0){

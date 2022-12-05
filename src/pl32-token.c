@@ -33,7 +33,7 @@ char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
 	/* Copies the memory block into the return pointer */
 	size_t strSize = endPtr - str;
 	retPtr = plMTAlloc(mt, strSize + 1);
-	memcpy(retPtr, string, strSize);
+	memcpy(retPtr, str, strSize);
 	retPtr[strSize] = '\0';
 
 	if(endPtr != searchLimit)
@@ -44,6 +44,7 @@ char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
 	return retPtr;
 }
 
+/* New implementation of plTokenize that uses pl32lib's strtok implementation */
 char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 	if(string == NULL || leftoverStr == NULL || mt == NULL)
 		return NULL;
@@ -53,11 +54,15 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 
 	char* tempPtr[2] = { strchr(string, '"'), strchr(string, '\'') };
 	char* spaceChar = strchr(string, ' ');
+
+	/* String checks */
 	bool noQuotesFound = (tempPtr[0] == NULL && tempPtr[1] == NULL);
-	bool noEndQuotesFound = (tempPtr[0] != NULL && strchr(tempPtr[0] + 1, '"') == NULL) || (tempPtr[1] != NULL && strchr(temPtr[1] + 1, '\'');
-	bool spaceComesFirst = ((tempPtr[0] != NULL && spaceChar < tempPtr[0]) || (tempPtr[1] != NULL && spaceChar < tempPtr[1]));
+	bool noEndQuotesFound = (tempPtr[0] != NULL && strchr(tempPtr[0] + 1, '"') == NULL) || (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
+	bool spaceComesFirst = (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]);
 	bool literalBeforeBasicStr = (tempPtr[1] != NULL && tempPtr[1] < tempPtr[0]);
 
+	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
+	\* use strtok to get a token surrounded by whitespace                                         */
 	if(noQuotesFound || noEndQuotesFound || (spaceChar != NULL && spaceComesFirst)){
 		return plStrtok(string, " ", leftoverStr, mt);
 	}else{
@@ -66,7 +71,7 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 
 		if(literalBeforeBasicStr && strchr(tempPtr[1] + 1, '\'') != NULL){
 			retPtr = plStrtok(tempPtr[1] + 1, "'", leftoverStr, mt);
-			if(*leftoverStr != NULL && *leftoverStr + 1 == searchLimit &&  *(*leftoverStr + 1) == ' ')
+			if(*leftoverStr != NULL && *leftoverStr + 1 == searchLimit)
 				*leftoverStr = NULL;
 
 			return retPtr;
@@ -75,10 +80,26 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 		char* startPtr = tempPtr[0] + 1;
 		char* endPtr = strchr(startPtr, '"');
 
-		if(endPtr == NULL)
-			return NULL;
+		while(endPtr != NULL && *(endPtr - 1) == '\\')
+			endPtr = strchr(endPtr + 1, '"');
 
-		
+		if(endPtr == NULL){
+			*leftoverStr = NULL;
+			return NULL;
+		}
+
+		size_t strSize = endPtr - startPtr;
+		retPtr = plMTAlloc(mt, strSize + 1);
+		memcpy(retPtr, startPtr, strSize);
+		retPtr[strSize] = '\0';
+
+		if(endPtr + 1 == searchLimit){
+			*leftoverStr = NULL;
+		}else{
+			*leftoverStr = endPtr + 1;
+		}
+
+		return retPtr;
 	}
 }
 
