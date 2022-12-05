@@ -8,7 +8,7 @@ subdir('include')
 subdir('src')
 
 pkg_mod = import('pkgconfig')
-pkg_mod.generate(libraries : 'pl32lib-ng',
+pkg_mod.generate(libraries : pl32lib_ng,
 				version : '0.95',
 				name : 'pl32lib-ng',
 				filebase : 'pl32',
@@ -17,7 +17,7 @@ pkg_mod.generate(libraries : 'pl32lib-ng',
 ## Tests
 testexe = executable('pl32-test.out', 'pl32-test.c',
 					include_directories : inc,
-					link_with : pl32lib)
+					link_with : pl32lib_ng)
 #test('Check Version', testexe, args : ['version'])
 #test('Show Memory Usage', testexe, args : ['show-memusg'])
 test('Parser', testexe, args : ['parser-test'])
