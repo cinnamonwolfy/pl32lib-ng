@@ -1,7 +1,7 @@
-/******************************************************\
-* pl32-test: pl32lib testcase                          *
-* (c)2022 pocketlinux32, Under Mozilla Public License  *
-\******************************************************/
+/****************************************\
+* pl32-test: pl32lib testcase            *
+* (c)2022 pocketlinux32, Under MPL v2.0  *
+\****************************************/
 #include <pl32-memory.h>
 #include <pl32-file.h>
 #include <pl32-token.h>
