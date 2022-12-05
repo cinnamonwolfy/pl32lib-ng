@@ -5,6 +5,7 @@
 #include <pl32-memory.h>
 #include <pl32-file.h>
 #include <pl32-token.h>
+bool nonInteractive = false;
 
 void printArray(int* array, size_t size){
 	printf("Printing out array:\n");
@@ -18,7 +19,8 @@ void printCurrentMemUsg(plmt_t* mt){
 
 	printf("Current RAM usage: %ld bytes\n", plMTMemAmnt(mt, PLMT_GET_USEDMEM, 0));
 	printf("Press Enter to continue test...");
-	gchVar = getchar();
+	if(!nonInteractive)
+		gchVar = getchar();
 }
 
 int testLoop(char* strToTokenize, plmt_t* mt){
@@ -26,7 +28,7 @@ int testLoop(char* strToTokenize, plmt_t* mt){
 	char* result = plTokenizeStrtok(strToTokenize, &holder, mt);
 	int i = 2;
 
-	if(!result)
+	if(result == NULL)
 		return 1;
 
 	printf("Token 1: %s\n", result);
@@ -58,8 +60,9 @@ int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
 	printf("Reallocating int array...");
 
 	void* tempPtr = plMTRealloc(mt, nano, sizeof(int) * 8);
-	if(!tempPtr){
+	if(tempPtr == NULL){
 		printf("Error!\n Error: plMTRealloc() returned NULL\n");
+		return 1;
 	}else{
 		nano = tempPtr;
 		printf("Done\n");
@@ -108,7 +111,7 @@ int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 	plfile_t* realFile = plFOpen(filepath, "r", mt);
 	plfile_t* memFile = plFOpen(NULL, "w+", mt);
 
-	if(!realFile){
+	if(realFile == NULL){
 		printf("Error!\nError opening file. Exiting...\n");
 		plFClose(memFile);
 		return 1;
@@ -201,6 +204,9 @@ int main(int argc, const char* argv[]){
 
 	if(argc < 2)
 		return 1;
+
+	if(argc > 2)
+		nonInteractive = true;
 
 	if(strcmp(argv[1], "parser-test") == 0){
 		plShellTest(mainMT);

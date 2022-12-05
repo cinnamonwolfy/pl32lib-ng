@@ -68,7 +68,7 @@ int plMTManage(plmt_t* mt, int mode, void* ptr, size_t size, void* ptr2){
 			if(mt->listAmnt >= mt->allocListAmnt){
 				void* tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
-				if(!tempPtr)
+				if(tempPtr == NULL)
 					return 1;
 
 				mt->ptrList = tempPtr;
