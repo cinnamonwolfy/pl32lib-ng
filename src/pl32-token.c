@@ -1,7 +1,7 @@
 /*****************************************************************\
  pl32lib-ng, v0.95
- (c) 2022 pocketlinux32, Under Lesser GPLv2.1
- pl32-token.c: String manipulation and parser module header
+ (c) 2022 pocketlinux32, Under MPL v2.0
+ pl32-token.c: String manipulation and parser module
 \*****************************************************************/
 #include <pl32-token.h>
 

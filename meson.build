@@ -1,6 +1,6 @@
 project('pl32lib-ng', 'c',
 		version : '0.95',
-		license : 'LGPL-2.1-or-later')
+		license : 'MPL-2.0')
 
 inc = include_directories('include')
 
