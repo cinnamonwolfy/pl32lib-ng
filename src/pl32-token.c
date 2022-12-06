@@ -1,5 +1,5 @@
 /*****************************************************************\
- pl32lib-ng, v0.95
+ pl32lib-ng, v0.96
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-token.c: String manipulation and parser module
 \*****************************************************************/
@@ -44,8 +44,8 @@ char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
 	return retPtr;
 }
 
-/* New implementation of plTokenize that uses pl32lib's strtok implementation */
-char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
+/* Tokenizes a string similarly to how it is done in a shell interpreter */
+char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 	if(string == NULL || leftoverStr == NULL || mt == NULL)
 		return NULL;
 
@@ -69,6 +69,7 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 		char* retPtr = NULL;
 		char* searchLimit = string + strlen(string);
 
+		/* If a literal string started before a basic one, tokenize using plStrtok */
 		if(literalBeforeBasicStr && strchr(tempPtr[1] + 1, '\'') != NULL){
 			retPtr = plStrtok(tempPtr[1] + 1, "'", leftoverStr, mt);
 			if(*leftoverStr != NULL && *leftoverStr + 1 == searchLimit)
@@ -77,22 +78,33 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 			return retPtr;
 		}
 
+		/* If none of the above is true, start tokenizing a basic string */
 		char* startPtr = tempPtr[0] + 1;
 		char* endPtr = strchr(startPtr, '"');
 
+		/* If the end quote is escaped, keep searching for an end quote */
 		while(endPtr != NULL && *(endPtr - 1) == '\\')
 			endPtr = strchr(endPtr + 1, '"');
 
+		/* If an end quote has not been found, return a NULL pointer */
 		if(endPtr == NULL){
 			*leftoverStr = NULL;
 			return NULL;
 		}
 
+		/* Copy the basic string into a memory-allocated buffer */
 		size_t strSize = endPtr - startPtr;
 		retPtr = plMTAlloc(mt, strSize + 1);
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
 
+		while((endPtr = strchr(retPtr, '\\')) != NULL){
+			memcpy(endPtr, endPtr+1, sizeof(endPtr+1));
+			endPtr++;
+		}
+
+		/* If the end quote is one char away from the end of the input string, *\
+		\* set *leftoverStr as NULL. Otherwise, set *leftoverStr as endPtr + 1 */
 		if(endPtr + 1 == searchLimit){
 			*leftoverStr = NULL;
 		}else{
@@ -101,70 +113,6 @@ char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt){
 
 		return retPtr;
 	}
-}
-
-/* Tokenizes string in a similar way an interactive command line would */
-char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
-	if(string == NULL || leftoverStr == NULL || mt == NULL)
-		return NULL;
-
-	char* tempPtr[2] = { strchr(string, '"'), strchr(string, ' ') };
-	char* searchLimit = string + strlen(string);
-	char* startPtr = NULL;
-	char* endPtr = NULL;
-	char* retPtr;
-
-	if(strlen(string) == 0){
-		return NULL;
-	}
-
-	/* If string starts with a space and string pointer is lower than the search limit, *\
-	\* keep increasing string pointer until it equals tempPtr[1]                        */
-	if(*string == ' '){
-		while(*string == ' ' && string < searchLimit)
-			string++;
-
-		if(tempPtr[1] < string)
-			tempPtr[1] = strchr(string, ' ');
-	}
-
-	/* If there are no string in quotes, or if the quotes come after a whitespace, assign the   *\
-	   beginning of the string to be returned as the pointer of the given string and the end of
-	\* the string as the next whitespace                                                        */
-	if((!tempPtr[0] && tempPtr[1]) || (tempPtr[1] && tempPtr[1] < tempPtr[0])){
-		startPtr = string;
-		endPtr = tempPtr[1];
-	/* Else, if the beginning of the given string begins with a quote, assign the beginning   *\
-	   of the string to be returned as the opening quote + 1 and the end of the string as the
-	\* closing quote                                                                          */
-	}else if(tempPtr[0] && tempPtr[0] == string){
-		startPtr = tempPtr[0] + 1;
-		endPtr = strchr(tempPtr[0] + 1, '"');
-	}
-
-	size_t strSize = (endPtr - startPtr);
-
-	/* If there's no whitespace or quotes in the given string, return the given string. */
-	if(!startPtr || !endPtr || !strSize){
-		if(strlen(string) != 0){
-			strSize = strlen(string);
-			*leftoverStr = NULL;
-			startPtr = string;
-		}else{
-			return NULL;
-		}
-	}else{
-	/* Else what remains of the given string into the leftover variable */
-		*leftoverStr = endPtr+1;
-	}
-
-	/* Allocate memory for return string, copy the selected part of the string, *\
-	\* and null-terminate the return string                                     */
-	retPtr = plMTAlloc(mt, (strSize + 1) * sizeof(char));
-	memcpy(retPtr, startPtr, strSize);
-
-	retPtr[strSize] = '\0';
-	return retPtr;
 }
 
 /* Parses a string into an array */

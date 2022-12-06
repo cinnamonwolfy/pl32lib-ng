@@ -1,5 +1,5 @@
 /*****************************************************************\
- pl32lib-ng, v0.95
+ pl32lib-ng, v0.96
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-token.h: String manipulation and parser module header
 \*****************************************************************/
@@ -11,7 +11,6 @@ extern "C" {
 #endif
 
 char* plStrtok(char* string, char* delimiter, char** leftoverStr, plmt_t* mt);
-char* plTokenizeStrtok(char* string, char** leftoverStr, plmt_t* mt);
 char* plTokenize(char* string, char** leftoverStr, plmt_t* mt);
 plarray_t* plParser(char* input, plmt_t* mt);
 
