@@ -142,11 +142,11 @@ int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 }
 
 int plShellTest(/*plarray_t* args, */plmt_t* mt){
-	char* tknTestStrings[7] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\" 'and just a literal string with no ending :3" };
+	char* tknTestStrings[8] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'" };
 
 	printf("This is a test of the pl32-shell tokenizer\n\n");
 
-	for(int i = 0; i < 7; i++){
+	for(int i = 0; i < 8; i++){
 		printf("Test %d:\n", i);
 		if(testLoop(tknTestStrings[i], mt)){
 			printf("An error occurred. Exiting...\n");

@@ -57,13 +57,14 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 
 	/* String checks */
 	bool noQuotesFound = (tempPtr[0] == NULL && tempPtr[1] == NULL);
-	bool noEndQuotesFound = (tempPtr[0] != NULL && strchr(tempPtr[0] + 1, '"') == NULL) || (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
+	bool noEndQuoteBasic = (tempPtr[0] != NULL && strchr(tempPtr[0] + 1, '"') == NULL);
+	bool noEndQuoteLiteral = (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
 	bool spaceComesFirst = (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]);
-	bool literalBeforeBasicStr = (tempPtr[1] != NULL && tempPtr[1] < tempPtr[0]);
+	bool literalBeforeBasicStr = (tempPtr[1] != NULL && (tempPtr[0] == NULL || tempPtr[1] < tempPtr[0]));
 
 	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
 	\* use strtok to get a token surrounded by whitespace                                         */
-	if(noQuotesFound || noEndQuotesFound || (spaceChar != NULL && spaceComesFirst)){
+	if(noQuotesFound || (noEndQuoteBasic && !literalBeforeBasicStr) || (noEndQuoteLiteral && literalBeforeBasicStr) || (spaceChar != NULL && spaceComesFirst)){
 		return plStrtok(string, " ", leftoverStr, mt);
 	}else{
 		char* retPtr = NULL;
@@ -98,10 +99,25 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
 
-		char* holderPtr;
-		while((holderPtr = strchr(retPtr, '\\')) != NULL){
-			memcpy(holderPtr - 1, holderPtr + 1, strlen(holderPtr + 1));
+		char* holderPtr = strchr(retPtr, '\\');
+		size_t sizeReducer = 0;
+		while(holderPtr != NULL){
+			memcpy(holderPtr, holderPtr + 1, strlen(holderPtr + 1));
 			holderPtr++;
+			sizeReducer++;
+			holderPtr = strchr(holderPtr, '\\');
+		}
+
+		if(sizeReducer != 0){
+			void* tempPtr = plMTRealloc(mt, retPtr, strSize + 1 - sizeReducer);
+			if(tempPtr == NULL){
+				free(retPtr);
+				*leftoverStr = NULL;
+				return NULL;
+			}
+
+			retPtr = tempPtr;
+			retPtr[strSize - sizeReducer] = '\0';
 		}
 
 		/* If the end quote is one char away from the end of the input string, *\
