@@ -8,7 +8,7 @@ exec_prefix="$prefix"
 bindir="$exec_prefix/bin"
 libdir="$prefix/lib"
 includedir="$prefix/include"
-posix=0
+platform="c"
 indev=0
 
 update_prefixes(){
@@ -18,12 +18,6 @@ update_prefixes(){
 	bindir="$exec_prefix/bin"
 	libdir="$prefix/lib"
 	includedir="$prefix/include"
-}
-
-toolchain_test(){
-	printf "Is C compiler C99-compliant..."
-	$CC $CFLAGS pl-tests.c
-	return 0
 }
 
 generate_config(){
@@ -77,18 +71,35 @@ generate_config(){
 		echo "$CC"
 	fi
 
-	#toolchain_test
+	compile_config_str="CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\n"
+	install_config_str="prefix=\"$prefix\"\nexec_prefix=\"$exec_prefix\"\nbindir=\"$bindir\"\nlibdir=\"$libdir\"\nincludedir=\"$includedir\"\n"
+	src_config_str=""
 
-	if [ $posix -eq 1 ]; then
-		src="$src $src_posix"
+	if [ "$platform" != "c" ]; then
+		case $platform in
+			win32 | mingw)
+				if [ "$separate_platforms" != ""]; then
+					src_config_str="src_win32=\"$src_win32\"\n"
+				else
+					src="$src $src_win32"
+				fi
+				;;
+			posix)
+				if [ "$separate_platforms" != ""]; then
+					src_config_str="src_posix=\"$src_posix\"\n"
+				else
+					src="$src $src_posix"
+				fi
+				;;
+		esac
 	fi
 
 	if [ $indev -eq 1 ]; then
 		src="$src $src_indev"
 	fi
 
-	printf "CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\nprefix=\"$prefix\"\nexec_prefix=\"$exec_prefix\"\n" > ./.config
-	printf "bindir=\"$bindir\"\nlibdir=\"$libdir\"\nincludedir=\"$includedir\"\nsrc=\"$src\"\n" >> ./.config
+	printf "$compile_config_str\n$install_config_str\n" > ./.config
+	printf "src=\"$src\"\n$src_config_str" >> ./.config
 
 	if [ -f ./custom.conf ]; then
 		cat custom.conf >> ./.config
@@ -149,9 +160,6 @@ while [ $# -ne 0 ]; do
 				shift
 			fi
 			;;
-		--enable-posix)
-			posix=1
-			;;
 		--enable-indev)
 			indev=1
 			;;
@@ -170,26 +178,31 @@ while [ $# -ne 0 ]; do
 			printf "PocketLinux32's Generic C99 Configure System v0.02\n\n"
 			printf "Usage: $0 [OPTIONS]...\n\n"
 			echo "Install Options"
-			echo "--prefix=DIR		Set install path (default=/usr/local)"
-			echo "--exec-prefix=DIR	Sets executable install path (default=prefix)"
-			echo "--bindir=DIR		Set binary install path (default=exec_prefix/bin)"
-			echo "--libdir=DIR		Set library install path (default=prefix/lib)"
-			echo "--includedir=DIR	Set include headers install path (default=prefix/include)"
+			echo "--prefix=DIR			Set install path (default=/usr/local)"
+			echo "--exec-prefix=DIR		Sets executable install path (default=prefix)"
+			echo "--bindir=DIR			Set binary install path (default=exec_prefix/bin)"
+			echo "--libdir=DIR			Set library install path (default=prefix/lib)"
+			echo "--includedir=DIR		Set include headers install path (default=prefix/include)"
 			printf "\nCompile Options\n"
-			echo "--target=TARGET		Set the target system"
-			echo "--enable-posix		Compile POSIX modules/source files"
-			echo "--enable-indev		Compile incomplete modules/source files"
-			echo "--enable-wall		Compile with -Wall"
-			echo "--enable-wextra		Compile with -Wextra (enables -Wall)"
-			echo "--enable-werror		Compile with -Werror (enables -Wall -Wextra)"
+			echo "--target=TARGET			Set the target system"
+			echo "--enable-nonportable		Compile platform-specific modules/source files"
+			echo "--enable-indev			Compile incomplete modules/source files"
+			echo "--enable-wall			Compile with -Wall"
+			echo "--enable-wextra			Compile with -Wextra (enables -Wall)"
+			echo "--enable-werror			Compile with -Werror (enables -Wall -Wextra)"
 			printf "\nInfluential Environment Variables\n"
+			echo "  CC				C compiler"
+			echo "  CFLAGS			Flags passed to the C compiler"
+			echo "  AR				Archival tool for creating static libraries"
+			echo "  RANLIB			Like AR, but indexes symbols in an AR archive"
 			exit 0
 			;;
 		CC=*)
 			CC=$(echo $1 | cut -d= -f2)
 			;;
 		CFLAGS=*)
-			CFLAGS="$CFLAGS $(echo $1 | cut -d -f2)"
+			CFLAGS="$CFLAGS $(echo $1 | cut -d= -f2)"
+			;;
 		AR=*)
 			AR=$(echo $1 | cut -d= -f2)
 			;;

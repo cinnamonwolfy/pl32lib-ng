@@ -1,11 +1,10 @@
 /*****************************************************************\
- pl32lib-ng, v0.95
+ pl-shell, v0.90
  (c) 2022 pocketlinux32, Under MPL v2.0
- pl32-shell.h: Interpreter module header
+ Header file
 \*****************************************************************/
 #pragma once
-#include <pl32-token.h>
-#include <pl32-file.h>
+#include <pl32.h>
 
 #ifdef __cplusplus
 extern "C" {

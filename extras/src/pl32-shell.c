@@ -1,7 +1,7 @@
 /**********************************************************\
- pl32lib-ng, v0.95
+ pl-shell, v0.90
  (c) 2022 pocketlinux32, Under MPL v2.0
- pl32-shell.c: Interpreter module
+ Source File
 \**********************************************************/
 #include <pl32-shell.h>
 

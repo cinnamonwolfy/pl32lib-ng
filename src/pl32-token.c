@@ -1,5 +1,5 @@
 /*****************************************************************\
- pl32lib-ng, v0.96
+ pl32lib-ng, v1.00
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-token.c: String manipulation and parser module
 \*****************************************************************/
@@ -98,9 +98,10 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
 
-		while((endPtr = strchr(retPtr, '\\')) != NULL){
-			memcpy(endPtr, endPtr+1, sizeof(endPtr+1));
-			endPtr++;
+		char* holderPtr;
+		while((holderPtr = strchr(retPtr, '\\')) != NULL){
+			memcpy(holderPtr - 1, holderPtr + 1, strlen(holderPtr + 1));
+			holderPtr++;
 		}
 
 		/* If the end quote is one char away from the end of the input string, *\
