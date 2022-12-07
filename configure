@@ -21,7 +21,8 @@ update_prefixes(){
 }
 
 toolchain_test(){
-	# TODO: Add compiler/toolchain test
+	printf "Is C compiler C99-compliant..."
+	$CC $CFLAGS pl-tests.c
 	return 0
 }
 
@@ -76,7 +77,7 @@ generate_config(){
 		echo "$CC"
 	fi
 
-	toolchain_test
+	#toolchain_test
 
 	if [ $posix -eq 1 ]; then
 		src="$src $src_posix"
@@ -166,7 +167,7 @@ while [ $# -ne 0 ]; do
 			fi
 			;;
 		--help | --*)
-			printf "PocketLinux32's Generic C99 Configure System v0.01\n\n"
+			printf "PocketLinux32's Generic C99 Configure System v0.02\n\n"
 			printf "Usage: $0 [OPTIONS]...\n\n"
 			echo "Install Options"
 			echo "--prefix=DIR		Set install path (default=/usr/local)"
@@ -181,11 +182,14 @@ while [ $# -ne 0 ]; do
 			echo "--enable-wall		Compile with -Wall"
 			echo "--enable-wextra		Compile with -Wextra (enables -Wall)"
 			echo "--enable-werror		Compile with -Werror (enables -Wall -Wextra)"
+			printf "\nInfluential Environment Variables\n"
 			exit 0
 			;;
 		CC=*)
 			CC=$(echo $1 | cut -d= -f2)
 			;;
+		CFLAGS=*)
+			CFLAGS="$CFLAGS $(echo $1 | cut -d -f2)"
 		AR=*)
 			AR=$(echo $1 | cut -d= -f2)
 			;;
