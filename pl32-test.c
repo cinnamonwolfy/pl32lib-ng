@@ -162,10 +162,13 @@ int main(int argc, const char* argv[]){
 		nonInteractive = true;
 
 	if(strcmp(argv[1], "parser-test") == 0){
-		return plShellTest(mainMT);
+		return plTokenTest(mainMT);
 	}else if(strcmp(argv[1], "memory-test") == 0){
 		return plMemoryTest(mainMT);
 	}else if(strcmp(argv[1], "file-test") == 0){
+		if(argc > 2)
+			return plFileTest(argv[2], mainMT);
+
 		return plFileTest(NULL, mainMT);
 	}else{
 		return 1;
