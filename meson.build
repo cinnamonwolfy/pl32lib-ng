@@ -26,4 +26,4 @@ testexe = executable('pl32-test.out', 'pl32-test.c',
 #test('Show Memory Usage', testexe, args: ['show-memusg'])
 test('Parser', testexe, args: ['parser-test'])
 test('Memory Allocation', testexe, args: ['memory-test', 'non-interactive'])
-test('File Reading', testexe, args: ['file-test', '/usr/include/stdio.h'])
+test('File Reading', testexe, args: ['file-test'])
