@@ -7,7 +7,7 @@ action="compile_lib"
 _compile_obj(){
 	extra_flag=""
 	printf "Compiling $1 ($2)..."
-	basename=$(echo $1 | cut -d. -f1)
+	basename=$(echo $(basename $1) | cut -d. -f1)
 	if [ -f obj/$basename-$2.o ]; then
 		echo "Already Built."
 		return 0
@@ -16,7 +16,7 @@ _compile_obj(){
 			extra_flag="-fPIC"
 		fi
 
-		$CC -c $extra_flag -Iinclude src/$1 -o obj/$basename-$2.o $CFLAGS
+		$CC -c $extra_flag -Iinclude $1 -o obj/$basename-$2.o $CFLAGS
 		echo "Done."
 	fi
 }
@@ -58,10 +58,15 @@ _runtime_calc(){
 }
 
 compile_static_lib(){
+	if [ "$1" = "" ]; then
+		srcdir="src"
+	else
+		srcdir="$1"
+	fi
 	mkdir obj -p
 
 	for i in $src; do
-		_compile_obj $i "static"
+		_compile_obj $srcdir/$i "static"
 	done
 	printf "Creating static library $1..."
 	$AR rc lib$libname.a $(find obj | grep static) 2>&1 >/dev/null
@@ -69,10 +74,15 @@ compile_static_lib(){
 }
 
 compile_shared_lib(){
+	if [ "$1" = "" ]; then
+		srcdir="src"
+	else
+		srcdir="$1"
+	fi
 	mkdir obj -p
 
 	for i in $src; do
-		_compile_obj $i "shared"
+		_compile_obj $srcdir/$i "shared"
 	done
 	printf "Creating shared library $1..."
 	$CC -shared $(find obj | grep shared) -o lib$libname.so $CFLAGS
@@ -80,15 +90,15 @@ compile_shared_lib(){
 	rm *.o -f
 }
 
-compile_lib(){
-	compile_static_lib
-	compile_shared_lib
-}
-
 compile_test(){
 	printf "Compiling test program $libtest..."
 	$CC $libtest.c -Iinclude -L. -l$libname -static $CFLAGS -o $libtest.out
 	echo "Done."
+}
+
+compile_lib(){
+	compile_static_lib
+	compile_shared_lib
 }
 
 install_lib(){

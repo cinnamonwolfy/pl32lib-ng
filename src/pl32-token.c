@@ -32,7 +32,7 @@ char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
 
 	/* Copies the memory block into the return pointer */
 	size_t strSize = endPtr - str;
-	retPtr = plMTAlloc(mt, strSize + 1);
+	retPtr = plMTAllocE(mt, strSize + 1);
 	memcpy(retPtr, str, strSize);
 	retPtr[strSize] = '\0';
 
@@ -95,7 +95,7 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 
 		/* Copy the basic string into a memory-allocated buffer */
 		size_t strSize = endPtr - startPtr;
-		retPtr = plMTAlloc(mt, strSize + 1);
+		retPtr = plMTAllocE(mt, strSize + 1);
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
 
@@ -138,9 +138,9 @@ plarray_t* plParser(char* input, plmt_t* mt){
 		return NULL;
 
 	char* leftoverStr;
-	plarray_t* returnStruct = plMTAlloc(mt, sizeof(plarray_t));
+	plarray_t* returnStruct = plMTAllocE(mt, sizeof(plarray_t));
 	returnStruct->size = 1;
-	returnStruct->array = plMTAlloc(mt, 2 * sizeof(char*));
+	returnStruct->array = plMTAllocE(mt, 2 * sizeof(char*));
 
 	/* First token */
 	char* tempPtr = plTokenize(input, &leftoverStr, mt);

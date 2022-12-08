@@ -41,12 +41,12 @@ int testLoop(char* strToTokenize, plmt_t* mt){
 	return 0;
 }
 
-int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
+int plMemoryTest(plmt_t* mt){
 	printCurrentMemUsg(mt);
 
 	printf("Allocating and initializing int array (4 ints)...");
 
-	int* nano = plMTAlloc(mt, sizeof(int) * 4);
+	int* nano = plMTAllocE(mt, sizeof(int) * 4);
 	for(int i = 0; i < 4; i++){
 		nano[i] = i + 1;
 	}
@@ -59,52 +59,47 @@ int plMemoryTest(/*plarray_t* args, */plmt_t* mt){
 	printf("Reallocating int array...");
 
 	void* tempPtr = plMTRealloc(mt, nano, sizeof(int) * 8);
-	if(tempPtr == NULL){
-		printf("Error!\n Error: plMTRealloc() returned NULL\n");
-		return 1;
-	}else{
-		nano = tempPtr;
-		printf("Done\n");
-		printCurrentMemUsg(mt);
+	nano = tempPtr;
+	printf("Done\n");
+	printCurrentMemUsg(mt);
 
-		printf("Deallocating int array...");
-		plMTFree(mt, nano);
-		printf("Done\n");
-		printCurrentMemUsg(mt);
+	printf("Deallocating int array...");
+	plMTFree(mt, nano);
+	printf("Done\n");
+	printCurrentMemUsg(mt);
 
-		printf("Testing double free protection...");
-		plMTFree(mt, nano);
-		printf("Done\n");
+	printf("Testing double free protection...");
+	plMTFree(mt, nano);
+	printf("Done\n");
 
-		printf("Allocating multiple arrays of multiple sizes...");
+	printf("Allocating multiple arrays of multiple sizes...");
 
-		char* nano2 = plMTAlloc(mt, sizeof(char) * 16);
-		char** nano3 = plMTAlloc(mt, sizeof(char*) * 4);
-		int* nano4 = plMTAlloc(mt, sizeof(int) * 10);
-		int* nano5 = plMTAlloc(mt, sizeof(int) * 20);
+	char* nano2 = plMTAllocE(mt, sizeof(char) * 16);
+	char** nano3 = plMTAllocE(mt, sizeof(char*) * 4);
+	int* nano4 = plMTAllocE(mt, sizeof(int) * 10);
+	int* nano5 = plMTAllocE(mt, sizeof(int) * 20);
 
-		printf("Done\n");
-		printCurrentMemUsg(mt);
+	printf("Done\n");
+	printCurrentMemUsg(mt);
 
-		printf("Deallocating arrays...");
+	printf("Deallocating arrays...");
 
-		plMTFree(mt, nano2);
-		plMTFree(mt, nano3);
-		plMTFree(mt, nano4);
-		plMTFree(mt, nano5);
+	plMTFree(mt, nano2);
+	plMTFree(mt, nano3);
+	plMTFree(mt, nano4);
+	plMTFree(mt, nano5);
 
-		printf("Done\n");
-		printCurrentMemUsg(mt);
-	}
+	printf("Done\n");
+	printCurrentMemUsg(mt);
 
 	return 0;
 }
 
-int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
+int plFileTest(char* customFile, plmt_t* mt){
 	char stringBuffer[4096] = "";
 	char filepath[256] = "src/pl32-file.c";
-	/*if(args->size > 1)
-		strcpy(filepath, ((char**)args->array)[1]);*/
+	if(customFile != NULL)
+		strcpy(filepath, customFile);
 
 	printf("Opening an existing file...");
 	plfile_t* realFile = plFOpen(filepath, "r", mt);
@@ -141,10 +136,10 @@ int plFileTest(/*plarray_t* args,*/ plmt_t* mt){
 	return 0;
 }
 
-int plShellTest(/*plarray_t* args, */plmt_t* mt){
+int plTokenTest(plmt_t* mt){
 	char* tknTestStrings[8] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'" };
 
-	printf("This is a test of the pl32-shell tokenizer\n\n");
+	printf("This is a test of the pl32lib-ng tokenizer\n\n");
 
 	for(int i = 0; i < 8; i++){
 		printf("Test %d:\n", i);
@@ -159,47 +154,6 @@ int plShellTest(/*plarray_t* args, */plmt_t* mt){
 
 int main(int argc, const char* argv[]){
 	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
-/*	plarray_t commandBuf, variableBuf;
-
-	int plmajorver = 4;
-	int plminorver = 0;
-	int birthyear = 2020;
-	char string[16] = "Hello, World!";
-
-	commandBuf.array = plMTAlloc(mainMT, sizeof(plfunctionptr_t) * 4);
-	commandBuf.size = 4;
-	commandBuf.isMemAlloc = true;
-	variableBuf.array = plMTAlloc(mainMT, sizeof(plvariable_t) * 4);
-	variableBuf.size = 4;
-	variableBuf.isMemAlloc = true;
-
-	((plfunctionptr_t*)commandBuf.array)[0].function = plShellTest;
-	((plfunctionptr_t*)commandBuf.array)[0].name = "parser-test";
-	((plfunctionptr_t*)commandBuf.array)[1].function = plMemoryTest;
-	((plfunctionptr_t*)commandBuf.array)[1].name = "memory-test";
-	((plfunctionptr_t*)commandBuf.array)[2].function = plFileTest;
-	((plfunctionptr_t*)commandBuf.array)[2].name = "file-test";
-	((plfunctionptr_t*)commandBuf.array)[3].function = plTermTest;
-	((plfunctionptr_t*)commandBuf.array)[3].name = "term-test";
-
-	((plvariable_t*)variableBuf.array)[0].varptr = &plmajorver;
-	((plvariable_t*)variableBuf.array)[0].type = PLSHVAR_INT;
-	((plvariable_t*)variableBuf.array)[0].name = "plver";
-	((plvariable_t*)variableBuf.array)[0].isMemAlloc = false;
-	((plvariable_t*)variableBuf.array)[1].varptr = &plminorver;
-	((plvariable_t*)variableBuf.array)[1].type = PLSHVAR_INT;
-	((plvariable_t*)variableBuf.array)[1].name = "plfeatlvl";
-	((plvariable_t*)variableBuf.array)[1].isMemAlloc = false;
-	((plvariable_t*)variableBuf.array)[2].varptr = &birthyear;
-	((plvariable_t*)variableBuf.array)[2].type = PLSHVAR_INT;
-	((plvariable_t*)variableBuf.array)[2].name = "birthyear";
-	((plvariable_t*)variableBuf.array)[2].isMemAlloc = false;
-	((plvariable_t*)variableBuf.array)[3].varptr = string;
-	((plvariable_t*)variableBuf.array)[3].type = PLSHVAR_STRING;
-	((plvariable_t*)variableBuf.array)[3].name = "test_string";
-	((plvariable_t*)variableBuf.array)[3].isMemAlloc = false;
-
-	plShell(argv[1], &variableBuf, &commandBuf, &mainMT);*/
 
 	if(argc < 2)
 		return 1;
@@ -208,11 +162,11 @@ int main(int argc, const char* argv[]){
 		nonInteractive = true;
 
 	if(strcmp(argv[1], "parser-test") == 0){
-		plShellTest(mainMT);
+		return plShellTest(mainMT);
 	}else if(strcmp(argv[1], "memory-test") == 0){
-		plMemoryTest(mainMT);
+		return plMemoryTest(mainMT);
 	}else if(strcmp(argv[1], "file-test") == 0){
-		plFileTest(mainMT);
+		return plFileTest(NULL, mainMT);
 	}else{
 		return 1;
 	}

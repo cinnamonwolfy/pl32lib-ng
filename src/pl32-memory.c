@@ -20,6 +20,12 @@ struct plmt {
 	size_t maxMemory;
 };
 
+/* Aborts the program. It's called whenever malloc fails to allocate */
+void plMTMemError(){
+	printf("Error: Out of memory\n");
+	abort();
+}
+
 /* Creates and initializes a memory allocation tracker */
 plmt_t* plMTInit(size_t maxMemoryInit){
 	plmt_t* returnMT = malloc(sizeof(plmt_t));
@@ -27,6 +33,9 @@ plmt_t* plMTInit(size_t maxMemoryInit){
 	returnMT->listAmnt = 0;
 	returnMT->allocListAmnt = 2;
 	returnMT->usedMemory = 0;
+
+	if(returnMT == NULL || returnMT->ptrList == NULL)
+		plMTMemError();
 
 	if(!maxMemoryInit){
 		returnMT->maxMemory = 128 * 1024 * 1024;
@@ -69,7 +78,7 @@ int plMTManage(plmt_t* mt, int mode, void* ptr, size_t size, void* ptr2){
 				void* tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
 				if(tempPtr == NULL)
-					return 1;
+					plMTMemError();
 
 				mt->ptrList = tempPtr;
 				mt->allocListAmnt++;
@@ -134,10 +143,16 @@ void* plMTAlloc(plmt_t* mt, size_t size){
 	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
-	if(plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL)){
-		free(tempPtr);
-		return NULL;
-	}
+	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
+	return tempPtr;
+}
+
+/* plMTAlloc() wrapper that mimics BSD's emalloc behavior */
+void* plMTAllocE(plmt_t* mt, size_t size){
+	void* tempPtr = plMTAlloc(mt, size);
+
+	if(tempPtr == NULL)
+		plMTMemError();
 
 	return tempPtr;
 }
@@ -149,11 +164,7 @@ void* plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
-	if(plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL)){
-		free(tempPtr);
-		return NULL;
-	}
-
+	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
 	return tempPtr;
 }
 

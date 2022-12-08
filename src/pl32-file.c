@@ -19,12 +19,12 @@ plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
 	plfile_t* returnStruct = NULL;
 
 	if(mode){
-		returnStruct = plMTAlloc(mt, sizeof(plfile_t));
+		returnStruct = plMTAllocE(mt, sizeof(plfile_t));
 
 		/* If no filename is given, set up a file in memory */
 		if(!filename){
 			returnStruct->fileptr = NULL;
-			returnStruct->strbuf = plMTAlloc(mt, 4098);
+			returnStruct->strbuf = plMTAllocE(mt, 4098);
 			returnStruct->bufsize = 4098;
 		}else{
 			returnStruct->fileptr = fopen(filename, mode);
@@ -39,7 +39,7 @@ plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
 
 		returnStruct->mtptr = mt;
 		returnStruct->seekbyte = 0;
-		returnStruct->mode = plMTAlloc(mt, (strlen(mode)+1) * sizeof(char));
+		returnStruct->mode = plMTAllocE(mt, (strlen(mode)+1) * sizeof(char));
 		strcpy(returnStruct->mode, mode);
 	}
 

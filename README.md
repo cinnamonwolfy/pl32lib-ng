@@ -12,6 +12,8 @@ There are two ways to build pl32lib-ng: By using Meson or by running
 
 ## Meson
 
+**This is the recommended way to build pl32lib-ng**
+
 To build using Meson, create an empty build folder within the project root, and
 then run `meson setup` and `meson compile`:
 ```sh
@@ -23,9 +25,9 @@ meson compile
 
 To install the library and headers, run `meson install`
 
-**This is the recommended way to build pl32lib-ng**
-
 ## `./configure` and `./compile`
+
+**NOTICE: Only use this one for experimental features**
 
 To build the pl32lib-ng libraries, you first run `./configure` and then you run
 `./compile` to compile both the static and shared libraries. If you want to

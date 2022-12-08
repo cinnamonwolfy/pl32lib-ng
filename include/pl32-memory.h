@@ -21,10 +21,10 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define PL32LIB_VERSION "4.00"
-#define PL32LIB_API_VER 4
-#define PL32LIB_FEATURELVL 0
-#define PL32LIB_PATCHLVL 0
+#define PL32LIBNG_VERSION "1.00"
+#define PL32LIBNG_API_VER 1
+#define PL32LIBNG_FEATURELVL 0
+#define PL32LIBNG_PATCHLVL 0
 
 #define PLMT_STOP 1
 #define PLMT_SEARCHPTR 2
@@ -49,6 +49,7 @@ void plMTStop(plmt_t* mt);
 size_t plMTMemAmnt(plmt_t* mt, int action, size_t size);
 
 void* plMTAlloc(plmt_t* mt, size_t size);
+void* plMTAllocE(plmt_t* mt, size_t size);
 void* plMTCalloc(plmt_t* mt, size_t amount, size_t size);
 void* plMTRealloc(plmt_t* mt, void* pointer, size_t size);
 void plMTFree(plmt_t* mt, void* pointer);
