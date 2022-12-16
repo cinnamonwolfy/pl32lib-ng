@@ -142,7 +142,7 @@ fi
 . ./.config
 
 echo "Compiler: $CC"
-printf "Compiler Flags: $CFLAGS\n\n"
+echo "Compiler Flags: $CFLAGS"
 printf "Linker Flags: $LDFLAGS\n\n"
 
 _runtime_calc start
