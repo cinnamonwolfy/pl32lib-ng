@@ -21,8 +21,8 @@ update_prefixes(){
 }
 
 generate_config(){
-	if [ ! -f ./sources.conf ]; then
-		echo "Error: Sources file is missing!"
+	if [ ! -f ./defaults.conf ]; then
+		echo "Error: Defaults file is missing!"
 		echo "Notice: If you're not the project maintainer, this is a bug. Please report this to the project maintainers."
 		exit 1
 	fi
