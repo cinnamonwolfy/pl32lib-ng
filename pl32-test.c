@@ -14,7 +14,7 @@ void printArray(int* array, size_t size){
 }
 
 void printCurrentMemUsg(plmt_t* mt){
-	char gchVar;
+	byte_t gchVar;
 
 	printf("Current RAM usage: %ld bytes\n", plMTMemAmnt(mt, PLMT_GET_USEDMEM, 0));
 	printf("Press Enter to continue test...");
@@ -22,9 +22,9 @@ void printCurrentMemUsg(plmt_t* mt){
 		gchVar = getchar();
 }
 
-int testLoop(char* strToTokenize, plmt_t* mt){
-	char* holder;
-	char* result = plTokenize(strToTokenize, &holder, mt);
+int testLoop(string_t strToTokenize, plmt_t* mt){
+	string_t holder;
+	string_t result = plTokenize(strToTokenize, &holder, mt);
 	int i = 2;
 
 	if(result == NULL)
@@ -58,7 +58,7 @@ int plMemoryTest(plmt_t* mt){
 
 	printf("Reallocating int array...");
 
-	void* tempPtr = plMTRealloc(mt, nano, sizeof(int) * 8);
+	memptr_t tempPtr = plMTRealloc(mt, nano, sizeof(int) * 8);
 	nano = tempPtr;
 	printf("Done\n");
 	printCurrentMemUsg(mt);
@@ -74,8 +74,8 @@ int plMemoryTest(plmt_t* mt){
 
 	printf("Allocating multiple arrays of multiple sizes...");
 
-	char* nano2 = plMTAllocE(mt, sizeof(char) * 16);
-	char** nano3 = plMTAllocE(mt, sizeof(char*) * 4);
+	string_t nano2 = plMTAllocE(mt, sizeof(byte_t) * 16);
+	string_t* nano3 = plMTAllocE(mt, sizeof(string_t) * 4);
 	int* nano4 = plMTAllocE(mt, sizeof(int) * 10);
 	int* nano5 = plMTAllocE(mt, sizeof(int) * 20);
 
@@ -95,9 +95,9 @@ int plMemoryTest(plmt_t* mt){
 	return 0;
 }
 
-int plFileTest(char* customFile, plmt_t* mt){
-	char stringBuffer[4096] = "";
-	char filepath[256] = "src/pl32-file.c";
+int plFileTest(string_t customFile, plmt_t* mt){
+	byte_t stringBuffer[4096] = "";
+	byte_t filepath[256] = "src/pl32-file.c";
 	if(customFile != NULL)
 		strcpy(filepath, customFile);
 
@@ -137,7 +137,7 @@ int plFileTest(char* customFile, plmt_t* mt){
 }
 
 int plTokenTest(plmt_t* mt){
-	char* tknTestStrings[8] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'" };
+	string_t tknTestStrings[8] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'" };
 
 	printf("This is a test of the pl32lib-ng tokenizer\n\n");
 
@@ -152,7 +152,7 @@ int plTokenTest(plmt_t* mt){
 	return 0;
 }
 
-int main(int argc, const char* argv[]){
+int main(int argc, string_t argv[]){
 	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
 
 	if(argc < 2)

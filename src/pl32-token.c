@@ -1,18 +1,18 @@
 /*****************************************************************\
- pl32lib-ng, v1.00
+ pl32lib-ng, v1.01
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-token.c: String manipulation and parser module
 \*****************************************************************/
 #include <pl32-token.h>
 
 /* A thread-safe reimplementation of Standard C function strtok */
-char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
+string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* mt){
 	if(str == NULL || delim == NULL || leftoverStr == NULL || mt == NULL)
 		return NULL;
 
-	char* retPtr;
-	char* endPtr = strstr(str, delim);
-	char* searchLimit = str + strlen(str);
+	string_t retPtr;
+	string_t endPtr = strstr(str, delim);
+	string_t searchLimit = str + strlen(str);
 	size_t delimSize = strlen(delim);
 
 	if(endPtr == NULL)
@@ -45,15 +45,15 @@ char* plStrtok(char* str, char* delim, char** leftoverStr, plmt_t* mt){
 }
 
 /* Tokenizes a string similarly to how it is done in a shell interpreter */
-char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
+string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	if(string == NULL || leftoverStr == NULL || mt == NULL)
 		return NULL;
 
 	if(strlen(string) == 0)
 		return NULL;
 
-	char* tempPtr[2] = { strchr(string, '"'), strchr(string, '\'') };
-	char* spaceChar = strchr(string, ' ');
+	string_t tempPtr[2] = { strchr(string, '"'), strchr(string, '\'') };
+	string_t spaceChar = strchr(string, ' ');
 
 	/* String checks */
 	bool noQuotesFound = (tempPtr[0] == NULL && tempPtr[1] == NULL);
@@ -67,8 +67,8 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 	if(noQuotesFound || (noEndQuoteBasic && !literalBeforeBasicStr) || (noEndQuoteLiteral && literalBeforeBasicStr) || (spaceChar != NULL && spaceComesFirst)){
 		return plStrtok(string, " ", leftoverStr, mt);
 	}else{
-		char* retPtr = NULL;
-		char* searchLimit = string + strlen(string);
+		string_t retPtr = NULL;
+		string_t searchLimit = string + strlen(string);
 
 		/* If a literal string started before a basic one, tokenize using plStrtok */
 		if(literalBeforeBasicStr && strchr(tempPtr[1] + 1, '\'') != NULL){
@@ -80,8 +80,8 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 		}
 
 		/* If none of the above is true, start tokenizing a basic string */
-		char* startPtr = tempPtr[0] + 1;
-		char* endPtr = strchr(startPtr, '"');
+		string_t startPtr = tempPtr[0] + 1;
+		string_t endPtr = strchr(startPtr, '"');
 
 		/* If the end quote is escaped, keep searching for an end quote */
 		while(endPtr != NULL && *(endPtr - 1) == '\\')
@@ -99,7 +99,7 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
 
-		char* holderPtr = strchr(retPtr, '\\');
+		string_t holderPtr = strchr(retPtr, '\\');
 		size_t sizeReducer = 0;
 		while(holderPtr != NULL){
 			memcpy(holderPtr, holderPtr + 1, strlen(holderPtr + 1));
@@ -133,27 +133,27 @@ char* plTokenize(char* string, char** leftoverStr, plmt_t* mt){
 }
 
 /* Parses a string into an array */
-plarray_t* plParser(char* input, plmt_t* mt){
+plarray_t* plParser(string_t input, plmt_t* mt){
 	if(!input || !mt)
 		return NULL;
 
-	char* leftoverStr;
+	string_t leftoverStr;
 	plarray_t* returnStruct = plMTAllocE(mt, sizeof(plarray_t));
 	returnStruct->size = 1;
-	returnStruct->array = plMTAllocE(mt, 2 * sizeof(char*));
+	returnStruct->array = plMTAllocE(mt, 2 * sizeof(string_t));
 
 	/* First token */
-	char* tempPtr = plTokenize(input, &leftoverStr, mt);
-	((char**)returnStruct->array)[0] = tempPtr;
+	string_t tempPtr = plTokenize(input, &leftoverStr, mt);
+	((string_t*)returnStruct->array)[0] = tempPtr;
 
 	/* Keep tokenizing until there is no more string left to tokenize */
 	while((tempPtr = plTokenize(leftoverStr, &leftoverStr, mt)) != NULL){
 		returnStruct->size++;
-		char** tempArrPtr = plMTRealloc(mt, returnStruct->array, returnStruct->size * sizeof(char*));
+		string_t* tempArrPtr = plMTRealloc(mt, returnStruct->array, returnStruct->size * sizeof(string_t));
 
 		if(!tempArrPtr){
 			for(int i = 0; i < returnStruct->size; i++)
-				plMTFree(mt, ((char**)returnStruct->array)[i]);
+				plMTFree(mt, ((string_t*)returnStruct->array)[i]);
 
 			plMTFree(mt, returnStruct->array);
 			plMTFree(mt, returnStruct);
@@ -162,7 +162,7 @@ plarray_t* plParser(char* input, plmt_t* mt){
 		}
 
 		returnStruct->array = tempArrPtr;
-		((char**)returnStruct->array)[returnStruct->size - 1] = tempPtr;
+		((string_t*)returnStruct->array)[returnStruct->size - 1] = tempPtr;
 	}
 
 	returnStruct->isMemAlloc = true;

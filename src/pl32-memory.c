@@ -1,5 +1,5 @@
 /*****************************************************\
- pl32lib-ng, v1.00
+ pl32lib-ng, v1.01
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-memory.c: Safe memory management module
 \*****************************************************/
@@ -7,7 +7,7 @@
 
 /* Internal type for representing internal pointer references */
 typedef struct plpointer {
-	void* pointer;
+	memptr_t pointer;
 	size_t size;
 } plptr_t;
 
@@ -56,7 +56,7 @@ void plMTStop(plmt_t* mt){
 }
 
 /* An internal control function for the memory allocation tracker */
-int plMTManage(plmt_t* mt, int mode, void* ptr, size_t size, void* ptr2){
+int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
 	if(mt == NULL){
 		return 1;
 	}
@@ -75,7 +75,7 @@ int plMTManage(plmt_t* mt, int mode, void* ptr, size_t size, void* ptr2){
 		/* Adds pointer reference to the tracking array */
 		case PLMT_ADDPTR: ;
 			if(mt->listAmnt >= mt->allocListAmnt){
-				void* tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
+				memptr_t tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
 				if(tempPtr == NULL)
 					plMTMemError();
@@ -137,8 +137,8 @@ size_t plMTMemAmnt(plmt_t* mt, int action, size_t size){
 }
 
 /* malloc() wrapper that interfaces with the memory allocation tracker */
-void* plMTAlloc(plmt_t* mt, size_t size){
-	void* tempPtr;
+memptr_t plMTAlloc(plmt_t* mt, size_t size){
+	memptr_t tempPtr;
 
 	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
@@ -148,8 +148,8 @@ void* plMTAlloc(plmt_t* mt, size_t size){
 }
 
 /* plMTAlloc() wrapper that mimics BSD's emalloc behavior */
-void* plMTAllocE(plmt_t* mt, size_t size){
-	void* tempPtr = plMTAlloc(mt, size);
+memptr_t plMTAllocE(plmt_t* mt, size_t size){
+	memptr_t tempPtr = plMTAlloc(mt, size);
 
 	if(tempPtr == NULL)
 		plMTMemError();
@@ -158,8 +158,8 @@ void* plMTAllocE(plmt_t* mt, size_t size){
 }
 
 /* calloc() wrapper that interfaces with the memory allocation tracker */
-void* plMTCalloc(plmt_t* mt, size_t amount, size_t size){
-	void* tempPtr;
+memptr_t plMTCalloc(plmt_t* mt, size_t amount, size_t size){
+	memptr_t tempPtr;
 
 	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
@@ -169,8 +169,8 @@ void* plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 }
 
 /* realloc() wrapper that interfaces with the memory allocation tracker */
-void* plMTRealloc(plmt_t* mt, void* pointer, size_t size){
-	void* tempPtr;
+memptr_t plMTRealloc(plmt_t* mt, memptr_t pointer, size_t size){
+	memptr_t tempPtr;
 
 	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
@@ -184,7 +184,7 @@ void* plMTRealloc(plmt_t* mt, void* pointer, size_t size){
 }
 
 /* free() wrapper that interfaces with the memory allocation tracker */
-void plMTFree(plmt_t* mt, void* pointer){
+void plMTFree(plmt_t* mt, memptr_t pointer){
 	plMTManage(mt, PLMT_RMPTR, pointer, 0, NULL);
 }
 
@@ -192,7 +192,7 @@ void plMTFree(plmt_t* mt, void* pointer){
 void plMTFreeArray(plarray_t* array, bool is2DArray){
 	if(is2DArray){
 		for(int i = 0; i < array->size; i++)
-			plMTFree(array->mt, ((void**)array->array)[i]);
+			plMTFree(array->mt, ((memptr_t*)array->array)[i]);
 	}
 	plMTFree(array->mt, array->array);
 	plMTFree(array->mt, array);

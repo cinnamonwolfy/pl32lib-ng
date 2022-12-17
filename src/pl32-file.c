@@ -1,5 +1,5 @@
 /****************************************************\
- pl32lib-ng, v1.00
+ pl32lib-ng, v1.01
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-file.c: File management module
 \****************************************************/
@@ -7,15 +7,15 @@
 
 struct plfile {
 	FILE* fileptr; /* File pointer for actual files */
-	char* strbuf; /* String pointer for stringstream */
-	char* mode; /* File open mode */
+	byte_t* strbuf; /* String pointer for stringstream */
+	string_t mode; /* File open mode */
 	size_t seekbyte; /* Byte offset from the beginning of buffer */
 	size_t bufsize; /* Buffer size */
 	plmt_t* mtptr; /* pointer to MT (see pl32-memory.h) */
 };
 
 /* Opens a file stream. If filename is NULL, a file-in-memory is returned */
-plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
+plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 	plfile_t* returnStruct = NULL;
 
 	if(mode){
@@ -39,7 +39,7 @@ plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
 
 		returnStruct->mtptr = mt;
 		returnStruct->seekbyte = 0;
-		returnStruct->mode = plMTAllocE(mt, (strlen(mode)+1) * sizeof(char));
+		returnStruct->mode = plMTAllocE(mt, (strlen(mode)+1) * sizeof(byte_t));
 		strcpy(returnStruct->mode, mode);
 	}
 
@@ -47,7 +47,7 @@ plfile_t* plFOpen(char* filename, char* mode, plmt_t* mt){
 }
 
 /* Converts a FILE pointer into a plfile_t pointer */
-plfile_t* plFToP(FILE* pointer, char* mode, plmt_t* mt){
+plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
 	plfile_t* returnPointer = plFOpen(NULL, mode, mt);
 	returnPointer->fileptr = pointer;
 	returnPointer->bufsize = 0;
@@ -111,7 +111,7 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 }
 
 // Puts a character into the file stream
-int plFPutC(char ch, plfile_t* stream){
+int plFPutC(byte_t ch, plfile_t* stream){
 	if(!stream->fileptr){
 		if(stream->bufsize - stream->seekbyte < 1){
 			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + 1);
@@ -130,7 +130,7 @@ int plFPutC(char ch, plfile_t* stream){
 
 // Gets a character from the file stream
 int plFGetC(plfile_t* stream){
-	char ch = '\0';
+	byte_t ch = '\0';
 	if(!stream->fileptr){
 		if(stream->seekbyte > stream->bufsize){
 			ch = *(stream->strbuf + stream->seekbyte);
@@ -144,7 +144,7 @@ int plFGetC(plfile_t* stream){
 }
 
 // Puts a string into the file stream
-int plFPuts(char* string, plfile_t* stream){
+int plFPuts(string_t string, plfile_t* stream){
 	if(!stream->fileptr){
 		if(plFWrite(string, 1, strlen(string)+1, stream))
 			return 0;
@@ -156,9 +156,9 @@ int plFPuts(char* string, plfile_t* stream){
 }
 
 // Gets a string from the file stream
-char* plFGets(char* string, int num, plfile_t* stream){
+string_t plFGets(string_t string, int num, plfile_t* stream){
 	if(!stream->fileptr){
-		char* endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
+		string_t endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
 		unsigned int writeNum = 0;
 		if(!endMark)
 			endMark = strchr(stream->strbuf + stream->seekbyte, '\0');
@@ -231,7 +231,7 @@ size_t plFTell(plfile_t* stream){
 	}
 }
 
-int plFPToFile(char* filename, plfile_t* stream){
+int plFPToFile(string_t filename, plfile_t* stream){
 	if(!stream || !filename || !stream->strbuf)
 		return -1;
 
@@ -244,7 +244,7 @@ int plFPToFile(char* filename, plfile_t* stream){
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){
 	plFSeek(dest, 0, destWhence);
 	plFSeek(src, 0, srcWhence);
-	char ch;
+	byte_t ch;
 
 	while((ch = plFGetC(src)) != '\0')
 		plFPutC(ch, dest);
