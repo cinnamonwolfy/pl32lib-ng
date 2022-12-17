@@ -8,13 +8,24 @@ development less error-prone and more thread-safe. This documentation will only
 contain definitions and examples for the base library
 
 Components
-##########
+----------
 
-* ``pl32-memory``: Tracks dynamic memory allocations. It was the first module
-implemented and it's also the module every other module depends on
+pl32-memory
+===========
 
-* ``pl32-file``: Wrapper around the ``fopen`` suite of Standard C functions
-that allow for file-in-memory creation
+``pl32-memory`` is a memory tracker module. It keeps track of all dynamic
+memory allocation pointers and how much memory was allocated through it. The
+trackers themselves are thread-specific, and shouldn't be used accross threads.
 
-* ``pl32-token``: Family of tokenizers that can be used as the foundation for
-any custom parser
+pl32-file
+=========
+
+``pl32-file`` is a wrapper around the Standard C File Streams API that allows
+for the creation of file-in-memory: a block of memory that gets treated like a
+file stream
+
+pl32-token
+==========
+
+``pl32-token`` is a family of tokenizers that can be used to make custom
+parsers or shell interpreters
