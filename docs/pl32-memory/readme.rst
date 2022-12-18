@@ -30,9 +30,8 @@ Functions
 * |plMTFree|_
 * |plMTFreeArray|_
 
+.. || replace:: ````
 
-
-.. | replace:: ``
 .. _Macros: macros.rst
 .. _`Simple Typedefs`: typedefs.rst
 .. _`plmt_t`: plmt.rst
