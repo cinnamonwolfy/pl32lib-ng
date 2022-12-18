@@ -37,7 +37,7 @@ S
 .. |plMTCalloc| replace:: ``plMTCalloc``
 .. |plMTRealloc| replace:: ``plMTRealloc``
 .. |plMTFree| replace:: ``plMTFree``
-.. |plMTFreeArray| replace:: plMTFreeArray``
+.. |plMTFreeArray| replace:: ``plMTFreeArray``
 
 .. _Macros: macros.rst
 .. _`Simple Typedefs`: typedefs.rst
