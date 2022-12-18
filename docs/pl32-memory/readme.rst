@@ -28,17 +28,7 @@ S
 
 
 
-.. |plmt_t| replace:: ``plmt_t``
-.. |plMTInit| replace:: ``plMTInit``
-.. |plMTStop| replace:: ``plMTStop``
-.. |plMTMemAmnt| replace:: ``plMTMemAmnt``
-.. |plMTAlloc| replace:: ``plMTAlloc``
-.. |plMTAllocE| replace:: ``plMTAllocE``
-.. |plMTCalloc| replace:: ``plMTCalloc``
-.. |plMTRealloc| replace:: ``plMTRealloc``
-.. |plMTFree| replace:: ``plMTFree``
-.. |plMTFreeArray| replace:: ``plMTFreeArray``
-
+.. | replace:: ``
 .. _Macros: macros.rst
 .. _`Simple Typedefs`: typedefs.rst
 .. _`plmt_t`: plmt.rst
