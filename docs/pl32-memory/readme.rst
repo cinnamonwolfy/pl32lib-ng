@@ -10,13 +10,45 @@ Public Definitions (``pl32-memory.h``)
 --------------------------------------
 
 * Macros_ (All of the macros will be in one file)
-* Simple Typedefs_ (Stuff such as ``byte_t`` are typedef to basic types built into C99, so they will be in the same file)
-* |plmt_t|_
+* `Simple Typedefs`_ (Stuff such as ``byte_t`` are typedef to basic types built into C99, so they will be in the same file)
+* |plmt_t|_ (Technically private, as it's an opaque struct, but it is defined in the headers)
+* |plarray_t|_
+
+S
+
 * |plMTInit|_
 * |plMTStop|_
-* |plMT
+* |plMTMemAmnt|_
+* |plMTAlloc|_
+* |plMTAllocE|_
+* |plMTCalloc|_
+* |plMTRealloc|_
+* |plMTFree|_
+* |plMTFreeArray|_
 
 
 
 .. |plmt_t| replace:: ``plmt_t``
 .. |plMTInit| replace:: ``plMTInit``
+.. |plMTStop| replace:: ``plMTStop``
+.. |plMTMemAmnt| replace:: ``plMTMemAmnt``
+.. |plMTAlloc| replace:: ``plMTAlloc``
+.. |plMTAllocE| replace:: ``plMTAllocE``
+.. |plMTCalloc| replace:: ``plMTCalloc``
+.. |plMTRealloc| replace:: ``plMTRealloc``
+.. |plMTFree| replace:: ``plMTFree``
+.. |plMTFreeArray| replace:: plMTFreeArray``
+
+.. _Macros: macros.rst
+.. _`Simple Typedefs`: typedefs.rst
+.. _`plmt_t`: plmt.rst
+.. _`plarray_t`: plarray.rst
+.. _plMTInit: plmtinit.rst
+.. _plMTStop: plmtstop.rst
+.. _plMTMemAmnt: plmtmemamnt.rst
+.. _plMTAlloc: plmtalloc.rst
+.. _plMTAllocE: plmtalloc.rst
+.. _plMTCalloc: plmtcalloc.rst
+.. _plMTRealloc: plmtrealloc.rst
+.. _plMTFree: plmtfree.rst
+.. _plMTFreeArray: plmtfreearray.rst
