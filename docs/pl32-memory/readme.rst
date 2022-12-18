@@ -9,12 +9,16 @@ containing a list of links to them
 Public Definitions (``pl32-memory.h``)
 --------------------------------------
 
+Macros and Types
+================
+
 * Macros_ (All of the macros will be in one file)
 * `Simple Typedefs`_ (Stuff such as ``byte_t`` are typedef to basic types built into C99, so they will be in the same file)
 * |plmt_t|_ (Technically private, as it's an opaque struct, but it is defined in the headers)
 * |plarray_t|_
 
-S
+Functions
+=========
 
 * |plMTInit|_
 * |plMTStop|_
