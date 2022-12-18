@@ -20,17 +20,17 @@ Macros and Types
 Functions
 =========
 
-* |plMTInit|_
-* |plMTStop|_
-* |plMTMemAmnt|_
-* |plMTAlloc|_
-* |plMTAllocE|_
-* |plMTCalloc|_
-* |plMTRealloc|_
-* |plMTFree|_
-* |plMTFreeArray|_
+* | plMTInit |_
+* | plMTStop |_
+* | plMTMemAmnt |_
+* | plMTAlloc |_
+* | plMTAllocE |_
+* | plMTCalloc |_
+* | plMTRealloc |_
+* | plMTFree |_
+* | plMTFreeArray |_
 
-.. || replace:: ````
+.. | replace:: ``
 
 .. _Macros: macros.rst
 .. _`Simple Typedefs`: typedefs.rst
