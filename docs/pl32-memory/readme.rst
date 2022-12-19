@@ -52,7 +52,7 @@ Functions
 .. |plMTError| replace:: ``plMTError``
 .. |plMTInit| replace:: ``plMTInit``
 .. |plMTStop| replace:: ``plMTStop``
-.. |plMTManage| replace :: ``plMTManage``
+.. |plMTManage| replace:: ``plMTManage``
 .. |plMTMemAmnt| replace:: ``plMTMemAmnt``
 .. |plMTAlloc| replace:: ``plMTAlloc``
 .. |plMTAllocE| replace:: ``plMTAllocE``
