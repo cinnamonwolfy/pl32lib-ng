@@ -1,0 +1,457 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+body { background: #232629; }
+pre { background: #202121; }
+* { color: #eff0f1; }
+a, a * { color: #2980b9; }
+a { text-decoration: none; }
+</style>
+<meta name="generator" content="ReText 7.2.1">
+<title><span class="docutils literal"><span class="pre">pl32-memory</span></span>: <span class="docutils literal">plarray_t</span></title>
+<style type="text/css">
+/* Minimal style sheet for the HTML output of Docutils.                    */
+/*                                                                         */
+/* :Author: Günter Milde, based on html4css1.css by David Goodger          */
+/* :Id: $Id: minimal.css 8397 2019-09-20 11:09:34Z milde $               */
+/* :Copyright: © 2015 Günter Milde.                                        */
+/* :License: Released under the terms of the `2-Clause BSD license`_,      */
+/*    in short:                                                            */
+/*                                                                         */
+/*    Copying and distribution of this file, with or without modification, */
+/*    are permitted in any medium without royalty provided the copyright   */
+/*    notice and this notice are preserved.                                */
+/*                                                                         */
+/*    This file is offered as-is, without any warranty.                    */
+/*                                                                         */
+/* .. _2-Clause BSD license: http://www.spdx.org/licenses/BSD-2-Clause     */
+
+/* This CSS2.1_ stylesheet defines rules for Docutils elements without    */
+/* HTML equivalent. It is required to make the document semantic visible. */
+/*                                                                        */
+/* .. _CSS2.1: http://www.w3.org/TR/CSS2                                  */
+/* .. _validates: http://jigsaw.w3.org/css-validator/validator$link       */
+
+/* alignment of text and inline objects inside block objects*/
+.align-left   { text-align: left; }
+.align-right  { text-align: right; }
+.align-center { clear: both; text-align: center; }
+.align-top    { vertical-align: top; }
+.align-middle { vertical-align: middle; }
+.align-bottom { vertical-align: bottom; }
+
+/* titles */
+h1.title, p.subtitle {
+  text-align: center;
+}
+p.topic-title,
+p.sidebar-title,
+p.rubric,
+p.admonition-title,
+p.system-message-title {
+  font-weight: bold;
+}
+h1 + p.subtitle,
+h1 + p.section-subtitle {
+  font-size: 1.6em;
+}
+h2 + p.section-subtitle { font-size: 1.28em; }
+p.subtitle,
+p.section-subtitle,
+p.sidebar-subtitle {
+  font-weight: bold;
+  margin-top: -0.5em;
+}
+p.sidebar-title,
+p.rubric {
+  font-size: larger;
+}
+p.rubric { color: maroon; }
+a.toc-backref {
+  color: black;
+  text-decoration: none; }
+
+/* Warnings, Errors */
+div.caution p.admonition-title,
+div.attention p.admonition-title,
+div.danger p.admonition-title,
+div.error p.admonition-title,
+div.warning p.admonition-title,
+div.system-messages h1,
+div.error,
+span.problematic,
+p.system-message-title {
+  color: red;
+}
+
+/* inline literals */
+span.docutils.literal {
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+/* do not wraph at hyphens and similar: */
+.literal > span.pre { white-space: nowrap; }
+
+/* Lists */
+
+/* compact and simple lists: no margin between items */
+.simple  li, .compact li,
+.simple  ul, .compact ul,
+.simple  ol, .compact ol,
+.simple > li p, .compact > li p,
+dl.simple > dd, dl.compact > dd {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Table of Contents */
+div.topic.contents { margin: 0.5em 0; }
+div.topic.contents ul {
+  list-style-type: none;
+  padding-left: 1.5em;
+}
+
+/* Enumerated Lists */
+ol.arabic     { list-style: decimal }
+ol.loweralpha { list-style: lower-alpha }
+ol.upperalpha { list-style: upper-alpha }
+ol.lowerroman { list-style: lower-roman }
+ol.upperroman { list-style: upper-roman }
+
+dt span.classifier { font-style: italic }
+dt span.classifier:before {
+  font-style: normal;
+  margin: 0.5em;
+  content: ":";
+}
+
+/* Field Lists and drivatives */
+/* bold field name, content starts on the same line */
+dl.field-list > dt,
+dl.option-list > dt,
+dl.docinfo > dt,
+dl.footnote > dt,
+dl.citation > dt {
+  font-weight: bold;
+  clear: left;
+  float: left;
+  margin: 0;
+  padding: 0;
+  padding-right: 0.5em;
+}
+/* Offset for field content (corresponds to the --field-name-limit option) */
+dl.field-list > dd,
+dl.option-list > dd,
+dl.docinfo > dd {
+  margin-left:  9em; /* ca. 14 chars in the test examples */
+}
+/* start field-body on a new line after long field names */
+dl.field-list > dd > *:first-child,
+dl.option-list > dd > *:first-child
+{
+  display: inline-block;
+  width: 100%;
+  margin: 0;
+}
+/* field names followed by a colon */
+dl.field-list > dt:after,
+dl.docinfo > dt:after {
+  content: ":";
+}
+
+/* Bibliographic Fields (docinfo) */
+pre.address { font: inherit; }
+dd.authors > p { margin: 0; }
+
+/* Option Lists */
+dl.option-list { margin-left: 1.5em; }
+dl.option-list > dt { font-weight: normal; }
+span.option { white-space: nowrap; }
+
+/* Footnotes and Citations  */
+dl.footnote.superscript > dd {margin-left: 1em; }
+dl.footnote.brackets > dd {margin-left: 2em; }
+dl > dt.label { font-weight: normal; }
+a.footnote-reference.brackets:before,
+dt.label > span.brackets:before { content: "["; }
+a.footnote-reference.brackets:after,
+dt.label > span.brackets:after { content: "]"; }
+a.footnote-reference.superscript,
+dl.footnote.superscript > dt.label {
+  vertical-align: super;
+  font-size: smaller;
+}
+dt.label > span.fn-backref { margin-left: 0.2em; }
+dt.label > span.fn-backref > a { font-style: italic; }
+
+/* Line Blocks */
+div.line-block { display: block; }
+div.line-block div.line-block {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 40px;
+}
+
+/* Figures, Images, and Tables */
+.figure.align-left,
+figure.align-left,
+img.align-left,
+object.align-left,
+table.align-left {
+  margin-right: auto;
+}
+.figure.align-center,
+figure.align-center,
+img.align-center,
+object.align-center,
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure.align-right,
+figure.align-right,
+img.align-right,
+object.align-right,
+table.align-right {
+  margin-left: auto;
+}
+.figure.align-center, .figure.align-right,
+figure.align-center, figure.align-right,
+img.align-center, img.align-right,
+object.align-center, object.align-right {
+  display: block;
+}
+/* reset inner alignment in figures and tables */
+.figure.align-left, .figure.align-right,
+figure.align-left, figure.align-right,
+table.align-left, table.align-center, table.align-right {
+  text-align: inherit;
+}
+
+/* Admonitions and System Messages */
+div.admonition,
+div.system-message,
+div.sidebar,
+aside.sidebar {
+  margin: 1em 1.5em;
+  border: medium outset;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-right: 1em;
+  padding-left: 1em;
+}
+
+/* Sidebar */
+div.sidebar,
+aside.sidebar {
+  width: 30%;
+  max-width: 26em;
+  float: right;
+  clear: right;
+}
+
+/* Text Blocks */
+blockquote,
+div.topic,
+pre.literal-block,
+pre.doctest-block,
+pre.math,
+pre.code {
+  margin-left: 1.5em;
+  margin-right: 1.5em;
+}
+pre.code .ln { color: gray; } /* line numbers */
+
+/* Tables */
+table { border-collapse: collapse; }
+td, th {
+  border-style: solid;
+  border-color: silver;
+  padding: 0 1ex;
+  border-width: thin;
+}
+td > p:first-child, th > p:first-child { margin-top: 0; }
+td > p, th > p { margin-bottom: 0; }
+
+table > caption {
+  text-align: left;
+  margin-bottom: 0.25em
+}
+
+table.borderless td, table.borderless th {
+  border: 0;
+  padding: 0;
+  padding-right: 0.5em /* separate table cells */
+}
+
+/* Document Header and Footer */
+/* div.header,				      */
+/* header { border-bottom: 1px solid black; } */
+/* div.footer,				      */
+/* footer { border-top: 1px solid black; }    */
+
+/* new HTML5 block elements: set display for older browsers */
+header, section, footer, aside, nav, main, article, figure {
+  display: block;
+}
+
+pre { line-height: 125%; margin: 0; }
+td.linenos pre { color: #000000; background-color: #f0f0f0; padding: 0 5px 0 5px; }
+span.linenos { color: #000000; background-color: #f0f0f0; padding: 0 5px 0 5px; }
+td.linenos pre.special { color: #000000; background-color: #ffffc0; padding: 0 5px 0 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding: 0 5px 0 5px; }
+.code .hll { background-color: #ffffcc }
+.code { background: #f8f8f8; }
+.code .c { color: #408080; font-style: italic } /* Comment */
+.code .err { border: 1px solid #FF0000 } /* Error */
+.code .k { color: #008000; font-weight: bold } /* Keyword */
+.code .o { color: #666666 } /* Operator */
+.code .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.code .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.code .cp { color: #BC7A00 } /* Comment.Preproc */
+.code .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.code .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.code .cs { color: #408080; font-style: italic } /* Comment.Special */
+.code .gd { color: #A00000 } /* Generic.Deleted */
+.code .ge { font-style: italic } /* Generic.Emph */
+.code .gr { color: #FF0000 } /* Generic.Error */
+.code .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.code .gi { color: #00A000 } /* Generic.Inserted */
+.code .go { color: #888888 } /* Generic.Output */
+.code .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.code .gs { font-weight: bold } /* Generic.Strong */
+.code .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.code .gt { color: #0044DD } /* Generic.Traceback */
+.code .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.code .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.code .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.code .kp { color: #008000 } /* Keyword.Pseudo */
+.code .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.code .kt { color: #B00040 } /* Keyword.Type */
+.code .m { color: #666666 } /* Literal.Number */
+.code .s { color: #BA2121 } /* Literal.String */
+.code .na { color: #7D9029 } /* Name.Attribute */
+.code .nb { color: #008000 } /* Name.Builtin */
+.code .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.code .no { color: #880000 } /* Name.Constant */
+.code .nd { color: #AA22FF } /* Name.Decorator */
+.code .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.code .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.code .nf { color: #0000FF } /* Name.Function */
+.code .nl { color: #A0A000 } /* Name.Label */
+.code .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.code .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.code .nv { color: #19177C } /* Name.Variable */
+.code .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.code .w { color: #bbbbbb } /* Text.Whitespace */
+.code .mb { color: #666666 } /* Literal.Number.Bin */
+.code .mf { color: #666666 } /* Literal.Number.Float */
+.code .mh { color: #666666 } /* Literal.Number.Hex */
+.code .mi { color: #666666 } /* Literal.Number.Integer */
+.code .mo { color: #666666 } /* Literal.Number.Oct */
+.code .sa { color: #BA2121 } /* Literal.String.Affix */
+.code .sb { color: #BA2121 } /* Literal.String.Backtick */
+.code .sc { color: #BA2121 } /* Literal.String.Char */
+.code .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.code .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.code .s2 { color: #BA2121 } /* Literal.String.Double */
+.code .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.code .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.code .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.code .sx { color: #008000 } /* Literal.String.Other */
+.code .sr { color: #BB6688 } /* Literal.String.Regex */
+.code .s1 { color: #BA2121 } /* Literal.String.Single */
+.code .ss { color: #19177C } /* Literal.String.Symbol */
+.code .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.code .fm { color: #0000FF } /* Name.Function.Magic */
+.code .vc { color: #19177C } /* Name.Variable.Class */
+.code .vg { color: #19177C } /* Name.Variable.Global */
+.code .vi { color: #19177C } /* Name.Variable.Instance */
+.code .vm { color: #19177C } /* Name.Variable.Magic */
+.code .il { color: #666666 } /* Literal.Number.Integer.Long */
+</style>
+</head>
+<body>
+<div class="document" id="pl32-memory-plarray-t">
+<h1 class="title" data-posmap="3"><span class="docutils literal"><span class="pre">pl32-memory</span></span>: <span class="docutils literal">plarray_t</span></h1>
+<div class="section" data-posmap="6" id="declaration-and-definition">
+<h1 data-posmap="6">Declaration and Definition</h1>
+<pre class="code c literal-block" data-posmap="17"><code><span class="cm">/* pl32-memory.h declaration and definition */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">plarray</span> <span class="p">{</span>
+    <span class="n">memptr_t</span> <span class="n">array</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">isMemAlloc</span><span class="p">;</span>
+    <span class="n">plmt_t</span><span class="o">*</span> <span class="n">mt</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+<div class="section" data-posmap="19" id="explanation">
+<h1 data-posmap="19">Explanation</h1>
+<p data-posmap="21"><span class="docutils literal">plarray_t</span> is a structure meant to represent an array, whether dynamically
+allocated through plmt or statically allocated at compile time. This structure
+helps create more memory-safe programs, as it can prevent
+buffer overflows/overruns if used properly.</p>
+<p data-posmap="26">It consists of a memory pointer to an array, a number containing the size of the
+array, a boolean which tells the callee function that it is a dynamically
+allocated array and a pointer to a memory tracker instance in case deallocation
+is necessary.</p>
+<p data-posmap="31">Due to <span class="docutils literal">plarray_t</span> being directly defined in the header, creating a
+<span class="docutils literal">plarray_t</span> can only be done manually. A <span class="docutils literal">plarray_t</span> creation function might
+be added in a new version to pl32lib, although I do not see it necessary.</p>
+</div>
+<div class="section" data-posmap="36" id="usage-example">
+<h1 data-posmap="36">Usage Example</h1>
+<pre class="code c literal-block" data-posmap="87"><code><span class="cp">#include</span> <span class="cpf">&lt;pl32.h&gt;</span><span class="cp">
+</span>
+<span class="kt">void</span> <span class="nf">printIntArray</span><span class="p">(</span><span class="n">plarray_t</span><span class="o">*</span> <span class="n">safeArray</span><span class="p">){</span>
+    <span class="cm">/* Do stuff */</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Here is a list of coords in (x, y) form that represent a quadrilateral:</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">safeArray</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Point %d: (%d, %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">((</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">safeArray</span><span class="p">)[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span><span class="p">(){</span>
+
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/* Makes the code less messy */</span>
+<span class="kt">void</span> <span class="nf">setDynIntArray</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">array</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">offset</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
+    <span class="n">array</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="n">array</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">string_t</span> <span class="n">argv</span><span class="p">[]){</span>
+    <span class="cm">/* Creates a memory tracker for the dynamically allocated array (See plmt.rst and plmtalloc.rst) */</span>
+    <span class="n">plmt_t</span><span class="o">*</span> <span class="n">mt</span> <span class="o">=</span> <span class="n">plMTInit</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">);</span>
+
+    <span class="cm">/* Creates the test arrays */</span>
+    <span class="kt">int</span> <span class="n">staticArray</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span> <span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="mi">7</span> <span class="p">},</span> <span class="p">{</span><span class="mi">-5</span><span class="p">,</span> <span class="mi">8</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">-8</span><span class="p">,</span> <span class="mi">0</span> <span class="p">}</span> <span class="p">};</span>
+    <span class="kt">int</span><span class="o">*</span> <span class="n">dynamicArray</span> <span class="o">=</span> <span class="n">plMTAlloc</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">));</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">dynamicArray</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">plMTAlloc</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+    <span class="n">setDynIntArray</span><span class="p">(</span><span class="n">dynamicArray</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">setDynIntArray</span><span class="p">(</span><span class="n">dynamicArray</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+    <span class="n">setDynIntArray</span><span class="p">(</span><span class="n">dynamicArray</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+    <span class="n">setDynIntArray</span><span class="p">(</span><span class="n">dynamicArray</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+    <span class="cm">/* Creates a memory-safe array */</span>
+    <span class="n">plarray_t</span> <span class="n">safeArray</span><span class="p">;</span>
+
+    <span class="cm">/* Set safeArray up as a static array */</span>
+    <span class="n">safeArray</span><span class="p">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">staticArray</span><span class="p">;</span>
+    <span class="n">safeArray</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+    <span class="n">safeArray</span><span class="p">.</span><span class="n">isMemAlloc</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">safeArray</span><span class="p">.</span><span class="n">mt</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="cm">/* Print out the contents of the integer array */</span>
+    <span class="n">printIntArray</span><span class="p">(</span><span class="n">safeArray</span><span class="p">);</span>
+
+    <span class="cm">/* Set up
+}</span></code></pre>
+</div>
+</div>
+
+</body>
+</html>

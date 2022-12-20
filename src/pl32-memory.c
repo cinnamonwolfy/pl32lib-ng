@@ -11,7 +11,7 @@ typedef struct plpointer {
 	size_t size;
 } plptr_t;
 
-/* Structure of the memory allocation tracker . This memory allocation tracker is thread-specific */
+/* Structure of the memory allocation tracker. This memory allocation tracker is thread-specific */
 struct plmt {
 	plptr_t* ptrList;
 	size_t listAmnt;
@@ -190,6 +190,9 @@ void plMTFree(plmt_t* mt, memptr_t pointer){
 
 /* Frees a plarray_t */
 void plMTFreeArray(plarray_t* array, bool is2DArray){
+	if(!array->isMemAlloc || array->mt == NULL)
+		return
+
 	if(is2DArray){
 		for(int i = 0; i < array->size; i++)
 			plMTFree(array->mt, ((memptr_t*)array->array)[i]);

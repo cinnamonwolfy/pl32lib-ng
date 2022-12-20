@@ -2,7 +2,7 @@
 ``pl32-memory`` function and type definitions
 *********************************************
 
-This directory contains all function, macro and type definitions within 
+This directory contains all function, macro and type definitions within
 ``pl32-memory.h`` (public) and ``pl32-memory.c`` (internal), with this file
 containing a list of links to them
 
@@ -63,7 +63,7 @@ Functions
 
 .. _Macros: macros.rst
 .. _`Simple Typedefs`: typedefs.rst
-.. _`plptr_t`: plptr.rst
+.. _`plptr_t`: plpointer.rst
 .. _`plmt_t`: plmt.rst
 .. _`plarray_t`: plarray.rst
 .. _plMTError: plmterror.rst
