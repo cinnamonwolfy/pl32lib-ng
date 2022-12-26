@@ -24,8 +24,7 @@ helps create more memory-safe programs, as it can prevent
 buffer overflows/overruns if used properly.
 
 It consists of a memory pointer to an array, a number containing the size of the
-array, a boolean which tells the callee function that it is a dynamically
-allocated array and a pointer to a memory tracker instance in case deallocation
+array, a boolean which tells the callee function that this structure instance is dynamically allocated and a pointer to a memory tracker instance in case deallocation
 is necessary.
 
 Due to ``plarray_t`` being directly defined in the header, creating a
@@ -46,8 +45,12 @@ Usage Example
             printf("Point %d: (%d, %d)\n", i + 1, ((int*)safeArray)[i][0] )
         }
 
-        if(){
-            
+        if(safeArray->mt != NULL){
+            int* array = safeArray->array;
+            for(int i = 0; i < safeArray->size; i++){
+                plMTFree(array[i]);
+            }
+            plMTFree(array);
         }
     }
 
@@ -81,7 +84,16 @@ Usage Example
         safeArray.mt = NULL;
 
         /* Print out the contents of the integer array */
-        printIntArray(safeArray);
+        printIntArray(&safeArray);
 
-        /* Set up
+        /* Set safeArray up as a dynamically allocated array */
+        safeArray->array = dynamicArray;
+        safeArray->size = 4;
+        safeArray->isMemAlloc = false;
+        safeArray->mt = mt;
+
+        /* Print out the contents of the integer array again */
+        printIntArray(&safeArray);
+
+        return 0;
     }
