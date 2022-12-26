@@ -191,7 +191,7 @@ void plMTFree(plmt_t* mt, memptr_t pointer){
 /* Frees a plarray_t */
 void plMTFreeArray(plarray_t* array, bool is2DArray){
 	if(!array->isMemAlloc || array->mt == NULL)
-		return
+		return;
 
 	if(is2DArray){
 		for(int i = 0; i < array->size; i++)

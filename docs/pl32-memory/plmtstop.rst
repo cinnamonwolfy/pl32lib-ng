@@ -8,13 +8,13 @@ Declaration
 .. code-block:: c
 
     /* pl32-memory.h definition */
-    plmt_t* plMTInit(size_t maxMemoryInit);
+    void plMTStop(plmt_t* mt);
 
 
 Explanation
 -----------
 
-``plMTInit`` creates and initializes a memory tracker (See |plmt_t|_ for more information)
+``plMTInit`` deallocates a memory tracker (See |plmt_t|_ for more information)
 
 Usage Example
 -------------
@@ -24,7 +24,7 @@ Usage Example
     #include <pl32.h>
 
     int main(int argc, string_t argv[]){
-        /* Creates a memory tracker with a maximum size of 1MiB (See plmt.rst)*/
+        /* Creates a memory tracker with a maximum size of 1MiB (See plmtinit.rst)*/
         plmt_t* mt = plMTInit(1024 * 1024);
 
         /* Allocates some memory to an integer array (See plmtalloc.rst) */
@@ -42,7 +42,7 @@ Usage Example
         /* Deallocate the array */
         plMTFree(mt, intArray);
 
-        /* Stop the memory tracker (See plmtstop.rst) */
+        /* Stop the memory tracker (See plmt.rst) */
         /* NOTE: You can just stop the memory tracker instead of deallocating and then stopping */
         plMTStop(mt);
         return 0;
