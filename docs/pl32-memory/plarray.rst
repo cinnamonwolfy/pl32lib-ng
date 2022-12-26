@@ -42,7 +42,7 @@ Usage Example
         /* Do stuff */
         printf("Here is a list of coords in (x, y) form that represent a quadrilateral:\n\n");
         for(int i = 0; i < safeArray->size; i++){
-            printf("Point %d: (%d, %d)\n", i + 1, ((int*)safeArray)[i][0] )
+            printf("Point %d: (%d, %d)\n", i + 1, ((int*)safeArray)[i][0], ((int*)safeArray)[i][1]);
         }
 
         if(safeArray->mt != NULL){
