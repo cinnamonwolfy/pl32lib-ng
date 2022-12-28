@@ -21,6 +21,13 @@ _compile_obj(){
 	fi
 }
 
+_parse_projectstruct(){
+	libname=$(echo "$1" | cut -d'|' -f1)
+	src=$(echo "$1" | cut -d'|' -f2 | sed 's/,/\ /g')
+	libtest=$(echo "$1" | cut -d'|' -f3)
+	srcdir=$(echo "$1" | cut -d'|' -f4)
+}
+
 _runtime_calc(){
 	set +e
 	case $1 in
@@ -58,10 +65,8 @@ _runtime_calc(){
 }
 
 compile_static_lib(){
-	if [ "$1" = "" ]; then
+	if [ "$srcdir" = "" ]; then
 		srcdir="src"
-	else
-		srcdir="$1"
 	fi
 	mkdir obj -p
 
@@ -74,10 +79,8 @@ compile_static_lib(){
 }
 
 compile_shared_lib(){
-	if [ "$1" = "" ]; then
+	if [ "$srcdir" = "" ]; then
 		srcdir="src"
-	else
-		srcdir="$1"
 	fi
 	mkdir obj -p
 
