@@ -7,7 +7,7 @@ Declaration
 
 .. code-block:: c
 
-    /* pl32-memory.h definition */
+    /* pl32-memory.h declaration */
     plmt_t* plMTInit(size_t maxMemoryInit);
 
 

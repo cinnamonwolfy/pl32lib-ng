@@ -73,7 +73,7 @@ Functions
 .. _plMTMemAmnt: plmtmemamnt.rst
 .. _plMTAlloc: plmtalloc.rst
 .. _plMTAllocE: plmtalloc.rst
-.. _plMTCalloc: plmtcalloc.rst
+.. _plMTCalloc: plmtalloc.rst
 .. _plMTRealloc: plmtalloc.rst
 .. _plMTFree: plmtalloc.rst
 .. _plMTFreeArray: plmtfreearray.rst
