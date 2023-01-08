@@ -1,6 +1,6 @@
-****************************
-``pl32-token``: ``plStrtok``
-****************************
+******************************
+``pl32-token``: ``plTokenize``
+******************************
 
 Declaration
 -----------
@@ -8,13 +8,13 @@ Declaration
 .. code-block:: c
 
     /* pl32-token.h declaration */
-    string_t plStrtok(string_t string, string_t delimiter, string_t* leftoverStr, plmt_t* mt);
+    string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt);
 
 
 Explanation
 -----------
 
-``plStrtok`` is an implementation of Standard C library function ``strtok`` that returns memory-allocated strings instead of pointers to an internal string buffer. This prevents common memory bugs caused by Standard C ``strtok`` (these are usually caused by developers not knowing that ``strtok`` has an internal buffer that it rewrites every single call, and that this buffer is the one being returned)
+``plTokenize`` is a tokenizer designed to mimic the tokenization of a shell interpreter or a TOML parser. It supports basic and literal strings and just normal tokens separated by spaces. It uses |plStrtok|_ internally, and thus generates tokens in a similar way to it. This is the most used part of pl32lib-ng in my other projects (plinterpretlib, plml-parselib)
 
 Usage Example
 -------------
@@ -32,8 +32,8 @@ Usage Example
         string_t tokens[2];
         string_t holder;
 
-        tokens[0] = plStrtok(string, " ", &holder, mt);
-        tokens[1] = plStrtok(holder, " ", &holder, mt);
+        tokens[0] = plTokenize(string, &holder, mt);
+        tokens[1] = plTokenize(holder, &holder, mt);
 
         printf("Token 1: %s\n", tokens[0]);
         printf("Token 2: %s\n", tokens[1]);
@@ -47,3 +47,7 @@ Usage Example
         plMTStop(mt);
         return 0;
     }
+
+.. |plStrtok| replace:: ``plStrtok``
+
+.. _plStrtok: plstrtok.rst
