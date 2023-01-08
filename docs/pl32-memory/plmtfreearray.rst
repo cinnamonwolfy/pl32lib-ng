@@ -28,10 +28,7 @@ Usage Example
             printf("Point %d: (%d, %d)\n", i + 1, ((int*)safeArray)[i][0], ((int*)safeArray)[i][1]);
         }
 
-        int* array = safeArray->array;
-        for(int i = 0; i < safeArray->size; i++){
-            plMTFree(array[i]);
-        }
+        plMTFreeArray(array, true);
     }
 
     /* Makes the code less messy */
@@ -54,7 +51,7 @@ Usage Example
         setDynIntArray(dynamicArray, 3, 0, 0);
 
         /* Creates a memory-safe array */
-        plarray_t safeArray;
+        plarray_t* safeArray = plMTAlloc(mt, sizeof(plarray_t));
 
         /* Set safeArray up as a dynamically allocated array */
         safeArray->array = dynamicArray;
@@ -63,7 +60,7 @@ Usage Example
         safeArray->mt = mt;
 
         /* Print out the contents of the integer array */
-        printIntArray(&safeArray);
+        printIntArray(safeArray);
 
         return 0;
     }

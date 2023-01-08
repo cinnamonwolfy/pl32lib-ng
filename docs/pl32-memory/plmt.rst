@@ -7,17 +7,17 @@ Declaration and Definition
 
 .. code-block:: c
 
-	/* pl32-memory.h declaration */
-	typedef struct plmt plmt_t;
+    /* pl32-memory.h declaration */
+    typedef struct plmt plmt_t;
 
-	/* pl32-memory.c definition */
-	struct plmt {
-		plptr_t* ptrList;
-		size_t listAmnt;
-		size_t allocListAmnt;
-		size_t usedMemory;
-		size_t maxMemory;
-	};
+    /* pl32-memory.c definition */
+    struct plmt {
+        plptr_t* ptrList;
+        size_t listAmnt;
+        size_t allocListAmnt;
+        size_t usedMemory;
+        size_t maxMemory;
+    };
 
 Explanation
 -----------
@@ -59,7 +59,7 @@ Usage Example
 
         printf("Here's a bunch of random numbers: %d, %d, %d, %d\n", intArray[0], intArray,[1], intArray[2], intArray[3]);
 
-        /* Deallocate the array */
+        /* Deallocate the array (See plmtalloc.rst)*/
         plMTFree(mt, intArray);
 
         /* Stop the memory tracker (See plmtstop.rst) */

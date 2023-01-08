@@ -35,6 +35,6 @@ parsers or shell interpreters
 .. |pl32-memory| replace:: ``pl32-memory``
 .. |pl32-file| replace:: ``pl32-file``
 .. |pl32-token| replace:: ``pl32-token``
-.. _pl32-memory: pl32-memory
-.. _pl32-file: pl32-file
-.. _pl32-token: pl32-token
+.. _pl32-memory: pl32-memory/readme.rst
+.. _pl32-file: pl32-file/readme.rst
+.. _pl32-token: pl32-token/readme.rst

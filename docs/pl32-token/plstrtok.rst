@@ -42,7 +42,7 @@ Usage Example
         plMTFree(mt, tokens[0]);
         plMTFree(mt, tokens[1]);
 
-        /* Stop the memory tracker (See plmtstop.rst) */
+        /* Stop the memory tracker (See pl32-memory/plmtstop.rst) */
         /* NOTE: You can just stop the memory tracker instead of deallocating and then stopping */
         plMTStop(mt);
         return 0;

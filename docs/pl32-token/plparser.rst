@@ -35,10 +35,10 @@ Usage Example
         printf("Token 1: %s\n", tokensStr[0]);
         printf("Token 2: %s\n", tokensStr[1]);
 
-        /* Deallocate the array */
+        /* Deallocate the array (See pl32-memory/plmtfree.rst) */
         plMTFreeArray(mt, );
 
-        /* Stop the memory tracker (See plmtstop.rst) */
+        /* Stop the memory tracker (See pl32-memory/plmtstop.rst) */
         /* NOTE: You can just stop the memory tracker instead of deallocating and then stopping */
         plMTStop(tokens, true);
         return 0;

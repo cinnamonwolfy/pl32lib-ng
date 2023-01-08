@@ -39,7 +39,7 @@ Usage Example
 
         printf("Here's a bunch of random numbers: %d, %d, %d, %d\n", intArray[0], intArray,[1], intArray[2], intArray[3]);
 
-        /* Deallocate the array */
+        /* Deallocate the array (See plmtalloc.rst) */
         plMTFree(mt, intArray);
 
         /* Stop the memory tracker (See plmt.rst) */

@@ -37,7 +37,7 @@ Macros and Types
 ================
 
 * |plptr_t|_
-* |plmt_t|_ (Technically public, as it's declared in the headers, but the full definition is in ``pl32-memory.c``
+* |plmt_t|_ (Technically public, as it's declared in the headers, but the full definition is in ``pl32-memory.c``)
 
 Functions
 =========

@@ -45,6 +45,7 @@ Usage Example
             printf("Point %d: (%d, %d)\n", i + 1, ((int*)safeArray)[i][0], ((int*)safeArray)[i][1]);
         }
 
+        /* Free if the array is memory-allocated (See plmtalloc.rst) */
         if(safeArray->mt != NULL){
             int* array = safeArray->array;
             for(int i = 0; i < safeArray->size; i++){
