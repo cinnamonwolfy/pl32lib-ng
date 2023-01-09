@@ -42,14 +42,14 @@ Macros and Types
 Functions
 =========
 
-* |plMTError|_
+* |plMTMemError|_
 * |plMTManage|_
 
 
 .. |plptr_t| replace:: ``plptr_t``
 .. |plmt_t| replace:: ``plmt_t``
 .. |plarray_t| replace:: ``plarray_t``
-.. |plMTError| replace:: ``plMTError``
+.. |plMTMemError| replace:: ``plMTError``
 .. |plMTInit| replace:: ``plMTInit``
 .. |plMTStop| replace:: ``plMTStop``
 .. |plMTManage| replace:: ``plMTManage``
@@ -66,7 +66,7 @@ Functions
 .. _`plptr_t`: plpointer.rst
 .. _`plmt_t`: plmt.rst
 .. _`plarray_t`: plarray.rst
-.. _plMTError: plmterror.rst
+.. _plMTMemError: plmterror.rst
 .. _plMTInit: plmtinit.rst
 .. _plMTStop: plmtstop.rst
 .. _plMTManage: plmtmanage.rst

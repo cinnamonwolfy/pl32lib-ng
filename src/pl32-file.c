@@ -22,7 +22,7 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 		returnStruct = plMTAllocE(mt, sizeof(plfile_t));
 
 		/* If no filename is given, set up a file in memory */
-		if(!filename){
+		if(filename == NULL){
 			returnStruct->fileptr = NULL;
 			returnStruct->strbuf = plMTAllocE(mt, 4098);
 			returnStruct->bufsize = 4098;
@@ -31,7 +31,7 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 			returnStruct->bufsize = 0;
 			returnStruct->strbuf = NULL;
 
-			if(!returnStruct->fileptr){
+			if(returnStruct->fileptr == NULL){
 				plMTFree(mt, returnStruct);
 				return NULL;
 			}
@@ -57,7 +57,7 @@ plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
 
 // Closes a file stream
 int plFClose(plfile_t* ptr){
-	if(!ptr->fileptr){
+	if(ptr->fileptr == NULL){
 		plMTFree(ptr->mtptr, ptr->strbuf);
 	}else{
 		if(fclose(ptr->fileptr))
@@ -71,14 +71,14 @@ int plFClose(plfile_t* ptr){
 
 // Reads size * nmemb amount of bytes from the file stream
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		int elementAmnt = 1;
 		while(size * elementAmnt < stream->bufsize - stream->seekbyte && elementAmnt < nmemb){
 			elementAmnt++;
 		}
 		elementAmnt--;
 
-		if(!elementAmnt){
+		if(elementAmnt == NULL){
 			return 0;
 		}
 
@@ -92,7 +92,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 // Writes size * nmemb amount of bytes from the file stream
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		if(size * nmemb > stream->bufsize - stream->seekbyte){
 			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + size * nmemb);
 			if(!tempPtr){
@@ -112,11 +112,11 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 // Puts a character into the file stream
 int plFPutC(byte_t ch, plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		if(stream->bufsize - stream->seekbyte < 1){
 			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + 1);
 
-			if(!tempPtr)
+			if(tempPtr == NULL)
 				return '\0';
 
 			stream->strbuf = tempPtr;
@@ -131,7 +131,7 @@ int plFPutC(byte_t ch, plfile_t* stream){
 // Gets a character from the file stream
 int plFGetC(plfile_t* stream){
 	byte_t ch = '\0';
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		if(stream->seekbyte > stream->bufsize){
 			ch = *(stream->strbuf + stream->seekbyte);
 			stream->seekbyte++;
@@ -145,7 +145,7 @@ int plFGetC(plfile_t* stream){
 
 // Puts a string into the file stream
 int plFPuts(string_t string, plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		if(plFWrite(string, 1, strlen(string)+1, stream))
 			return 0;
 
@@ -157,10 +157,10 @@ int plFPuts(string_t string, plfile_t* stream){
 
 // Gets a string from the file stream
 string_t plFGets(string_t string, int num, plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		string_t endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
 		unsigned int writeNum = 0;
-		if(!endMark)
+		if(endMark == NULL)
 			endMark = strchr(stream->strbuf + stream->seekbyte, '\0');
 
 		writeNum = endMark - (stream->strbuf + stream->seekbyte);
@@ -188,7 +188,7 @@ string_t plFGets(string_t string, int num, plfile_t* stream){
 
 // Moves the seek position offset amount of bytes relative from whence
 int plFSeek(plfile_t* stream, long int offset, int whence){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		switch(whence){
 			case SEEK_SET:
 				if(offset < stream->bufsize){
@@ -223,7 +223,7 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 
 // Tells you the current seek position
 size_t plFTell(plfile_t* stream){
-	if(!stream->fileptr){
+	if(stream->fileptr == NULL){
 		return stream->seekbyte;
 	}else{
 		fflush(stream->fileptr);
@@ -232,7 +232,7 @@ size_t plFTell(plfile_t* stream){
 }
 
 int plFPToFile(string_t filename, plfile_t* stream){
-	if(!stream || !filename || !stream->strbuf)
+	if(stream == NULL || filename NULL || stream->strbuf == NULL)
 		return -1;
 
 	FILE* realFile = fopen(filename, "w");
