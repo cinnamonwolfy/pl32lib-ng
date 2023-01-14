@@ -10,24 +10,34 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	if(str == NULL || delim == NULL || leftoverStr == NULL || mt == NULL)
 		return NULL;
 
-	string_t retPtr;
-	string_t endPtr = strstr(str, delim);
-	string_t searchLimit = str + strlen(str);
 	size_t delimSize = strlen(delim);
+	int iterator = 0;
 
-	if(endPtr == NULL)
-		endPtr = searchLimit;
+	bool strConsistsOfDelim = false;
+	string_t retPtr;
+	string_t endPtr = NULL;
+	string_t searchLimit = str + strlen(str);
 
-	/* If endPtr also equals str, then keep increasing pointer address by the size of *\
-	\* delim. If the entire string consists of delim, then return a null pointer      */
-	if(endPtr == str){
-		while((endPtr = strstr(str, delim)) == str)
-			str += delimSize;
+	while((endPtr == NULL || endPtr <= str) && iterator < delimSize){
+		endPtr = strchr(str, delim[iterator]);
 
 		if(endPtr == NULL){
-			*leftoverStr = NULL;
-			return NULL;
+			iterator++;
+		}else if(endPtr == str){
+			if(str < searchLimit){
+				str++;
+			}else{
+				endPtr = NULL;
+				strConsistsOfDelim = true;
+			}
 		}
+	}
+
+	if(endPtr == NULL || strConsistsOfDelim){
+		*leftoverStr = NULL;
+		endPtr = searchLimit;
+		if(strConsistsOfDelim && endPtr == NULL)
+			return NULL;
 	}
 
 	/* Copies the memory block into the return pointer */

@@ -91,6 +91,9 @@ int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
 			break;
 		/* Removes pointer reference from the tracking array */
 		case PLMT_RMPTR: ;
+			if(ptr == NULL)
+				return 1;
+
 			int rmPtrResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0, NULL);
 			if(rmPtrResult == -1)
 				return 1;
@@ -140,7 +143,7 @@ size_t plMTMemAmnt(plmt_t* mt, int action, size_t size){
 memptr_t plMTAlloc(plmt_t* mt, size_t size){
 	memptr_t tempPtr;
 
-	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
+	if(mt == NULL || mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
 	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
@@ -161,7 +164,7 @@ memptr_t plMTAllocE(plmt_t* mt, size_t size){
 memptr_t plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 	memptr_t tempPtr;
 
-	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
+	if(mt == NULL|| mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
 	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
@@ -172,7 +175,7 @@ memptr_t plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 memptr_t plMTRealloc(plmt_t* mt, memptr_t pointer, size_t size){
 	memptr_t tempPtr;
 
-	if(mt->usedMemory + size > mt->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
+	if(mt == NULL || mt->usedMemory + size > mt->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
 		return NULL;
 
 	if(plMTManage(mt, PLMT_REALLOC, pointer, size, tempPtr)){
@@ -190,7 +193,7 @@ void plMTFree(plmt_t* mt, memptr_t pointer){
 
 /* Frees a plarray_t */
 void plMTFreeArray(plarray_t* array, bool is2DArray){
-	if(!array->isMemAlloc || array->mt == NULL)
+	if(array == NULL || array->mt == NULL)
 		return;
 
 	if(is2DArray){
@@ -198,5 +201,7 @@ void plMTFreeArray(plarray_t* array, bool is2DArray){
 			plMTFree(array->mt, ((memptr_t*)array->array)[i]);
 	}
 	plMTFree(array->mt, array->array);
-	plMTFree(array->mt, array);
+
+	if(array->isMemAlloc)
+		plMTFree(array->mt, array);
 }

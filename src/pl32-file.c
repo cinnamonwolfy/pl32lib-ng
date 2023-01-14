@@ -8,7 +8,6 @@
 struct plfile {
 	FILE* fileptr; /* File pointer for actual files */
 	byte_t* strbuf; /* String pointer for stringstream */
-	string_t mode; /* File open mode */
 	size_t seekbyte; /* Byte offset from the beginning of buffer */
 	size_t bufsize; /* Buffer size */
 	plmt_t* mtptr; /* pointer to MT (see pl32-memory.h) */
@@ -18,7 +17,7 @@ struct plfile {
 plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 	plfile_t* returnStruct = NULL;
 
-	if(mode){
+	if(mt != NULL){
 		returnStruct = plMTAllocE(mt, sizeof(plfile_t));
 
 		/* If no filename is given, set up a file in memory */
@@ -39,8 +38,6 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 
 		returnStruct->mtptr = mt;
 		returnStruct->seekbyte = 0;
-		returnStruct->mode = plMTAllocE(mt, (strlen(mode)+1) * sizeof(byte_t));
-		strcpy(returnStruct->mode, mode);
 	}
 
 	return returnStruct;
@@ -48,7 +45,7 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 
 /* Converts a FILE pointer into a plfile_t pointer */
 plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
-	plfile_t* returnPointer = plFOpen(NULL, mode, mt);
+	plfile_t* returnPointer = plFOpen(NULL, NULL, mt);
 	returnPointer->fileptr = pointer;
 	returnPointer->bufsize = 0;
 	plMTFree(mt, returnPointer->strbuf);
@@ -64,7 +61,6 @@ int plFClose(plfile_t* ptr){
 			return 1;
 	}
 
-	plMTFree(ptr->mtptr, ptr->mode);
 	plMTFree(ptr->mtptr, ptr);
 	return 0;
 }
@@ -78,7 +74,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 		}
 		elementAmnt--;
 
-		if(elementAmnt == NULL){
+		if(elementAmnt == 0){
 			return 0;
 		}
 
@@ -232,7 +228,7 @@ size_t plFTell(plfile_t* stream){
 }
 
 int plFPToFile(string_t filename, plfile_t* stream){
-	if(stream == NULL || filename NULL || stream->strbuf == NULL)
+	if(stream == NULL || filename == NULL || stream->strbuf == NULL)
 		return -1;
 
 	FILE* realFile = fopen(filename, "w");

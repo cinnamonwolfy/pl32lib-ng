@@ -1,28 +1,20 @@
 ***************************
-``pl32-file``: ``plfile_t``
+``pl32-file``: ``plFClose``
 ***************************
 
-Declaration and Definition
---------------------------
+Declaration
+-----------
 
 .. code-block:: c
 
-    /* pl32-memory.h declaration */
-    typedef struct plfile plfile_t;
+    /* pl32-file.h declaration */
+    void plFClose(plfile_t* ptr);
 
-    /* pl32-memory.c definition */
-    struct plmt {
-        FILE* fileptr;
-        byte_t* strbuf;
-        size_t seekbyte;
-        size_t bufsize;
-        plmt_t* ptrmt;
-    };
 
 Explanation
 -----------
 
-``plfile_t`` is a structure representing an open file. It can be a pointer to an actual file or a block of memory treated as a file.
+``plFClose`` closes an open file handle. If it's a file in memory, it just frees all of the memory it has dynamiaclly allocated. If it points to an actual file, it closes the file and then frees any memory it has dynamically allocated
 
 Usage Example
 -------------
@@ -50,7 +42,7 @@ Usage Example
         plFGets(buffer, 2047, memFile);
         printf("In-memory file: %s\n", buffer);
 
-        /* Close the files (See plfclose.rst) */
+        /* Close the files */
         plFClose(realFile);
         plFClose(memFile);
         plMTFree(mt, buffer) /* Free the buffer (See pl32-memory/plmtalloc.rst) */
@@ -60,3 +52,6 @@ Usage Example
         plMTStop(mt);
         return 0;
     }
+
+.. |plmt_t| replace:: ``plmt_t``
+.. _plmt_t: ../pl32-memory/plmt.rst

@@ -56,7 +56,7 @@ Macros and Types
 
 .. _`plfile_t`: plfile.rst
 .. _plFOpen: plfopen.rst
-.. _plFToP: plmtmemamnt.rst
+.. _plFToP: plftop.rst
 .. _plFClose: plfclose.rst
 .. _plFRead: plfread.rst
 .. _plFWrite: plfwrite.rst

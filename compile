@@ -71,7 +71,7 @@ compile_static_lib(){
 	mkdir obj -p
 
 	for i in $src; do
-		_compile_obj $srcdir/$i "static"
+		_compile_obj $srcdir/$i.c "static"
 	done
 	printf "Creating static library $1..."
 	$AR rc lib$libname.a $(find obj | grep static) 2>&1 >/dev/null
@@ -85,7 +85,7 @@ compile_shared_lib(){
 	mkdir obj -p
 
 	for i in $src; do
-		_compile_obj $srcdir/$i "shared"
+		_compile_obj $srcdir/$i.c "shared"
 	done
 	printf "Creating shared library $1..."
 	$CC -shared $(find obj | grep shared) -o lib$libname.so $CFLAGS $LDFLAGS
@@ -149,6 +149,7 @@ echo "Compiler Flags: $CFLAGS"
 printf "Linker Flags: $LDFLAGS\n\n"
 
 _runtime_calc start
+_parse_projectstruct $main_project
 $action
 _runtime_calc stop
 
