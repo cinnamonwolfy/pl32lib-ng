@@ -47,7 +47,7 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	retPtr[strSize] = '\0';
 
 	if(endPtr != searchLimit)
-		*leftoverStr = endPtr + delimSize;
+		*leftoverStr = endPtr + 1;
 	else
 		*leftoverStr = NULL;
 
@@ -75,7 +75,7 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
 	\* use strtok to get a token surrounded by whitespace                                         */
 	if(noQuotesFound || (noEndQuoteBasic && !literalBeforeBasicStr) || (noEndQuoteLiteral && literalBeforeBasicStr) || (spaceChar != NULL && spaceComesFirst)){
-		return plStrtok(string, " ", leftoverStr, mt);
+		return plStrtok(string, " \n", leftoverStr, mt);
 	}else{
 		string_t retPtr = NULL;
 		string_t searchLimit = string + strlen(string);
@@ -131,8 +131,10 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		}
 
 		/* If the end quote is one char away from the end of the input string, *\
-		\* set *leftoverStr as NULL. Otherwise, set *leftoverStr as endPtr + 1 */
-		if(endPtr + 1 == searchLimit){
+		   or if end quote is two chars away from the end of the input string
+		   and the char is a space or a newline, set *leftoverStr as NULL.
+		\* Otherwise, set *leftoverStr as endPtr + 1                           */
+		if(endPtr + 1 == searchLimit || (endPtr + 1 == searchLimit - 1 && (*(endPtr + 1) == ' ' || *(endPtr + 1) == '\n'))){
 			*leftoverStr = NULL;
 		}else{
 			*leftoverStr = endPtr + 1;

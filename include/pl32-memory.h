@@ -21,9 +21,9 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define PL32LIBNG_VERSION "1.01"
+#define PL32LIBNG_VERSION "1.02"
 #define PL32LIBNG_API_VER 1
-#define PL32LIBNG_FEATURELVL 1
+#define PL32LIBNG_FEATURELVL 2
 #define PL32LIBNG_PATCHLVL 0
 
 #define PLMT_STOP 1
