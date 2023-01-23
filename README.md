@@ -42,3 +42,9 @@ To install the library and headers, run `./compile --install`
 
 Bug reporting can be done by going to the repo's issues page and opening a new
 issue.
+
+# Contributions
+
+Due to the nature of the project, direct contributions to pl32lib-ng are not
+accepted. pl32lib-ng will only be maintained by me throughout its entire
+lifetime.
