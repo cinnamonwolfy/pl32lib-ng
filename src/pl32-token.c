@@ -18,7 +18,7 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	string_t searchLimit = str + strlen(str);
 
 	while(endPtr == NULL && str < searchLimit){
-		char* tempChr = strchr(str, delim[iterator]);
+		string_t tempChr = strchr(str, delim[iterator]);
 
 		if(tempChr == NULL){
 			iterator++;
@@ -27,7 +27,7 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 		}else{
 			for(int i = 0; i < delimSize; i++){
 				if(delim[i] != delim[iterator]){
-					char* tempChr2 = strchr(str, delim[i]);
+					string_t tempChr2 = strchr(str, delim[i]);
 					if(tempChr2 != NULL && tempChr2 < tempChr)
 						tempChr = tempChr2;
 				}
@@ -57,10 +57,10 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	/* Calculates the pointer to put into leftoverStr*/
 	*leftoverStr = NULL;
 	if(endPtr != searchLimit){
-		char* strPtr = endPtr + 1;
+		string_t strPtr = endPtr + 1;
 		iterator = 0;
 		while(*leftoverStr == NULL && strPtr < searchLimit){
-			char* tempChr = strchr(strPtr, delim[iterator]);
+			string_t tempChr = strchr(strPtr, delim[iterator]);
 
 			if(tempChr == NULL || tempChr > strPtr){
 				iterator++;
