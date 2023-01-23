@@ -62,14 +62,12 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 		while(*leftoverStr == NULL && strPtr < searchLimit){
 			char* tempChr = strchr(strPtr, delim[iterator]);
 
-			if(tempChr == NULL || tempChr > strPtr + 1){
+			if(tempChr == NULL || tempChr > strPtr){
 				iterator++;
 				if(iterator >= delimSize)
 					*leftoverStr = strPtr;
 			}else{
 				strPtr++;
-				if(tempChr == strPtr)
-					iterator = 0;
 			}
 		}
 	}

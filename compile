@@ -105,7 +105,7 @@ compile_lib(){
 }
 
 install_lib(){
-	printf "Installing library $LIBNAME..."
+	printf "Installing library $libname..."
 	for i in $(ls include | grep ".h"); do
 		cp include/$i "$prefix/include"
 	done
@@ -116,7 +116,7 @@ install_lib(){
 printf "PocketLinux32's Generic C Library Build System v0.05\n\n"
 
 case $1 in
-	--clean)
+	clean)
 		rm obj *.out *.a *.so core* -rf
 		if [ "$2" = "fully" ]; then
 			rm .config
@@ -124,16 +124,16 @@ case $1 in
 		echo "Project directory has been cleaned"
 		exit 0
 		;;
-	--build)
+	build)
 		action="compile_$2"
 		;;
-	--install)
+	install)
 		action="install_lib"
 		;;
-	--help)
-		echo "--clean			Removes any files generated during compilation"
-		echo "--build [action]	Compiles the library or the library testcase"
-		echo "--install		Installs the compiled library to dest"
+	help)
+		echo "clean			Removes any files generated during compilation"
+		echo "build [action]	Compiles the library or the library testcase"
+		echo "install		Installs the compiled library to dest"
 		exit 0
 		;;
 esac
