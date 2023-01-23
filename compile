@@ -113,7 +113,7 @@ install_lib(){
 	echo "Done."
 }
 
-printf "PocketLinux32's Generic C Library Build System v0.05\n\n"
+printf "PocketLinux32's Generic C Library Build System v0.06\n\n"
 
 case $1 in
 	clean)
