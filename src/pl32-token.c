@@ -13,31 +13,39 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	size_t delimSize = strlen(delim);
 	int iterator = 0;
 
-	bool strConsistsOfDelim = false;
 	string_t retPtr;
 	string_t endPtr = NULL;
 	string_t searchLimit = str + strlen(str);
 
-	while((endPtr == NULL || endPtr <= str) && iterator < delimSize){
-		endPtr = strchr(str, delim[iterator]);
+	while(endPtr == NULL && str < searchLimit){
+		char* tempChr = strchr(str, delim[iterator]);
 
-		if(endPtr == NULL){
+		if(tempChr == NULL){
 			iterator++;
-		}else if(endPtr == str){
-			if(str < searchLimit){
+			if(iterator >= delimSize)
+				endPtr = searchLimit;
+		}else{
+			for(int i = 0; i < delimSize; i++){
+				if(delim[i] != delim[iterator]){
+					char* tempChr2 = strchr(str, delim[i]);
+					if(tempChr2 != NULL && tempChr2 < tempChr)
+						tempChr = tempChr2;
+				}
+			}
+
+			if(tempChr == str){
 				str++;
+				iterator = 0;
 			}else{
-				endPtr = NULL;
-				strConsistsOfDelim = true;
+				endPtr = tempChr;
 			}
 		}
+
 	}
 
-	if(endPtr == NULL || strConsistsOfDelim){
+	if(endPtr == NULL){
 		*leftoverStr = NULL;
-		endPtr = searchLimit;
-		if(strConsistsOfDelim && endPtr == NULL)
-			return NULL;
+		return NULL;
 	}
 
 	/* Copies the memory block into the return pointer */
@@ -46,10 +54,25 @@ string_t plStrtok(string_t str, string_t delim, string_t* leftoverStr, plmt_t* m
 	memcpy(retPtr, str, strSize);
 	retPtr[strSize] = '\0';
 
-	if(endPtr != searchLimit)
-		*leftoverStr = endPtr + 1;
-	else
-		*leftoverStr = NULL;
+	/* Calculates the pointer to put into leftoverStr*/
+	*leftoverStr = NULL;
+	if(endPtr != searchLimit){
+		char* strPtr = endPtr + 1;
+		iterator = 0;
+		while(*leftoverStr == NULL && strPtr < searchLimit){
+			char* tempChr = strchr(strPtr, delim[iterator]);
+
+			if(tempChr == NULL || tempChr > strPtr + 1){
+				iterator++;
+				if(iterator >= delimSize)
+					*leftoverStr = strPtr;
+			}else{
+				strPtr++;
+				if(tempChr == strPtr)
+					iterator = 0;
+			}
+		}
+	}
 
 	return retPtr;
 }
