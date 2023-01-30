@@ -109,11 +109,11 @@ install_lib(){
 	for i in $(ls include | grep ".h"); do
 		cp include/$i "$prefix/include"
 	done
-	mv libpl32.* "$prefix/lib"
+	mv lib$libname.* "$prefix/lib"
 	echo "Done."
 }
 
-printf "PocketLinux32's Generic C Library Build System v0.06\n\n"
+printf "PocketLinux32's Generic C Library Build System v0.07\n\n"
 
 case $1 in
 	clean)
