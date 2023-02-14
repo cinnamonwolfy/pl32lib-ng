@@ -7,3 +7,9 @@
 #include <pl32-memory.h>
 #include <pl32-file.h>
 #include <pl32-token.h>
+
+#ifdef _cplusplus
+namespace pl32 {
+
+}
+#endif
