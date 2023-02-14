@@ -1,5 +1,5 @@
 /********************************************\
- pl32lib-ng, v1.01
+ pl32lib-ng, v1.03
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-file.h: File management module header
 \********************************************/

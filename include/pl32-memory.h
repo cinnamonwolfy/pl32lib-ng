@@ -1,16 +1,10 @@
 /****************************************************\
- pl32lib-ng, v1.01
+ pl32lib-ng, v1.03
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-memory.h: Safe memory management module headers
 \****************************************************/
 #pragma once
 #ifdef __cplusplus
-#include <cstdio>
-#include <cstdlib>
-#include <cstdint>
-#include <cerrno>
-#include <cstring>
-
 extern "C" {
 #else
 #include <stdio.h>
@@ -21,9 +15,9 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define PL32LIBNG_VERSION "1.02"
+#define PL32LIBNG_VERSION "1.03"
 #define PL32LIBNG_API_VER 1
-#define PL32LIBNG_FEATURELVL 2
+#define PL32LIBNG_FEATURELVL 3
 #define PL32LIBNG_PATCHLVL 0
 
 #define PLMT_STOP 1
