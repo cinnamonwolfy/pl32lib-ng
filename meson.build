@@ -2,7 +2,8 @@ project('pl32lib-ng', 'c',
         version: '1.02',
         license: 'MPL-2.0',
         default_options: ['c_std=c99',
-                          'warning_level=3'])
+                          'warning_level=3',
+                          'c_args=-Os'])
 
 add_project_arguments('-pedantic', language : 'c')
 
