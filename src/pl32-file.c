@@ -185,7 +185,7 @@ string_t plFGets(string_t string, int num, plfile_t* stream){
 
 		writeNum = endMark - (stream->strbuf + stream->seekbyte);
 
-		if(writeNum > num)
+		if(writeNum >= num)
 			writeNum = num - 1;
 
 		if(writeNum == 0)
