@@ -45,6 +45,9 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 
 /* Converts a FILE pointer into a plfile_t pointer */
 plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
+	if(pointer == NULL)
+		return NULL;
+
 	plfile_t* returnPointer = plFOpen(NULL, NULL, mt);
 	returnPointer->fileptr = pointer;
 	returnPointer->bufsize = 0;
@@ -54,6 +57,9 @@ plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
 
 // Closes a file stream
 int plFClose(plfile_t* ptr){
+	if(ptr == NULL)
+		return 1;
+
 	if(ptr->fileptr == NULL){
 		plMTFree(ptr->mtptr, ptr->strbuf);
 	}else{
@@ -67,6 +73,9 @@ int plFClose(plfile_t* ptr){
 
 // Reads size * nmemb amount of bytes from the file stream
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
+	if(stream == NULL)
+		return 0;
+
 	if(stream->fileptr == NULL){
 		int elementAmnt = 1;
 		while(size * elementAmnt < stream->bufsize - stream->seekbyte && elementAmnt < nmemb){
@@ -88,6 +97,9 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 // Writes size * nmemb amount of bytes from the file stream
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
+	if(stream == NULL)
+		return 0;
+
 	if(stream->fileptr == NULL){
 		if(size * nmemb > stream->bufsize - stream->seekbyte){
 			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + size * nmemb);
@@ -108,6 +120,9 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 // Puts a character into the file stream
 int plFPutC(byte_t ch, plfile_t* stream){
+	if(stream == NULL)
+		return '\0';
+
 	if(stream->fileptr == NULL){
 		if(stream->bufsize - stream->seekbyte < 1){
 			void* tempPtr = plMTRealloc(stream->mtptr, stream->strbuf, stream->bufsize + 1);
@@ -126,8 +141,11 @@ int plFPutC(byte_t ch, plfile_t* stream){
 
 // Gets a character from the file stream
 int plFGetC(plfile_t* stream){
-	byte_t ch = '\0';
+	if(stream == NULL)
+		return '\0';
+
 	if(stream->fileptr == NULL){
+		byte_t ch = '\0';
 		if(stream->seekbyte > stream->bufsize){
 			ch = *(stream->strbuf + stream->seekbyte);
 			stream->seekbyte++;
@@ -141,6 +159,9 @@ int plFGetC(plfile_t* stream){
 
 // Puts a string into the file stream
 int plFPuts(string_t string, plfile_t* stream){
+	if(stream == NULL)
+		return 0;
+
 	if(stream->fileptr == NULL){
 		if(plFWrite(string, 1, strlen(string)+1, stream))
 			return 0;
@@ -153,6 +174,9 @@ int plFPuts(string_t string, plfile_t* stream){
 
 // Gets a string from the file stream
 string_t plFGets(string_t string, int num, plfile_t* stream){
+	if(stream == NULL)
+		return NULL;
+
 	if(stream->fileptr == NULL){
 		string_t endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
 		unsigned int writeNum = 0;
@@ -184,6 +208,9 @@ string_t plFGets(string_t string, int num, plfile_t* stream){
 
 // Moves the seek position offset amount of bytes relative from whence
 int plFSeek(plfile_t* stream, long int offset, int whence){
+	if(stream == NULL)
+		return 1;
+
 	if(stream->fileptr == NULL){
 		switch(whence){
 			case SEEK_SET:
@@ -219,6 +246,9 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 
 // Tells you the current seek position
 size_t plFTell(plfile_t* stream){
+	if(stream == NULL)
+		return 0;
+
 	if(stream->fileptr == NULL){
 		return stream->seekbyte;
 	}else{
@@ -238,6 +268,9 @@ int plFPToFile(string_t filename, plfile_t* stream){
 }
 
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){
+	if(dest == NULL || src == NULL)
+		return;
+
 	plFSeek(dest, 0, destWhence);
 	plFSeek(src, 0, srcWhence);
 	byte_t ch;
