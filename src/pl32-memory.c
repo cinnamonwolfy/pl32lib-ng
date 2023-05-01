@@ -5,6 +5,15 @@
 \*****************************************************/
 #include <pl32-memory.h>
 
+/* internal enum for plMTManage() */
+typedef enum plmtiaction {
+	PLMT_STOP,
+	PLMT_SEARCHPTR,
+	PLMT_ADDPTR = 3,
+	PLMT_RMPTR = 4,
+	PLMT_REALLOC = 5,
+} plmtiaction_t;
+
 /* Internal type for representing internal pointer references */
 typedef struct plpointer {
 	memptr_t pointer;
@@ -21,8 +30,8 @@ struct plmt {
 };
 
 /* Aborts the program. It's called whenever malloc fails to allocate */
-void plMTMemError(){
-	puts("Error: Out of memory");
+void plMTMemError(void){
+	fputs("Error: Out of memory", stderr);
 	abort();
 }
 
@@ -56,7 +65,7 @@ void plMTStop(plmt_t* mt){
 }
 
 /* An internal control function for the memory allocation tracker */
-int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
+int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size, memptr_t ptr2){
 	if(mt == NULL){
 		return 1;
 	}
@@ -73,7 +82,7 @@ int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
 
 			return -1;
 		/* Adds pointer reference to the tracking array */
-		case PLMT_ADDPTR: ;
+		case PLMT_ADDPTR:
 			if(mt->listAmnt >= mt->allocListAmnt){
 				memptr_t tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
@@ -90,7 +99,7 @@ int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
 			mt->usedMemory += size;
 			break;
 		/* Removes pointer reference from the tracking array */
-		case PLMT_RMPTR: ;
+		case PLMT_RMPTR:
 			if(ptr == NULL)
 				return 1;
 
@@ -126,13 +135,13 @@ int plMTManage(plmt_t* mt, int mode, memptr_t ptr, size_t size, memptr_t ptr2){
 
 /* Get the current memory usage or the maximum memory usage limit, or set a new *\
 \* maximum memory usage limit                                                   */
-size_t plMTMemAmnt(plmt_t* mt, int action, size_t size){
+size_t plMTMemAmnt(plmt_t* mt, plmtaction_t action, size_t size){
 	switch(action){
-		case PLMT_GET_USEDMEM: ;
+		case PLMT_GET_USEDMEM:
 			return mt->usedMemory;
-		case PLMT_GET_MAXMEM: ;
+		case PLMT_GET_MAXMEM:
 			return mt->maxMemory;
-		case PLMT_SET_MAXMEM: ;
+		case PLMT_SET_MAXMEM:
 			mt->maxMemory = size;
 			break;
 	}

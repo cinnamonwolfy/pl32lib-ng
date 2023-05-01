@@ -15,19 +15,17 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define PL32LIBNG_VERSION "1.03"
+#define PL32LIBNG_VERSION "1.04"
 #define PL32LIBNG_API_VER 1
-#define PL32LIBNG_FEATURELVL 3
+#define PL32LIBNG_FEATURELVL 4
 #define PL32LIBNG_PATCHLVL 0
 
-#define PLMT_STOP 1
-#define PLMT_SEARCHPTR 2
-#define PLMT_ADDPTR 3
-#define PLMT_RMPTR 4
-#define PLMT_REALLOC 5
-#define PLMT_GET_USEDMEM 6
-#define PLMT_GET_MAXMEM 7
-#define PLMT_SET_MAXMEM 8
+// TODO: remove enum values next ABI breakage
+typedef enum plmtaction {
+	PLMT_GET_USEDMEM = 6,
+	PLMT_GET_MAXMEM = 7,
+	PLMT_SET_MAXMEM = 8,
+} plmtaction_t;
 
 typedef char byte_t;
 typedef char* string_t;
@@ -44,7 +42,7 @@ typedef struct plarray {
 
 plmt_t* plMTInit(size_t maxMemoryAlloc);
 void plMTStop(plmt_t* mt);
-size_t plMTMemAmnt(plmt_t* mt, int action, size_t size);
+size_t plMTMemAmnt(plmt_t* mt, plmtaction_t action, size_t size);
 
 memptr_t plMTAlloc(plmt_t* mt, size_t size);
 memptr_t plMTAllocE(plmt_t* mt, size_t size);
