@@ -178,10 +178,10 @@ string_t plFGets(string_t string, int num, plfile_t* stream){
 		return NULL;
 
 	if(stream->fileptr == NULL){
-		string_t endMark = strchr(stream->strbuf + stream->seekbyte, '\n');
+		byte_t* endMark = (byte_t*)strchr((string_t)stream->strbuf + stream->seekbyte, '\n');
 		unsigned int writeNum = 0;
 		if(endMark == NULL)
-			endMark = strchr(stream->strbuf + stream->seekbyte, '\0');
+			endMark = (byte_t*)strchr((string_t)stream->strbuf + stream->seekbyte, '\0');
 
 		writeNum = endMark - (stream->strbuf + stream->seekbyte);
 
@@ -262,7 +262,10 @@ int plFPToFile(string_t filename, plfile_t* stream){
 		return -1;
 
 	FILE* realFile = fopen(filename, "w");
-	int retVar = fputs(stream->strbuf, realFile);
+	if(realFile == NULL)
+		return 0;
+
+	int retVar = fputs((string_t)stream->strbuf, realFile);
 	fclose(realFile);
 	return retVar;
 }

@@ -96,8 +96,8 @@ int plMemoryTest(plmt_t* mt){
 }
 
 int plFileTest(string_t customFile, plmt_t* mt){
-	byte_t stringBuffer[4096] = "";
-	byte_t filepath[256] = "src/pl32-file.c";
+	char stringBuffer[4096] = "";
+	char filepath[256] = "src/pl32-file.c";
 	if(customFile != NULL)
 		strcpy(filepath, customFile);
 

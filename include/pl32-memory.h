@@ -1,6 +1,6 @@
 /****************************************************\
- pl32lib-ng, v1.03
- (c) 2022 pocketlinux32, Under MPL v2.0
+ pl32lib-ng, v1.04
+ (c) 2022-2023 pocketlinux32, Under MPL v2.0
  pl32-memory.h: Safe memory management module headers
 \****************************************************/
 #pragma once
@@ -27,18 +27,19 @@ typedef enum plmtaction {
 	PLMT_SET_MAXMEM = 8,
 } plmtaction_t;
 
-typedef char byte_t;
+typedef uint8_t byte_t;
 typedef char* string_t;
 typedef void* memptr_t;
-
 typedef struct plmt plmt_t;
 
-typedef struct plarray {
+typedef struct plfatptr {
 	memptr_t array;
 	size_t size;
 	bool isMemAlloc;
 	plmt_t* mt;
-} plarray_t;
+} plfatptr_t;
+
+typedef plfatptr_t plarray_t;
 
 plmt_t* plMTInit(size_t maxMemoryAlloc);
 void plMTStop(plmt_t* mt);
