@@ -31,7 +31,7 @@ struct plmt {
 
 /* Aborts the program. It's called whenever malloc fails to allocate */
 void plMTMemError(void){
-	fputs("Error: Out of memory", stderr);
+	fputs("Error: Out of memory\n", stderr);
 	abort();
 }
 
