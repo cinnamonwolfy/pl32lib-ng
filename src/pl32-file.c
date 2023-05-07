@@ -31,8 +31,7 @@ plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
 			returnStruct->strbuf = NULL;
 
 			if(returnStruct->fileptr == NULL){
-				plMTFree(mt, returnStruct);
-				return NULL;
+				plPanic("plFOpen", true, false);
 			}
 		}
 
@@ -109,7 +108,6 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 
 			stream->strbuf = tempPtr;
 		}
-
 		memcpy(stream->strbuf + stream->seekbyte, ptr, size * nmemb);
 		stream->seekbyte += size * nmemb;
 		return size * nmemb;
@@ -259,11 +257,11 @@ size_t plFTell(plfile_t* stream){
 
 int plFPToFile(string_t filename, plfile_t* stream){
 	if(stream == NULL || filename == NULL || stream->strbuf == NULL)
-		return -1;
+		plPanic("plFPToFile: Stream, filename and/or byte buffer is NULL", false, true);
 
 	FILE* realFile = fopen(filename, "w");
 	if(realFile == NULL)
-		return 0;
+		plPanic("plFPToFile", true, false);
 
 	int retVar = fputs((string_t)stream->strbuf, realFile);
 	fclose(realFile);
@@ -272,7 +270,7 @@ int plFPToFile(string_t filename, plfile_t* stream){
 
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){
 	if(dest == NULL || src == NULL)
-		return;
+		plPanic("plFCat: Destination and/or source stream is NULL", false, true);
 
 	plFSeek(dest, 0, destWhence);
 	plFSeek(src, 0, srcWhence);

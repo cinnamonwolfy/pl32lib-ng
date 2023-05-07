@@ -41,6 +41,7 @@ typedef struct plfatptr {
 
 typedef plfatptr_t plarray_t;
 
+void plPanic(string_t msg, bool usePerror, bool devbug);
 plmt_t* plMTInit(size_t maxMemoryAlloc);
 void plMTStop(plmt_t* mt);
 size_t plMTMemAmnt(plmt_t* mt, plmtaction_t action, size_t size);

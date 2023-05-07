@@ -5,7 +5,7 @@
 \*****************************************************/
 #include <pl32-memory.h>
 
-/* internal enum for plMTManage() */
+/* Internal enum for plMTManage() */
 typedef enum plmtiaction {
 	PLMT_STOP,
 	PLMT_SEARCHPTR,
@@ -29,9 +29,19 @@ struct plmt {
 	size_t maxMemory;
 };
 
-/* Aborts the program. It's called whenever malloc fails to allocate */
-void plMTMemError(void){
-	fputs("Error: Out of memory\n", stderr);
+/* Prints an error and aborts the program. Within pl32-memory, it's used whenever malloc fails */
+void plPanic(string_t msg, bool usePerror, bool devbug){
+	fputs("Panic at function ", stderr);
+	if(usePerror){
+		perror(msg);
+	}else{
+		fputs(msg, stderr);
+		fputs("\n", stderr);
+	}
+
+	if(devbug)
+		fputs("If you're seeing this message, this is a bug. Please report this error to the project maintainers", stderr);
+
 	abort();
 }
 
@@ -44,7 +54,7 @@ plmt_t* plMTInit(size_t maxMemoryInit){
 	returnMT->usedMemory = 0;
 
 	if(returnMT == NULL || returnMT->ptrList == NULL)
-		plMTMemError();
+		plPanic("plMTInit: Failed to allocate memory", false, false);
 
 	if(!maxMemoryInit){
 		returnMT->maxMemory = 128 * 1024 * 1024;
@@ -87,7 +97,7 @@ int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size, memptr
 				memptr_t tempPtr = realloc(mt->ptrList, (mt->listAmnt + 1) * sizeof(plptr_t));
 
 				if(tempPtr == NULL)
-					plMTMemError();
+					plPanic("plMTManage: Failed to resize array", false, false);
 
 				mt->ptrList = tempPtr;
 				mt->allocListAmnt++;
@@ -164,7 +174,7 @@ memptr_t plMTAllocE(plmt_t* mt, size_t size){
 	memptr_t tempPtr = plMTAlloc(mt, size);
 
 	if(tempPtr == NULL)
-		plMTMemError();
+		plPanic("plMTAllocE: Failed to allocate memory", false, false);
 
 	return tempPtr;
 }

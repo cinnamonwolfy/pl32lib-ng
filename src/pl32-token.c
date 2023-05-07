@@ -168,7 +168,7 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 /* Parses a string into an array */
 plarray_t* plParser(string_t input, plmt_t* mt){
 	if(!input || !mt)
-		return NULL;
+		plPanic("plParser: Input or memory tracker is NULL", false, true);
 
 	string_t leftoverStr;
 	plarray_t* returnStruct = plMTAllocE(mt, sizeof(plarray_t));
@@ -177,6 +177,9 @@ plarray_t* plParser(string_t input, plmt_t* mt){
 
 	/* First token */
 	string_t tempPtr = plTokenize(input, &leftoverStr, mt);
+	if(tempPtr == NULL)
+		plPanic("plParser: Invalid string", false, true);
+
 	((string_t*)returnStruct->array)[0] = tempPtr;
 
 	/* Keep tokenizing until there is no more string left to tokenize */
@@ -191,7 +194,7 @@ plarray_t* plParser(string_t input, plmt_t* mt){
 			plMTFree(mt, returnStruct->array);
 			plMTFree(mt, returnStruct);
 
-			return NULL;
+			plPanic("plParser: Failed to resize array", false, false);
 		}
 
 		returnStruct->array = tempArrPtr;
