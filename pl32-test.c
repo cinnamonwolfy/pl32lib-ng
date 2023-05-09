@@ -18,8 +18,11 @@ void printCurrentMemUsg(plmt_t* mt){
 
 	printf("Current RAM usage: %ld bytes\n", plMTMemAmnt(mt, PLMT_GET_USEDMEM, 0));
 	printf("Press Enter to continue test...");
+	fflush(stdout);
 	if(!nonInteractive)
 		gchVar = getchar();
+	else
+		fputs("\n", stdout);
 }
 
 int testLoop(string_t strToTokenize, plmt_t* mt){
@@ -155,8 +158,10 @@ int plTokenTest(plmt_t* mt){
 int main(int argc, string_t argv[]){
 	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
 
-	if(argc < 2)
+	if(argc < 2){
+		printf("Valid test values:\n parser-test\n memory-test\n file-test\n");
 		return 1;
+	}
 
 	if(argc > 2)
 		nonInteractive = true;
