@@ -1,5 +1,5 @@
 /*****************************************************\
- pl32lib-ng, v1.01
+ pl32lib-ng, v1.04
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-memory.c: Safe memory management module
 \*****************************************************/
@@ -9,9 +9,9 @@
 typedef enum plmtiaction {
 	PLMT_STOP,
 	PLMT_SEARCHPTR,
-	PLMT_ADDPTR = 3,
-	PLMT_RMPTR = 4,
-	PLMT_REALLOC = 5,
+	PLMT_ADDPTR,
+	PLMT_RMPTR,
+	PLMT_REALLOC,
 } plmtiaction_t;
 
 /* Internal type for representing internal pointer references */
