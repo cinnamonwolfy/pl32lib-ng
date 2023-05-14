@@ -39,7 +39,15 @@ typedef struct plfatptr {
 	plmt_t* mt;
 } plfatptr_t;
 
+typedef struct plchar {
+	uint8_t bytes[4];
+} plchar_t;
+
 typedef plfatptr_t plarray_t;
+typedef struct plstring {
+	plarray_t data;
+	bool isplChar;
+} plstring_t;
 
 void plPanic(string_t msg, bool usePerror, bool devbug);
 plmt_t* plMTInit(size_t maxMemoryAlloc);

@@ -14,7 +14,7 @@ subdir('src')
 
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries: pl32lib_ng,
-                 version: '1.02',
+                 version: '1.04',
                  name: 'pl32lib-ng',
                  filebase: 'pl32',
                  description: 'A library containing all portable routines/algorithms I\'ve ever implemented in any program')
