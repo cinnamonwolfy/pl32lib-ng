@@ -1,8 +1,8 @@
-/****************************************************\
- pl32lib-ng, v1.04
+/***************************************************\
+ pl32lib-ng, v1.05
  (c) 2022-2023 pocketlinux32, Under MPL v2.0
- pl32-memory.h: Safe memory management module headers
-\****************************************************/
+ pl32-memory.h: Safe memory management module header
+\***************************************************/
 #pragma once
 #ifdef __cplusplus
 extern "C" {
@@ -15,9 +15,9 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define PL32LIBNG_VERSION "1.04"
+#define PL32LIBNG_VERSION "1.05"
 #define PL32LIBNG_API_VER 1
-#define PL32LIBNG_FEATURELVL 4
+#define PL32LIBNG_FEATURELVL 5
 #define PL32LIBNG_PATCHLVL 0
 
 // TODO: remove enum values next ABI breakage
@@ -40,7 +40,7 @@ typedef struct plfatptr {
 } plfatptr_t;
 
 typedef struct plchar {
-	uint8_t bytes[4];
+	byte_t bytes[5];
 } plchar_t;
 
 typedef plfatptr_t plarray_t;

@@ -15,29 +15,32 @@ struct plfile {
 
 /* Opens a file stream. If filename is NULL, a file-in-memory is returned */
 plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt){
-	plfile_t* returnStruct = NULL;
+	if(mt == NULL)
+		plPanic("plFOpen: Memory tracker was set to NULL", false, true);
 
-	if(mt != NULL){
-		returnStruct = plMTAllocE(mt, sizeof(plfile_t));
+	plfile_t* returnStruct = plMTAllocE(mt, sizeof(plfile_t));
 
-		/* If no filename is given, set up a file in memory */
-		if(filename == NULL){
-			returnStruct->fileptr = NULL;
-			returnStruct->strbuf = plMTAllocE(mt, 4098);
-			returnStruct->bufsize = 4098;
-		}else{
-			returnStruct->fileptr = fopen(filename, mode);
-			returnStruct->bufsize = 0;
-			returnStruct->strbuf = NULL;
+	/* If no filename is given, set up a file in memory */
+	if(filename == NULL){
+		returnStruct->fileptr = NULL;
+		returnStruct->strbuf = plMTAllocE(mt, 4098);
+		returnStruct->bufsize = 4098;
+	}else{
+		if(mode == NULL)
+			plPanic("plFOpen: File mode was set to NULL", false, true);
 
-			if(returnStruct->fileptr == NULL){
-				plPanic("plFOpen", true, false);
-			}
+		returnStruct->fileptr = fopen(filename, mode);
+		returnStruct->bufsize = 0;
+		returnStruct->strbuf = NULL;
+
+		if(returnStruct->fileptr == NULL){
+			plPanic("plFOpen", true, false);
 		}
-
-		returnStruct->mtptr = mt;
-		returnStruct->seekbyte = 0;
 	}
+
+	returnStruct->mtptr = mt;
+	returnStruct->seekbyte = 0;
+
 
 	return returnStruct;
 }
@@ -54,7 +57,7 @@ plfile_t* plFToP(FILE* pointer, string_t mode, plmt_t* mt){
 	return returnPointer;
 }
 
-// Closes a file stream
+/* Closes a file stream */
 int plFClose(plfile_t* ptr){
 	if(ptr == NULL)
 		return 1;
@@ -70,7 +73,7 @@ int plFClose(plfile_t* ptr){
 	return 0;
 }
 
-// Reads size * nmemb amount of bytes from the file stream
+/* Reads size * nmemb amount of bytes from the file stream */
 size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(stream == NULL)
 		return 0;
@@ -94,7 +97,7 @@ size_t plFRead(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	}
 }
 
-// Writes size * nmemb amount of bytes from the file stream
+/* Writes size * nmemb amount of bytes from the file stream */
 size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	if(stream == NULL)
 		return 0;
@@ -116,7 +119,7 @@ size_t plFWrite(void* ptr, size_t size, size_t nmemb, plfile_t* stream){
 	}
 }
 
-// Puts a character into the file stream
+/* Puts a character into the file stream */
 int plFPutC(byte_t ch, plfile_t* stream){
 	if(stream == NULL)
 		return '\0';
@@ -137,7 +140,7 @@ int plFPutC(byte_t ch, plfile_t* stream){
 	}
 }
 
-// Gets a character from the file stream
+/* Gets a character from the file stream */
 int plFGetC(plfile_t* stream){
 	if(stream == NULL)
 		return '\0';
@@ -155,7 +158,7 @@ int plFGetC(plfile_t* stream){
 	}
 }
 
-// Puts a string into the file stream
+/* Puts a string into the file stream */
 int plFPuts(string_t string, plfile_t* stream){
 	if(stream == NULL)
 		return 0;
@@ -170,7 +173,7 @@ int plFPuts(string_t string, plfile_t* stream){
 	}
 }
 
-// Gets a string from the file stream
+/* Gets a string from the file stream */
 string_t plFGets(string_t string, int num, plfile_t* stream){
 	if(stream == NULL)
 		return NULL;
@@ -204,7 +207,7 @@ string_t plFGets(string_t string, int num, plfile_t* stream){
 	}
 }
 
-// Moves the seek position offset amount of bytes relative from whence
+/* Moves the seek position offset amount of bytes relative from whence */
 int plFSeek(plfile_t* stream, long int offset, int whence){
 	if(stream == NULL)
 		return 1;
@@ -242,7 +245,7 @@ int plFSeek(plfile_t* stream, long int offset, int whence){
 	}
 }
 
-// Tells you the current seek position
+/* Tells you the current seek position */
 size_t plFTell(plfile_t* stream){
 	if(stream == NULL)
 		return 0;
@@ -255,6 +258,7 @@ size_t plFTell(plfile_t* stream){
 	}
 }
 
+/* Converts a memory buffer into a physical file */
 int plFPToFile(string_t filename, plfile_t* stream){
 	if(stream == NULL || filename == NULL || stream->strbuf == NULL)
 		plPanic("plFPToFile: Stream, filename and/or byte buffer is NULL", false, true);
@@ -268,6 +272,7 @@ int plFPToFile(string_t filename, plfile_t* stream){
 	return retVar;
 }
 
+/* Concatenates two files */
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc){
 	if(dest == NULL || src == NULL)
 		plPanic("plFCat: Destination and/or source stream is NULL", false, true);
