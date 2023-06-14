@@ -92,6 +92,7 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	bool noEndQuoteLiteral = (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
 	bool spaceComesFirst = (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]);
 	bool literalBeforeBasicStr = (tempPtr[1] != NULL && (tempPtr[0] == NULL || tempPtr[1] < tempPtr[0]));
+	bool quoteIsNotFirstChar = (tempPtr[0] != NULL && tempPtr[0] != string);
 
 	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
 	\* use strtok to get a token surrounded by whitespace                                         */
@@ -100,6 +101,8 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	}else{
 		string_t retPtr = NULL;
 		string_t searchLimit = string + strlen(string);
+		string_t startPtr = NULL;
+		string_t endPtr = NULL;
 
 		/* If a literal string started before a basic one, tokenize using plStrtok */
 		if(literalBeforeBasicStr && strchr(tempPtr[1] + 1, '\'') != NULL){
@@ -108,20 +111,25 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 				*leftoverStr = NULL;
 
 			return retPtr;
-		}
-
+		/* Else, if a basic quote is not the first character in the string,       *\
+		|* then make the starting pointer equal the string and the ending pointer *|
+		\* the basic quote                                                        */
+		}else if(quoteIsNotFirstChar){
+			startPtr = string;
+			endPtr = tempPtr[0];
 		/* If none of the above is true, start tokenizing a basic string */
-		string_t startPtr = tempPtr[0] + 1;
-		string_t endPtr = strchr(startPtr, '"');
+		}else{
+			startPtr = tempPtr[0] + 1;
+			endPtr = strchr(startPtr, '"');
+			/* If the end quote is escaped, keep searching for an end quote */
+			while(endPtr != NULL && *(endPtr - 1) == '\\')
+				endPtr = strchr(endPtr + 1, '"');
 
-		/* If the end quote is escaped, keep searching for an end quote */
-		while(endPtr != NULL && *(endPtr - 1) == '\\')
-			endPtr = strchr(endPtr + 1, '"');
-
-		/* If an end quote has not been found, return a NULL pointer */
-		if(endPtr == NULL){
-			*leftoverStr = NULL;
-			return NULL;
+			/* If an end quote has not been found, return a NULL pointer */
+			if(endPtr == NULL){
+				*leftoverStr = NULL;
+				return NULL;
+			}
 		}
 
 		/* Copy the basic string into a memory-allocated buffer */
