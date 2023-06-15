@@ -92,7 +92,8 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	bool noEndQuoteLiteral = (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
 	bool spaceComesFirst = (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]);
 	bool literalBeforeBasicStr = (tempPtr[1] != NULL && (tempPtr[0] == NULL || tempPtr[1] < tempPtr[0]));
-	bool quoteIsNotFirstChar = (tempPtr[0] != NULL && tempPtr[0] != string);
+	bool basicQuoteIsNotFirstChar = (tempPtr[0] != NULL && tempPtr[0] != string);
+	bool literalQuoteIsNotFirstChar = (tempPtr[1] != NULL && tempPtr[1] != string) && literalBeforeBasicStr;
 
 	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
 	\* use strtok to get a token surrounded by whitespace                                         */
@@ -104,8 +105,9 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		string_t startPtr = NULL;
 		string_t endPtr = NULL;
 
-		/* If a literal string started before a basic one, tokenize using plStrtok */
-		if(literalBeforeBasicStr && strchr(tempPtr[1] + 1, '\'') != NULL){
+		/* If a literal string started before a basic one and the starting quote is the first character, *\
+		\* tokenize using plStrtok                                                                       */
+		if(literalBeforeBasicStr && !literalQuoteIsNotFirstChar && strchr(tempPtr[1] + 1, '\'') != NULL){
 			retPtr = plStrtok(tempPtr[1] + 1, "'", leftoverStr, mt);
 			if(*leftoverStr != NULL && *leftoverStr + 1 == searchLimit)
 				*leftoverStr = NULL;
@@ -114,9 +116,12 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		/* Else, if a basic quote is not the first character in the string,       *\
 		|* then make the starting pointer equal the string and the ending pointer *|
 		\* the basic quote                                                        */
-		}else if(quoteIsNotFirstChar){
+		}else if(basicQuoteIsNotFirstChar || literalQuoteIsNotFirstChar){
 			startPtr = string;
-			endPtr = tempPtr[0];
+			if(literalBeforeBasicStr)
+				endPtr = tempPtr[1];
+			else
+				endPtr = tempPtr[0];
 		/* If none of the above is true, start tokenizing a basic string */
 		}else{
 			startPtr = tempPtr[0] + 1;
@@ -125,15 +130,17 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 			while(endPtr != NULL && *(endPtr - 1) == '\\')
 				endPtr = strchr(endPtr + 1, '"');
 
-			/* If an end quote has not been found, return a NULL pointer */
-			if(endPtr == NULL){
-				*leftoverStr = NULL;
-				return NULL;
-			}
+			/* If an end quote has not been found, panic (what kind of tomfoolery were you doing???) */
+			if(endPtr == NULL)
+				plPanic("plTokenize: Ending quote not found after quote check", false, true);
+
+			endPtr++;
 		}
 
 		/* Copy the basic string into a memory-allocated buffer */
 		size_t strSize = endPtr - startPtr;
+		if(startPtr == tempPtr[0] + 1)
+			strSize--;
 		retPtr = plMTAllocE(mt, strSize + 1);
 		memcpy(retPtr, startPtr, strSize);
 		retPtr[strSize] = '\0';
@@ -163,10 +170,10 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		   or if end quote is two chars away from the end of the input string
 		   and the char is a space or a newline, set *leftoverStr as NULL.
 		\* Otherwise, set *leftoverStr as endPtr + 1                           */
-		if(endPtr + 1 == searchLimit || (endPtr + 1 == searchLimit - 1 && (*(endPtr + 1) == ' ' || *(endPtr + 1) == '\n'))){
+		if(endPtr == searchLimit || (endPtr == searchLimit - 1 && (*(endPtr + 1) == ' ' || *(endPtr + 1) == '\n'))){
 			*leftoverStr = NULL;
 		}else{
-			*leftoverStr = endPtr + 1;
+			*leftoverStr = endPtr;
 		}
 
 		return retPtr;
