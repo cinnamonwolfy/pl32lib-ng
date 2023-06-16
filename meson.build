@@ -1,5 +1,5 @@
 project('pl32lib-ng', 'c',
-        version: '1.02',
+        version: '1.05',
         license: 'MPL-2.0',
         default_options: ['c_std=c99',
                           'warning_level=3',
@@ -14,7 +14,7 @@ subdir('src')
 
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries: pl32lib_ng,
-                 version: '1.04',
+                 version: '1.05',
                  name: 'pl32lib-ng',
                  filebase: 'pl32',
                  description: 'A library containing all portable routines/algorithms I\'ve ever implemented in any program')

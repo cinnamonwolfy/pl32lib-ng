@@ -1,5 +1,5 @@
 /*****************************************************\
- pl32lib-ng, v1.04
+ pl32lib-ng, v1.05
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-memory.c: Safe memory management module
 \*****************************************************/
@@ -220,7 +220,4 @@ void plMTFreeArray(plarray_t* array, bool is2DArray){
 			plMTFree(array->mt, ((memptr_t*)array->array)[i]);
 	}
 	plMTFree(array->mt, array->array);
-
-	if(array->isMemAlloc)
-		plMTFree(array->mt, array);
 }

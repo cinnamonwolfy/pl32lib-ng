@@ -40,7 +40,7 @@ typedef struct plfatptr {
 } plfatptr_t;
 
 typedef struct plchar {
-	byte_t bytes[5];
+	byte_t bytes[4];
 } plchar_t;
 
 typedef plfatptr_t plarray_t;

@@ -1,5 +1,5 @@
 /*****************************************************************\
- pl32lib-ng, v1.04
+ pl32lib-ng, v1.05
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32-token.c: String manipulation and parser module
 \*****************************************************************/
@@ -109,7 +109,7 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		\* tokenize using plStrtok                                                                       */
 		if(literalBeforeBasicStr && !literalQuoteIsNotFirstChar && strchr(tempPtr[1] + 1, '\'') != NULL){
 			retPtr = plStrtok(tempPtr[1] + 1, "'", leftoverStr, mt);
-			if(*leftoverStr != NULL && *leftoverStr + 1 == searchLimit)
+			if(*leftoverStr != NULL && *leftoverStr == searchLimit)
 				*leftoverStr = NULL;
 
 			return retPtr;

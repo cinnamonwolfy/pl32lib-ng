@@ -140,11 +140,11 @@ int plFileTest(string_t customFile, plmt_t* mt){
 }
 
 int plTokenTest(plmt_t* mt){
-	string_t tknTestStrings[9] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'", "string    with an  embedded = newline \" char\"\n  " };
+	string_t tknTestStrings[10] = { "oneword", "two words", "\"multiple words enclosed by quotes\" not anymore x3", "\"quotes at the beginning\" some stuff in the middle \"and now quotes at the back\"", "\"just quotes x3\"", "\'time for a literal string :3\' with stuff \"mixed all over\" it x3", "\"\\\"Escaped quotes this time\\\"\" and 'just a literal string with no ending :3", "\"now we have a basic string with no ending but 'a literal that does :3'", "string    with an  embedded = newline \" char\"\n  ", "[\"array test\",\'literal string here\', \"basic string here, preceded by a space\"]" };
 
 	printf("This is a test of the pl32lib-ng tokenizer\n\n");
 
-	for(int i = 0; i < 9; i++){
+	for(int i = 0; i < 10; i++){
 		printf("Test %d:\n", i);
 		if(testLoop(tknTestStrings[i], mt)){
 			printf("An error occurred. Exiting...\n");

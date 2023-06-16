@@ -4,43 +4,153 @@
  pl32.hpp: Base API header (C++ Bindings)
 \****************************************/
 
-#define PL32LIBNG_VERSION "1.05"
-#define PL32LIBNG_API_VER 1
-#define PL32LIBNG_FEATURELVL 5
-#define PL32LIBNG_PATCHLVL 0
-
-enum plmtaction {
-	PLMT_GET_USEDMEM = 6,
-	PLMT_GET_MAXMEM = 7,
-	PLMT_SET_MAXMEM = 8,
-};
-
-
 namespace pl32 {
-	using plmtaction_t = enum plmtaction;
-	using byte_t = uint8_t;
-	using string_t = char*;
-	using memptr_t = void*;
-
-	struct plmt;
-	struct plfatptr {
-		memptr_t array;
-		size_t size;
-		bool isMemAlloc;
-		plmt_t* mt;
-	};
-	struct plchar {
-		byte_t bytes[5];
-	};
-
-	using plchar_t = struct plchar;
-	using plfatptr_t = struct plfatptr;
-	using plarray_t = struct plfatptr;
-
-	struct plstring {
-		plarray_t data;
-		bool isplChar;
+	namespace cApi {
+		extern "C" {
+			#include <pl32-memory.h>
+			#include <pl32-token.h>
+			#include <pl32-file.h>
+			//#include <pl32-ustring.h>	Incomplete, disabled for now
+		}
 	}
 
-	using plstring_t = struct plstring;
+	namespace memory{
+		class tracker {
+			private
+				pl32::cApi::plmt_t* mt;
+			public:
+				memoryTracker(size_t maxMemoryAmnt){
+					mt = pl32::cApi::plMTInit(maxMemoryAmnt);
+				}
+
+				memoryTracker(){
+					mt = NULL;
+				}
+
+				~memoryTracker(){
+					if(mt != NULL)
+						pl32::cApi::plMTStop(mt);
+				}
+
+				void init(size_t maxMemoryAmnt){
+					if(mt == NULL)
+						mt = pl32::cApi::plMTInit(maxMemoryAmnt);
+				}
+
+				size_t getUsedSize(){
+					return pl32::cApi::plMTMemAmnt(mt, pl32::cApi::PLMT_GET_USEDMEM, 0);
+				}
+
+				size_t getMaxSize(){
+					return pl32::cApi::plMTMemAmnt(mt, pl32::cApi::PLMT_GET_MAXMEM, 0);
+				}
+
+				void setMaxSize(size_t newMaxSize){
+					pl32::cApi::plMTMemAmnt(mt, pl32::cApi::PLMT_SET_MAXMEM, newMaxSize);
+				}
+
+				pl32::cApi::memptr_t alloc(size_t size){
+					return pl32::cApi::plMTAllocE(mt, size);
+				}
+
+				pl32::cApi::memptr_t calloc(size_t size, size_t amount){
+					return pl32::cApi::plMTCalloc(mt, size, amount);
+				}
+
+				pl32::cApi::memptr_t realloc(pl32::cApi::memptr_t pointer, size_t newSize){
+					return pl32::cApi::plMTRealloc(mt, pointer, newSize);
+				}
+
+				void free(pl32::cApi::memptr_t pointer){
+					pl32::cApi::plMTFree(mt, pointer);
+				}
+
+				const pl32::cApi::plmt_t* getMTHandle(){
+					return mt;
+				}
+		};
+
+		class fatPointer {
+			private:
+				pl32::cApi::plfatptr_t fatPtr;
+				bool is2DArray;
+			public:
+				fatPointer(pl32::cApi::memptr_t pointer, size_t size, bool is2dimArray, bool isMemAlloc, tracker &tracker){
+					fatPtr.array = pointer;
+					fatPtr.size = size;
+					fatPtr.isMemAlloc = isMemAlloc;
+					fatPtr.mt = tracker.getMTHandle();
+					is2DArray = is2dimArray;
+				}
+
+				fatPointer(pl32::cApi::memptr_t pointer, size_t size, bool is2dimArray){
+					fatPtr.array = pointer;
+					fatPtr.size = size;
+					fatPtr.isMemAlloc = false;
+					fatPtr.mt = NULL;
+					is2DArray = is2dimArray;
+				}
+
+				~fatPointer(){
+					if(fatPtr.isMemAlloc && fatPtr.mt != NULL)
+						pl32::cApi::plMTFreeArray(&fatPtr, is2DArray);
+				}
+
+				pl32::cApi::memptr_t getPointer(){
+					return fatPtr.array;
+				}
+
+				size_t getSize(){
+					return fatPtr.size;
+				}
+
+				bool isMemAlloc(){
+					return fatPtr.isMemAlloc;
+				}
+
+				const pl32::cApi::plfatptr_t* getFatPointerHandle(){
+					return &fatPtr;
+				}
+		}
+	}
+
+	memory::fatPointer parser(cApi::string_t input, memory::tracker &tracker){
+		cApi::plfatptr_t* tempData cApi::plParser(input, tracker.getMTHandle());
+
+		memory::fatPointer returnPointer(tempData->array, tempData->size, true, true, tracker);
+		tracker.free(tempData);
+
+		return returnPointer;
+	}
+
+	class file {
+		private:
+			memory::tracker tracker;
+			cApi::plfile_t* fileHandle;
+		public:
+			file(cApi::string_t filename, cApi::string_t mode){
+				tracker.init(1024 * 1024);
+				fileHandle = cApi::plFOpen(filename, mode, tracker.getMTHandle());
+			}
+
+			file(size_t sizeOfBuffer){
+				tracker.init(sizeOfBuffer);
+				fileHandle = cApi::plFOpen(NULL, NULL, tracker.getMTHandle());
+			}
+
+			~file(){
+				cApi::plFClose(fileHandle);
+			}
+
+			memory::fatPointer read(size_t amountOfBytes, memory::tracker &extTracker){
+				cApi::memptr_t tempPtr = extTracker.alloc(amountOfBytes);
+				cApi::plFRead(retPtr, amountOfBytes, 1, fileHandle);
+
+				return memory::fatPointer(tempPtr, amountOfBytes, false, true, extTracker);
+			}
+
+			void write(memory::fatPointer data){
+				cApi::plFWrite(data.getPointer(), data.getSize(), 1, fileHandle)
+			}
+	};
 }
