@@ -4,9 +4,11 @@
  pl32-memory.h: Safe memory management module header
 \***************************************************/
 #pragma once
-#ifdef __cplusplus
-extern "C" {
-#else
+#if defined(__cplusplus) && !defined(PL32CPP)
+	#error Direct C header include in C++ detected. Please use pl32.hpp instead of directly using the C headers
+#endif
+
+#ifndef __cplusplus
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -61,7 +63,3 @@ memptr_t plMTRealloc(plmt_t* mt, memptr_t pointer, size_t size);
 void plMTFree(plmt_t* mt, memptr_t pointer);
 
 void plMTFreeArray(plarray_t* array, bool is2DArray);
-
-#ifdef __cplusplus
-}
-#endif

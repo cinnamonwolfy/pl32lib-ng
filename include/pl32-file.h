@@ -6,10 +6,6 @@
 #pragma once
 #include <pl32-memory.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct plfile plfile_t;
 
 plfile_t* plFOpen(string_t filename, string_t mode, plmt_t* mt);
@@ -30,7 +26,3 @@ size_t plFTell(plfile_t* stream);
 
 int plFPToFile(string_t filename, plfile_t* stream);
 void plFCat(plfile_t* dest, plfile_t* src, int destWhence, int srcWhence, bool closeSrc);
-
-#ifdef __cplusplus
-}
-#endif

@@ -4,6 +4,12 @@
  pl32.hpp: Base API header (C++ Bindings)
 \****************************************/
 
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+
+#define PL32CPP
+
 namespace pl32 {
 	namespace cApi {
 		extern "C" {
@@ -14,20 +20,20 @@ namespace pl32 {
 		}
 	}
 
-	namespace memory{
+	namespace memory {
 		class tracker {
-			private
+			private:
 				pl32::cApi::plmt_t* mt;
 			public:
-				memoryTracker(size_t maxMemoryAmnt){
+				tracker(size_t maxMemoryAmnt){
 					mt = pl32::cApi::plMTInit(maxMemoryAmnt);
 				}
 
-				memoryTracker(){
+				tracker(){
 					mt = NULL;
 				}
 
-				~memoryTracker(){
+				~tracker(){
 					if(mt != NULL)
 						pl32::cApi::plMTStop(mt);
 				}
@@ -65,7 +71,7 @@ namespace pl32 {
 					pl32::cApi::plMTFree(mt, pointer);
 				}
 
-				const pl32::cApi::plmt_t* getMTHandle(){
+				pl32::cApi::plmt_t* getMTHandle(){
 					return mt;
 				}
 		};
@@ -111,11 +117,11 @@ namespace pl32 {
 				const pl32::cApi::plfatptr_t* getFatPointerHandle(){
 					return &fatPtr;
 				}
-		}
+		};
 	}
 
-	memory::fatPointer parser(cApi::string_t input, memory::tracker &tracker){
-		cApi::plfatptr_t* tempData cApi::plParser(input, tracker.getMTHandle());
+	memory::fatPointer parser(pl32::cApi::string_t input, memory::tracker &tracker){
+		pl32::cApi::plfatptr_t* tempData = pl32::cApi::plParser(input, tracker.getMTHandle());
 
 		memory::fatPointer returnPointer(tempData->array, tempData->size, true, true, tracker);
 		tracker.free(tempData);
@@ -126,31 +132,31 @@ namespace pl32 {
 	class file {
 		private:
 			memory::tracker tracker;
-			cApi::plfile_t* fileHandle;
+			pl32::cApi::plfile_t* fileHandle;
 		public:
-			file(cApi::string_t filename, cApi::string_t mode){
+			file(pl32::cApi::string_t filename, pl32::cApi::string_t mode){
 				tracker.init(1024 * 1024);
-				fileHandle = cApi::plFOpen(filename, mode, tracker.getMTHandle());
+				fileHandle = pl32::cApi::plFOpen(filename, mode, tracker.getMTHandle());
 			}
 
 			file(size_t sizeOfBuffer){
 				tracker.init(sizeOfBuffer);
-				fileHandle = cApi::plFOpen(NULL, NULL, tracker.getMTHandle());
+				fileHandle = pl32::cApi::plFOpen(NULL, NULL, tracker.getMTHandle());
 			}
 
 			~file(){
-				cApi::plFClose(fileHandle);
+				pl32::cApi::plFClose(fileHandle);
 			}
 
 			memory::fatPointer read(size_t amountOfBytes, memory::tracker &extTracker){
-				cApi::memptr_t tempPtr = extTracker.alloc(amountOfBytes);
-				cApi::plFRead(retPtr, amountOfBytes, 1, fileHandle);
+				pl32::cApi::memptr_t tempPtr = extTracker.alloc(amountOfBytes);
+				pl32::cApi::plFRead(tempPtr, amountOfBytes, 1, fileHandle);
 
 				return memory::fatPointer(tempPtr, amountOfBytes, false, true, extTracker);
 			}
 
 			void write(memory::fatPointer data){
-				cApi::plFWrite(data.getPointer(), data.getSize(), 1, fileHandle)
+				pl32::cApi::plFWrite(data.getPointer(), data.getSize(), 1, fileHandle);
 			}
 	};
 }
