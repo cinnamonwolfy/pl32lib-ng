@@ -83,21 +83,24 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 	if(strlen(string) == 0)
 		return NULL;
 
-	string_t tempPtr[2] = { strchr(string, '"'), strchr(string, '\'') };
+	string_t tempPtr[3] = { strchr(string, '"'), strchr(string, '\''), strchr(string, '[')};
 	string_t spaceChar = strchr(string, ' ');
 
 	/* String checks */
 	bool noQuotesFound = (tempPtr[0] == NULL && tempPtr[1] == NULL);
 	bool noEndQuoteBasic = (tempPtr[0] != NULL && strchr(tempPtr[0] + 1, '"') == NULL);
 	bool noEndQuoteLiteral = (tempPtr[1] != NULL && strchr(tempPtr[1] + 1, '\'') == NULL);
-	bool spaceComesFirst = (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]);
+	bool noEndArrayBracket = (tempPtr[2] != NULL && strchr(tempPtr[2] + 1, ']') == NULL);
+	bool spaceComesFirst = (spaceChar != NULL && (tempPtr[0] == NULL || spaceChar < tempPtr[0]) && (tempPtr[1] == NULL || spaceChar < tempPtr[1]) && (tempPtr[2] == NULL || spaceChar < tempPtr[2]));
+	bool arrayBeforeStr = (tempPtr[2] != NULL && (tempPtr[0] == NULL || tempPtr[2] < tempPtr[0]) && (tempPtr[1] == NULL || tempPtr[2] < tempPtr[1]));
 	bool literalBeforeBasicStr = (tempPtr[1] != NULL && (tempPtr[0] == NULL || tempPtr[1] < tempPtr[0]));
+	bool arrayIsNotFirstChar = (tempPtr[2] != NULL && tempPtr[2] != string);
 	bool basicQuoteIsNotFirstChar = (tempPtr[0] != NULL && tempPtr[0] != string);
 	bool literalQuoteIsNotFirstChar = (tempPtr[1] != NULL && tempPtr[1] != string) && literalBeforeBasicStr;
 
-	/* If there are no quotes or there are no end quotes or space comes before any quote symbols, *\
-	\* use strtok to get a token surrounded by whitespace                                         */
-	if(noQuotesFound || (noEndQuoteBasic && !literalBeforeBasicStr) || (noEndQuoteLiteral && literalBeforeBasicStr) || (spaceChar != NULL && spaceComesFirst)){
+	/* If there are no quotes or there are no end brackets to an array or there are no end quotes or space comes *\
+	\* before any quote or array symbols, use strtok to get a token surrounded by whitespace                     */
+	if(noQuotesFound || (noEndArrayBracket && arrayBeforeStr)  || (noEndQuoteBasic && !literalBeforeBasicStr) || (noEndQuoteLiteral && literalBeforeBasicStr) || spaceComesFirst){
 		return plStrtok(string, " \n", leftoverStr, mt);
 	}else{
 		string_t retPtr = NULL;
@@ -105,9 +108,14 @@ string_t plTokenize(string_t string, string_t* leftoverStr, plmt_t* mt){
 		string_t startPtr = NULL;
 		string_t endPtr = NULL;
 
-		/* If a literal string started before a basic one and the starting quote is the first character, *\
-		\* tokenize using plStrtok                                                                       */
-		if(literalBeforeBasicStr && !literalQuoteIsNotFirstChar && strchr(tempPtr[1] + 1, '\'') != NULL){
+		/* If there is an array, make the beginning pointer the opening bracket, *\
+		\* then make the end pointer be the closing bracket                      */
+		if(arrayBeforeStr && !arrayIsNotFirstChar && !noEndArrayBracket){
+			startPtr = tempPtr[2];
+			endPtr = strchr(startPtr, ']') + 1;
+		/* Else, if a literal string started before a basic one and the starting quote is the first *\
+		\* character, tokenize using plStrtok                                                       */
+		}else if(literalBeforeBasicStr && !literalQuoteIsNotFirstChar && !noEndQuoteLiteral){
 			retPtr = plStrtok(tempPtr[1] + 1, "'", leftoverStr, mt);
 			if(*leftoverStr != NULL && *leftoverStr == searchLimit)
 				*leftoverStr = NULL;
