@@ -5,6 +5,24 @@
 \**********************************************/
 #include <pl32-ustring.h>
 
+bool isUStrNull(plstring_t* string){
+	if(string == NULL || string->data.array == NULL)
+		return true;
+
+	return false;
+}
+
+size_t getCharSize(plchar_t chr){
+	size_t size = 4;
+
+	for(int i = 0; i < 4; i++){
+		if(chr.bytes[i] != 0)
+			size--;
+	}
+
+	return size;
+}
+
 plstring_t plUStrFromCStr(string_t cStr, plmt_t* mt){
 	if(cStr == NULL)
 		plPanic("plStrFromCStr: NULL pointers given!", false, true);
@@ -32,17 +50,17 @@ plstring_t plUStrFromCStr(string_t cStr, plmt_t* mt){
 }
 
 void plUStrCompress(plstring_t* plCharStr, plmt_t* mt){
-	if(mt == NULL || plCharStr == NULL)
+	if(mt == NULL || isUStrNull(plCharStr))
 		plPanic("plStrCompress: NULL pointers given!", false, true);
 	if(!plCharStr->isplChar)
 		plPanic("plStrCompress: plCharStr is not a plChar string", false, true);
 
 	plchar_t* plCharStrPtr = plCharStr->data.array;
-	uint8_t* compressedStr = plMTAlloc(mt, plCharStr->data.size * 5);
+	uint8_t* compressedStr = plMTAlloc(mt, plCharStr->data.size * 4);
 	size_t offset = 0;
 	for(int i = 0; i < plCharStr->data.size; i++){
 		int endOfUtfChr = -1;
-		uint8_t bytes[5];
+		uint8_t bytes[4];
 
 		for(int j = 4; j > 0; j--){
 			if(endOfUtfChr == -1 && plCharStrPtr[i].bytes[j] != 0)
@@ -92,21 +110,23 @@ memptr_t plMemMatch(plarray_t* memBlock1, plarray_t* memBlock2){
 	return NULL;
 }
 
-ssize_t plUStrchr(plstring_t* string, plchar_t chr){
-	if(string == NULL || string->data.array == NULL)
+int64_t plUStrchr(plstring_t* string, plchar_t chr, size_t startAt){
+	if(isUStrNull(string))
 		plPanic("plUStrchr: Given string is NULL!", false, true);
 	if(string->isplChar)
 		plPanic("plUStrchr: Given string is a plChar array", false, true);
 
 	plarray_t tempStruct = {
 		.array = chr.bytes,
-		.size = 5,
+		.size = getCharSize(chr),
 		.isMemAlloc = false,
 		.mt = NULL
 	};
 
-	memptr_t tempPtr = plMemMatch(string->data.array, &tempStruct);
-	ssize_t retVar = -1;
+	string->data.array += startAt;
+	memptr_t tempPtr = plMemMatch(&string->data, &tempStruct);
+	int64_t retVar = -1;
+	string->data.array -= startAt;
 
 	if(tempPtr != NULL)
 		retVar = tempPtr - string->data.array;
@@ -114,14 +134,18 @@ ssize_t plUStrchr(plstring_t* string, plchar_t chr){
 	return retVar;
 }
 
-ssize_t plUStrstr(plstring_t* string1, plstring_t* string2){
-	if(string1 == NULL || string1->data.array == NULL || string2 == NULL || string2->data.array == NULL)
+int64_t plUStrstr(plstring_t* string1, plstring_t* string2, size_t startAt){
+	if(isUStrNull(string1) || isUStrNull(string2))
 		plPanic("plUStrstr: Given string is NULL!", false, true);
 	if(string1->isplChar || string2->isplChar)
 		plPanic("plUStrstr: Given string is a plChar array", false, true);
 
-	memptr_t tempPtr = plMemMatch(string1->data.array, string2->data.array);
-	ssize_t retVar = -1;
+	string1->data.array += startAt;
+	string1->data.size -= startAt;
+	memptr_t tempPtr = plMemMatch(&string1->data, &string2->data);
+	int64_t retVar = -1;
+	string1->data.size += startAt;
+	string1->data.array -= startAt;
 
 	if(tempPtr != NULL)
 		retVar = tempPtr - string1->data.array;
@@ -129,12 +153,110 @@ ssize_t plUStrstr(plstring_t* string1, plstring_t* string2){
 	return retVar;
 }
 
-plstring_t plUStrtok(plstring_t* string, plstring_t* delimeter, plstring_t* leftoverStr, plmt_t* mt){
-	plstring_t nano;
-	return nano;
+plstring_t plUStrtok(plstring_t* string, plstring_t* delimiter, plstring_t* leftoverStr, plmt_t* mt){
+	if(isUStrNull(string) || isUStrNull(delimiter) || leftoverStr == NULL || mt == NULL)
+		plPanic("plUStrtok: NULL was given!", false, true);
+	if(string->isplChar)
+		plPanic("plUStrtok: Given string is a plChar array", false, true);
+	if(!delimiter->isplChar)
+		plPanic("plUStrtok: Given delimiter is just a standard string", false, true);
+
+	plstring_t retStr = {
+		.data = {
+			.array = NULL,
+			.size = 0,
+			.isMemAlloc = false,
+			.mt = NULL
+		},
+		.isplChar = false
+	};
+
+	int iterator = 0;
+	int64_t endOffset = -1;
+	size_t currentPos = 0;
+	size_t searchLimit = string->data.size;
+	plchar_t* delim = delimiter->data.array;
+	uint8_t* startPtr = string->data.array;
+
+	while(endOffset == -1 && currentPos < searchLimit){
+		size_t tempChr = plUStrchr(string, delim[iterator], currentPos);
+
+		if(tempChr == -1){
+			iterator++;
+			if(iterator >= delimiter->data.size)
+				endOffset = searchLimit;
+		}else{
+			for(int i = 0; i < delimiter->data.size; i++){
+				if(i != iterator){
+					size_t tempChr2 = plUStrchr(string, delim[i], currentPos);
+					if(tempChr2 != -1 && tempChr2 < tempChr)
+						tempChr = tempChr2;
+				}
+			}
+
+			if(tempChr == 0){
+				if(startPtr[currentPos] >= 128){
+					while(startPtr[currentPos] >= 128)
+						currentPos++;
+				}else{
+					currentPos++;
+				}
+
+				iterator = 0;
+			}else{
+				endOffset = tempChr;
+			}
+		}
+
+	}
+
+	if(endOffset == -1){
+		leftoverStr->data.array = NULL;
+		leftoverStr->data.size = 0;
+		return retStr;
+	}
+
+	/* Copies the memory block into the return struct */
+	retStr.data.size = endOffset - currentPos + 1;
+	retStr.data.array = plMTAllocE(mt, retStr.data.size);
+	retStr.data.isMemAlloc = true;
+	retStr.data.mt = mt;
+	memcpy(retStr.data.array, string->data.array + currentPos, retStr.data.size);
+
+	/* Calculates the pointer to put into leftoverStr*/
+	leftoverStr->data.array = NULL;
+	leftoverStr->data.size = 0;
+	if(endOffset != searchLimit){
+		size_t leftoverOffset = endOffset + getCharSize(delim[iterator]);
+		iterator = 0;
+		while(leftoverStr->data.array == NULL && leftoverOffset < searchLimit){
+			int64_t tempChr = plUStrchr(string, delim[iterator], leftoverOffset);
+
+			if(tempChr <= 0){
+				iterator++;
+				if(iterator >= delimiter->data.size){
+					leftoverStr->data.array = startPtr + leftoverOffset;
+					leftoverStr->data.size = searchLimit - leftoverOffset;
+				}
+			}else{
+				leftoverOffset += getCharSize(delim[iterator]);
+			}
+		}
+	}
+
+
+	return retStr;
 }
 
 plstring_t plUStrdup(plstring_t* string, bool compress, plmt_t* mt){
-	plstring_t nano;
-	return nano;
+	if(isUStrNull(string) || mt == NULL)
+		plPanic("plUStrdup: NULL was given!", false, true);
+
+	plstring_t retStr;
+
+	retStr.data.array = plMTAlloc(mt, string->data.size);
+	retStr.data.size = string->data.size;
+	memcpy(retStr.data.array, string->data.array, string->data.size);
+
+	return retStr;
 }
