@@ -31,7 +31,7 @@ plstring_t plUStrFromCStr(string_t cStr, plmt_t* mt){
 	memptr_t tempPtr = cStr;
 	bool memAlloc = false;
 	if(mt != NULL){
-		tempPtr = plMTAlloc(mt, cStrSize);
+		tempPtr = plMTAllocE(mt, cStrSize);
 		memAlloc = true;
 		memcpy(tempPtr, cStr, cStrSize);
 	}
@@ -56,7 +56,7 @@ void plUStrCompress(plstring_t* plCharStr, plmt_t* mt){
 		plPanic("plStrCompress: plCharStr is not a plChar string", false, true);
 
 	plchar_t* plCharStrPtr = plCharStr->data.array;
-	uint8_t* compressedStr = plMTAlloc(mt, plCharStr->data.size * 4);
+	uint8_t* compressedStr = plMTAllocE(mt, plCharStr->data.size * 4);
 	size_t offset = 0;
 	for(int i = 0; i < plCharStr->data.size; i++){
 		int endOfUtfChr = -1;
@@ -70,10 +70,10 @@ void plUStrCompress(plstring_t* plCharStr, plmt_t* mt){
 		for(int j = 0; j < endOfUtfChr; j++)
 			compressedStr[offset + j] = plCharStrPtr[i].bytes[j];
 
-		offset += endOfUtfChr + 1;
+		offset += endOfUtfChr;
 	}
 
-	void* resizedPtr = plMTRealloc(mt, compressedStr, offset);
+	void* resizedPtr = plMTRealloc(mt, compressedStr, offset + 1);
 	if(resizedPtr == NULL)
 		plPanic("plStrCompress: Failed to reallocate memory", false, false);
 
@@ -255,7 +255,7 @@ plstring_t plUStrdup(plstring_t* string, bool compress, plmt_t* mt){
 
 	plstring_t retStr;
 
-	retStr.data.array = plMTAlloc(mt, string->data.size);
+	retStr.data.array = plMTAllocE(mt, string->data.size);
 	retStr.data.size = string->data.size;
 	memcpy(retStr.data.array, string->data.array, string->data.size);
 
