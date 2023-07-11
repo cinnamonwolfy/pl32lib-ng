@@ -6,8 +6,8 @@
 #pragma once
 #include <pl32-memory.h>
 
-plstring_t plStrFromCStr(string_t cStr, plmt_t* mt);
-void plStrCompress(plstring_t* plCharStr, plmt_t* mt);
+plstring_t plUStrFromCStr(string_t cStr, plmt_t* mt);
+void plUStrCompress(plstring_t* plCharStr, plmt_t* mt);
 memptr_t plMemMatch(plarray_t* memBlock1, plarray_t* memBlock2);
 int64_t plUStrchr(plstring_t* string, plchar_t chr, size_t startAt);
 int64_t plUStrstr(plstring_t* string1, plstring_t* string2, size_t startAt);

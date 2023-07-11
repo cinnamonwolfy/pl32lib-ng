@@ -82,7 +82,7 @@ void plUStrCompress(plstring_t* plCharStr, plmt_t* mt){
 		plMTFree(mt, plCharStr->data.array);
 
 	plCharStr->data.array = compressedStr;
-	plCharStr->data.size = offset
+	plCharStr->data.size = offset;
 	plCharStr->data.isMemAlloc = true;
 	plCharStr->data.mt = mt;
 }
