@@ -65,7 +65,7 @@ plmt_t* plMTInit(size_t maxMemoryInit){
 	return returnMT;
 }
 
-/* Frees all pointers currently in the memory allocation tracker */
+/* Frees all pointers currently in the memory allocation tracker and the tracker itself */
 void plMTStop(plmt_t* mt){
 	for(int i = 0; i < mt->listAmnt; i++){
 		free(mt->ptrList[i].pointer);
@@ -75,7 +75,7 @@ void plMTStop(plmt_t* mt){
 }
 
 /* An internal control function for the memory allocation tracker */
-int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size, memptr_t ptr2){
+int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size){
 	if(mt == NULL){
 		return 1;
 	}
@@ -113,7 +113,7 @@ int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size, memptr
 			if(ptr == NULL)
 				return 1;
 
-			int rmPtrResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0, NULL);
+			int rmPtrResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0);
 			if(rmPtrResult == -1)
 				return 1;
 
@@ -129,13 +129,19 @@ int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size, memptr
 			break;
 		/* Special mode for just realloc() */
 		case PLMT_REALLOC: ;
-			int reallocResult = plMTManage(mt, PLMT_SEARCHPTR, ptr, 0, NULL);
+			int reallocResult = plMTManage(mt, PLMT_SEARCHPTR, *((void**)ptr), 0);
 			if(reallocResult == -1)
 				return 1;
 
-			mt->ptrList[reallocResult].pointer = ptr2;
-			mt->usedMemory += (size - mt->ptrList[reallocResult].size);
+			void* tempPtr = realloc(ptr, size);
+			if(tempPtr == NULL)
+				plPanic("plMTManage: Couldn't reallocate memory", false, false);
+
+			mt->ptrList[reallocResult].pointer = tempPtr;
+			mt->usedMemory += (int)(size - mt->ptrList[reallocResult].size);
 			mt->ptrList[reallocResult].size = size;
+
+			*((void**)ptr) = tempPtr;
 			break;
 		default:
 			return 1;
@@ -165,7 +171,7 @@ memptr_t plMTAlloc(plmt_t* mt, size_t size){
 	if(mt == NULL || mt->usedMemory + size > mt->maxMemory || (tempPtr = malloc(size)) == NULL)
 		return NULL;
 
-	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
+	plMTManage(mt, PLMT_ADDPTR, tempPtr, size);
 	return tempPtr;
 }
 
@@ -186,28 +192,26 @@ memptr_t plMTCalloc(plmt_t* mt, size_t amount, size_t size){
 	if(mt == NULL|| mt->usedMemory + size > mt->maxMemory || (tempPtr = calloc(amount, size)) == NULL)
 		return NULL;
 
-	plMTManage(mt, PLMT_ADDPTR, tempPtr, size, NULL);
+	plMTManage(mt, PLMT_ADDPTR, tempPtr, size);
 	return tempPtr;
 }
 
 /* realloc() wrapper that interfaces with the memory allocation tracker */
 memptr_t plMTRealloc(plmt_t* mt, memptr_t pointer, size_t size){
-	memptr_t tempPtr;
+	memptr_t tempPtr = pointer;
 
-	if(mt == NULL || mt->usedMemory + size > mt->maxMemory || (tempPtr = realloc(pointer, size)) == NULL)
+	if(mt == NULL || mt->usedMemory + size > mt->maxMemory)
 		return NULL;
 
-	if(plMTManage(mt, PLMT_REALLOC, pointer, size, tempPtr)){
-		free(tempPtr);
+	if(plMTManage(mt, PLMT_REALLOC, &tempPtr, size))
 		return NULL;
-	}
 
 	return tempPtr;
 }
 
 /* free() wrapper that interfaces with the memory allocation tracker */
 void plMTFree(plmt_t* mt, memptr_t pointer){
-	plMTManage(mt, PLMT_RMPTR, pointer, 0, NULL);
+	plMTManage(mt, PLMT_RMPTR, pointer, 0);
 }
 
 /* Frees a plarray_t */
