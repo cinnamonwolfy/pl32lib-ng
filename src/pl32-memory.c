@@ -133,7 +133,7 @@ int plMTManage(plmt_t* mt, plmtiaction_t mode, memptr_t ptr, size_t size){
 			if(reallocResult == -1)
 				return 1;
 
-			void* tempPtr = realloc(ptr, size);
+			void* tempPtr = realloc(*(void**)ptr, size);
 			if(tempPtr == NULL)
 				plPanic("plMTManage: Couldn't reallocate memory", false, false);
 
