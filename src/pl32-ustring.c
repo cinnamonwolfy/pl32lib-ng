@@ -97,7 +97,7 @@ memptr_t plMemMatch(plarray_t* memBlock1, plarray_t* memBlock2){
 		if(*(mainPtr + i) == *(searchPtr)){
 			bool isThere = true;
 			for(int j = 1; j < memBlock2->size; j++){
-				if(*(mainPtr + i + j) != *(searchPtr)){
+				if(*(mainPtr + i + j) != *(searchPtr + j)){
 					isThere = false;
 					j = memBlock2->size;
 				}
