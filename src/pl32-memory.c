@@ -31,7 +31,7 @@ struct plmt {
 
 /* Prints an error and aborts the program. Within pl32-memory, it's used whenever malloc fails */
 void plPanic(string_t msg, bool usePerror, bool developerBug){
-	fputs("Panic at function ", stderr);
+	fputs("* Panic at function ", stderr);
 	if(usePerror){
 		perror(msg);
 	}else{
@@ -40,7 +40,7 @@ void plPanic(string_t msg, bool usePerror, bool developerBug){
 	}
 
 	if(developerBug)
-		fputs("* If you're seeing this message, this is a bug. Please report this error to the project maintainers", stderr);
+		fputs("* If you're seeing this message, this is a bug. Please report this error to the project maintainers\n", stderr);
 
 	abort();
 }

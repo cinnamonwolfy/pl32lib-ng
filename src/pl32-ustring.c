@@ -15,10 +15,8 @@ bool isUStrNull(plstring_t* string){
 size_t getCharSize(plchar_t chr){
 	size_t size = 4;
 
-	for(int i = 0; i < 4; i++){
-		if(chr.bytes[i] != 0)
-			size--;
-	}
+	while(size > 0 && chr.bytes[size - 1] == 0)
+		size--;
 
 	return size;
 }

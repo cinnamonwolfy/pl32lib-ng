@@ -34,23 +34,28 @@ int main(int argc, const char* argv[]){
 	fwrite(plCharString.data.array, 1, plCharString.data.size, stdout);
 	fputs("\n", stdout);
 
-	plarray_t matchStr = {
-		.array = plMTAlloc(mainMT, 2),
-		.size = 2,
-		.isMemAlloc = true,
-		.mt = mainMT
+	plstring_t matchStr = plUStrFromCStr("wo", NULL);
+	plchar_t plChr = {
+		.bytes = { 'w', '\0', '\0', '\0'  }
 	};
 
-	memcpy(matchStr.array, "wo", 2);
-	memptr_t retPtr = plMemMatch(&convertedStr.data, &matchStr);
-	if(retPtr == NULL)
-		plPanic("main: retPtr is NULL!", false, true);
+	int64_t retIndex = plUStrchr(&convertedStr, plChr, 0);
+	if(retIndex == -1)
+		plPanic("main: Offset is negative!", false, true);
 
-	printf("Original Pointer: %p\n", convertedStr.data.array);
-	printf("Returned Pointer: %p\n", retPtr);
+	printf("Returned Offset: %ld\n", retIndex);
+	printf("Current Value: %c\n", *((char*)convertedStr.data.array + retIndex));
+
+	retIndex = plUStrstr(&convertedStr, &matchStr, 5);
+	if(retIndex == -1)
+		plPanic("main: Offset is negative!", false, true);
+
+	printf("Returned Offset: %ld\n", retIndex);
 	fputs("Current Value: ", stdout);
-	fwrite(retPtr, 1, 11, stdout);
+	fwrite(convertedStr.data.array + retIndex, 1, 8, stdout);
 	fputs("\n", stdout);
+
+	plstring_t tokenizedStr = plUStrtok(&convertedStr)
 
 	plMTStop(mainMT);
 	return 0;
