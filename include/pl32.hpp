@@ -1,5 +1,5 @@
 /****************************************\
- pl32lib-ng, v1.05
+ pl32lib-ng, v1.06
  (c) 2022 pocketlinux32, Under MPL v2.0
  pl32.hpp: Base API header (C++ Bindings)
 \****************************************/

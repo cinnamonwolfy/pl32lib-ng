@@ -1,5 +1,5 @@
 /***************************************************\
- pl32lib-ng, v1.05
+ pl32lib-ng, v1.06
  (c) 2022-2023 pocketlinux32, Under MPL v2.0
  pl32-memory.h: Safe memory management module header
 \***************************************************/
@@ -17,7 +17,7 @@
 #include <string.h>
 #endif
 
-#define PL32LIBNG_VERSION "1.05"
+#define PL32LIBNG_VERSION "1.06"
 #define PL32LIBNG_API_VER 1
 #define PL32LIBNG_FEATURELVL 5
 #define PL32LIBNG_PATCHLVL 0
