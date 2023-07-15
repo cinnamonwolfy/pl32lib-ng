@@ -225,17 +225,19 @@ plstring_t plUStrtok(plstring_t* string, plstring_t* delimiter, plstring_t* left
 	/* Calculates the pointer to put into leftoverStr*/
 	leftoverStr->data.array = NULL;
 	leftoverStr->data.size = 0;
+	leftoverStr->isplChar = false;
 	if(endOffset != searchLimit){
 		size_t leftoverOffset = endOffset + getCharSize(delim[iterator]);
 		iterator = 0;
 		while(leftoverStr->data.array == NULL && leftoverOffset < searchLimit){
 			int64_t tempChr = plUStrchr(string, delim[iterator], leftoverOffset);
 
-			if(tempChr <= 0){
+			if(tempChr != 0){
 				iterator++;
-				if(iterator >= delimiter->data.size){
+				if(iterator == delimiter->data.size){
 					leftoverStr->data.array = startPtr + leftoverOffset;
 					leftoverStr->data.size = searchLimit - leftoverOffset;
+					leftoverOffset = searchLimit;
 				}
 			}else{
 				leftoverOffset += getCharSize(delim[iterator]);

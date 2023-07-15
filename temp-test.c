@@ -55,7 +55,39 @@ int main(int argc, const char* argv[]){
 	fwrite(convertedStr.data.array + retIndex, 1, 8, stdout);
 	fputs("\n", stdout);
 
-	plstring_t tokenizedStr = plUStrtok(&convertedStr)
+	plChr.bytes[0] = ' ';
+	plstring_t holderStr = {
+		.data = {
+			.array = NULL,
+			.size = 0,
+			.isMemAlloc = false,
+			.mt = NULL
+		},
+		.isplChar = false
+	};
+	plstring_t leftoverStr;
+	plstring_t delimiterArr = {
+		.data = {
+			.array = &plChr,
+			.size = 1,
+			.isMemAlloc = false,
+			.mt = NULL
+		},
+		.isplChar = true
+	};
+	plstring_t tokenizedStr = plUStrtok(&convertedStr, &delimiterArr, &holderStr, mainMT);
+	memcpy(&leftoverStr, &holderStr, sizeof(plstring_t));
+
+	if(tokenizedStr.data.array == NULL)
+		plPanic("main: Token is NULL!", false, true);
+
+	for(int i = 0; i < 3; i++){
+		fputs("Current Value: ", stdout);
+		fwrite(tokenizedStr.data.array, 1, tokenizedStr.data.size, stdout);
+		fputs("\n", stdout);
+		tokenizedStr = plUStrtok(&leftoverStr, &delimiterArr, &holderStr, mainMT);
+		memcpy(&leftoverStr, &holderStr, sizeof(plstring_t));
+	}
 
 	plMTStop(mainMT);
 	return 0;
