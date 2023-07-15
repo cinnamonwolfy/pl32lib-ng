@@ -155,11 +155,115 @@ int plTokenTest(plmt_t* mt){
 	return 0;
 }
 
+int plUStringTest(plmt_t* mt){
+	plstring_t convertedStr = plUStrFromCStr("hewwo wowwd :3", mt);
+	plstring_t plCharString = {
+		.data = {
+			.array = plMTAlloc(mt, 14 * sizeof(plchar_t)),
+			.size = 14,
+			.isMemAlloc = true,
+			.mt = mt
+		},
+		.isplChar = true
+	};
+
+	((plchar_t*)plCharString.data.array)[0].bytes[0] = 'h';
+	((plchar_t*)plCharString.data.array)[1].bytes[0] = 'e';
+	((plchar_t*)plCharString.data.array)[2].bytes[0] = 'w';
+	((plchar_t*)plCharString.data.array)[3].bytes[0] = 'w';
+	((plchar_t*)plCharString.data.array)[4].bytes[0] = 'o';
+	((plchar_t*)plCharString.data.array)[5].bytes[0] = ' ';
+	((plchar_t*)plCharString.data.array)[6].bytes[0] = 'w';
+	((plchar_t*)plCharString.data.array)[7].bytes[0] = 'o';
+	((plchar_t*)plCharString.data.array)[8].bytes[0] = 'w';
+	((plchar_t*)plCharString.data.array)[9].bytes[0] = 'w';
+	((plchar_t*)plCharString.data.array)[10].bytes[0] = 'd';
+	((plchar_t*)plCharString.data.array)[11].bytes[0] = ' ';
+	((plchar_t*)plCharString.data.array)[12].bytes[0] = ':';
+	((plchar_t*)plCharString.data.array)[13].bytes[0] = '3';
+	plUStrCompress(&plCharString, mt);
+
+	fputs("Converted C String: ", stdout);
+	fwrite(convertedStr.data.array, 1, convertedStr.data.size, stdout);
+	fputs("\n", stdout);
+
+	fputs("Compressed plchar_t string: ", stdout);
+	fwrite(plCharString.data.array, 1, plCharString.data.size, stdout);
+	fputs("\n\n", stdout);
+
+	plstring_t matchStr = plUStrFromCStr("wo", NULL);
+	plchar_t plChr = {
+		.bytes = { 'w', '\0', '\0', '\0'  }
+	};
+
+	puts("plchar_t-based Matching Test");
+
+	int64_t retIndex = plUStrchr(&convertedStr, plChr, 0);
+	if(retIndex == -1)
+		plPanic("main: Offset is negative!", false, true);
+
+	printf("Returned Offset: %ld\n", retIndex);
+	printf("Current Value: %c\n\n", *((char*)convertedStr.data.array + retIndex));
+
+	puts("plstring_t-based Matching Test");
+
+	retIndex = plUStrstr(&convertedStr, &matchStr, 5);
+	if(retIndex == -1)
+		plPanic("main: Offset is negative!", false, true);
+
+	printf("Returned Offset: %ld\n", retIndex);
+	fputs("Current Value: ", stdout);
+	fwrite(convertedStr.data.array + retIndex, 1, 8, stdout);
+	fputs("\n\n", stdout);
+
+	plChr.bytes[0] = ' ';
+	plstring_t holderStr = {
+		.data = {
+			.array = NULL,
+			.size = 0,
+			.isMemAlloc = false,
+			.mt = NULL
+		},
+		.isplChar = false
+	};
+	plstring_t leftoverStr;
+	plstring_t delimiterArr = {
+		.data = {
+			.array = &plChr,
+			.size = 1,
+			.isMemAlloc = false,
+			.mt = NULL
+		},
+		.isplChar = true
+	};
+	plstring_t tokenizedStr = plUStrtok(&convertedStr, &delimiterArr, &holderStr, mt);
+	memcpy(&leftoverStr, &holderStr, sizeof(plstring_t));
+
+	puts("plstring_t-based String Tokenizer Test");
+
+	if(tokenizedStr.data.array == NULL)
+		plPanic("main: Token is NULL!", false, true);
+
+	fputs("Current Value: ", stdout);
+	fwrite(tokenizedStr.data.array, 1, tokenizedStr.data.size, stdout);
+	fputs("\n", stdout);
+
+	for(int i = 0; i < 2; i++){
+		tokenizedStr = plUStrtok(&leftoverStr, &delimiterArr, &holderStr, mt);
+		memcpy(&leftoverStr, &holderStr, sizeof(plstring_t));
+		fputs("Current Value: ", stdout);
+		fwrite(tokenizedStr.data.array, 1, tokenizedStr.data.size, stdout);
+		fputs("\n", stdout);
+	}
+
+	return 0;
+}
+
 int main(int argc, string_t argv[]){
 	plmt_t* mainMT = plMTInit(8 * 1024 * 1024);
 
 	if(argc < 2){
-		printf("Valid test values:\n parser-test\n memory-test\n file-test\n");
+		printf("Valid test values:\n parser-test\n memory-test\n file-test\n ustring-test\n");
 		return 1;
 	}
 
@@ -175,7 +279,11 @@ int main(int argc, string_t argv[]){
 			return plFileTest(argv[2], mainMT);
 
 		return plFileTest(NULL, mainMT);
+	}else if(strcmp(argv[1], "ustring-test") == 0){
+		return plUStringTest(mainMT);
 	}else{
 		return 1;
 	}
+
+	plMTStop(mainMT);
 }
